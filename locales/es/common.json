@@ -1,0 +1,28 @@
+{
+  "nav": {
+    "home": "Inicio",
+    "destinations": "Destinos",
+    "services": "Servicios",
+    "vehicles": "Vehículos",
+    "contact": "Contacto",
+    "getQuote": "Cotizar"
+  },
+  "contact": {
+    "phone": "(998) 123 4567",
+    "email": "info@jetsettransfers.com",
+    "address": "Aeropuerto Internacional de Cancún, Q.R., México",
+    "title": "Contáctanos",
+    "subtitle": "¿Listo para tu próximo viaje? Envíanos un mensaje y te responderemos en menos de 24 horas."
+  },
+  "footer": {
+    "description": "Transporte privado seguro y puntual desde el Aeropuerto de Cancún a hoteles y destinos turísticos en la Riviera Maya.",
+    "services": "Servicios",
+    "legal": "Legal",
+    "contactTitle": "Contacto",
+    "terms": "Términos y Condiciones",
+    "privacy": "Política de Privacidad",
+    "cookies": "Política de Cookies",
+    "rights": "Todos los derechos reservados",
+    "yearsExperience": "años de experiencia"
+  }
+}

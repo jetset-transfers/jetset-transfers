@@ -1,0 +1,74 @@
+{
+  "hero": {
+    "badge": "Available 24/7",
+    "titleLine1": "Private transportation in",
+    "titleLine2": "Cancún & Riviera Maya",
+    "subtitle": "Safe, private, and punctual transfers from Cancun Airport to hotels and tourist destinations. Professional drivers and comfortable vehicles.",
+    "cta": {
+      "primary": "Book Transfer",
+      "secondary": "View Destinations"
+    },
+    "stats": {
+      "years": "years",
+      "transfers": "transfers",
+      "rating": "rating"
+    }
+  },
+  "services": {
+    "title": "Our Services",
+    "subtitle": "Choose the perfect transfer for your trip. Transparent pricing, instant booking.",
+    "private": {
+      "title": "Private Transfer",
+      "subtitle": "Exclusive transportation for your group",
+      "from": "From",
+      "viewAll": "View all destinations"
+    },
+    "shared": {
+      "title": "Shared Transfer",
+      "subtitle": "Affordable and comfortable option",
+      "from": "From",
+      "viewAll": "View options"
+    },
+    "destinations": {
+      "zonaHotelera": {
+        "name": "Cancun Hotel Zone",
+        "description": "Direct transfer to the best hotels in Cancun"
+      },
+      "playaDelCarmen": {
+        "name": "Playa del Carmen",
+        "description": "Comfortable arrival to Fifth Avenue and surroundings"
+      },
+      "tulum": {
+        "name": "Tulum",
+        "description": "Safe transportation to the archaeological zone and beaches"
+      },
+      "costaMujeres": {
+        "name": "Costa Mujeres",
+        "description": "Direct access to Costa Mujeres resorts"
+      }
+    },
+    "custom": {
+      "title": "Need something custom?",
+      "description": "We organize tailored transfers to your needs. Special destinations, flexible schedules, large groups.",
+      "cta": "Contact Us"
+    }
+  },
+  "transfers": {
+    "meta": {
+      "title": "Private Transfers | Jetset Transfers",
+      "description": "Private transfers from Cancun Airport to the best destinations in the Riviera Maya. Hotel Zone, Playa del Carmen, Tulum and more."
+    },
+    "title": "Private Transfers",
+    "subtitle": "Travel comfortably and safely to your destination",
+    "description": "We offer private transfers to the most popular destinations in the Riviera Maya. From Cancun Airport, we take you directly to your hotel or destination with maximum comfort and punctuality."
+  },
+  "zones": {
+    "meta": {
+      "title": "Destinations | Jetset Transfers",
+      "description": "Transfers to all areas of the Riviera Maya. Hotel Zone, Playa del Carmen, Tulum, Puerto Morelos, Akumal and more."
+    },
+    "title": "Our Destinations",
+    "subtitle": "Complete coverage in the Riviera Maya",
+    "description": "We cover all tourist destinations in the region. From Cancun's Hotel Zone to Tulum, through Playa del Carmen, Puerto Morelos and more. Always with comfortable vehicles and professional drivers."
+  }
+}

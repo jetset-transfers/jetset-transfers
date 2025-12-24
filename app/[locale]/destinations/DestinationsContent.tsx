@@ -1,0 +1,233 @@
+'use client';
+
+import { useEffect } from 'react';
+import Link from 'next/link';
+import Image from 'next/image';
+import {
+  TruckIcon,
+  ClockIcon,
+  UserGroupIcon,
+  ArrowLeftIcon,
+  PhoneIcon,
+} from '@heroicons/react/24/outline';
+import { useCurrency } from '@/contexts/CurrencyContext';
+import { trackViewItemList } from '@/lib/analytics';
+import LazySection from '@/components/ui/LazySection';
+
+interface VehiclePricing {
+  vehicle_name: string;
+  max_passengers: number;
+  price_usd: number;
+  notes_es: string;
+  notes_en: string;
+}
+
+interface Destination {
+  id: string;
+  slug: string;
+  name_es: string;
+  name_en: string;
+  description_es: string | null;
+  description_en: string | null;
+  travel_time: string | null;
+  price_from: number | null;
+  image_url: string | null;
+  vehicle_pricing?: VehiclePricing[] | null;
+}
+
+// Get minimum passengers from the lowest priced vehicle option
+function getMinPassengers(vehiclePricing?: VehiclePricing[] | null): number {
+  if (!vehiclePricing || vehiclePricing.length === 0) return 5; // Default fallback
+  // Find the vehicle with the lowest price and return its max_passengers
+  const lowestPriced = vehiclePricing.reduce((min, current) =>
+    current.price_usd < min.price_usd ? current : min
+  );
+  return lowestPriced.max_passengers;
+}
+
+interface DestinationsContentProps {
+  locale: string;
+  destinations: Destination[];
+}
+
+const translations = {
+  es: {
+    title: 'Destinos',
+    subtitle: 'Traslados seguros y puntuales a toda la Riviera Maya',
+    description: 'Ofrecemos traslados privados desde el Aeropuerto de Cancún a los hoteles y destinos más populares de la región. Viaja cómodo, seguro y sin preocupaciones.',
+    backToHome: 'Volver al inicio',
+    passengersFrom: 'Hasta',
+    passengersLabel: 'pasajeros',
+    bookNow: 'Reservar ahora',
+    noDestinations: 'No hay destinos disponibles',
+    customTitle: '¿No encuentras tu destino?',
+    customDesc: 'Ofrecemos traslados personalizados a cualquier hotel o destino en la Riviera Maya. Contáctanos para una cotización.',
+    requestQuote: 'Solicitar cotización',
+    travelTime: 'Tiempo de traslado',
+  },
+  en: {
+    title: 'Destinations',
+    subtitle: 'Safe and punctual transfers to all Riviera Maya',
+    description: 'We offer private transfers from Cancun Airport to the most popular hotels and destinations in the region. Travel comfortably, safely, and worry-free.',
+    backToHome: 'Back to home',
+    passengersFrom: 'Up to',
+    passengersLabel: 'passengers',
+    bookNow: 'Book now',
+    noDestinations: 'No destinations available',
+    customTitle: "Can't find your destination?",
+    customDesc: 'We offer custom transfers to any hotel or destination in the Riviera Maya. Contact us for a quote.',
+    requestQuote: 'Request a quote',
+    travelTime: 'Travel time',
+  },
+};
+
+export default function DestinationsContent({ locale, destinations }: DestinationsContentProps) {
+  const t = translations[locale as keyof typeof translations] || translations.es;
+  const { formatPrice, currency } = useCurrency();
+
+  // Track view_item_list event when page loads
+  useEffect(() => {
+    trackViewItemList('destinations', destinations.length);
+  }, [destinations.length]);
+
+  return (
+    <main className="min-h-screen pt-20">
+        {/* Hero Section */}
+        <section className="relative py-16 md:py-24 bg-gradient-to-b from-navy-50 to-white dark:from-navy-950 dark:to-navy-900">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <Link
+              href={`/${locale}`}
+              className="inline-flex items-center gap-2 text-sm text-muted hover:text-navy-600 dark:hover:text-navy-300 transition-colors mb-8"
+            >
+              <ArrowLeftIcon className="w-4 h-4" />
+              {t.backToHome}
+            </Link>
+
+            <div className="flex items-center gap-4 mb-6">
+              <div className="p-4 rounded-2xl bg-navy-100 dark:bg-navy-800">
+                <TruckIcon className="w-8 h-8 text-navy-600 dark:text-navy-300" />
+              </div>
+              <div>
+                <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold">{t.title}</h1>
+                <p className="text-lg text-muted mt-2">{t.subtitle}</p>
+              </div>
+            </div>
+
+            <p className="text-muted max-w-3xl">
+              {t.description}
+            </p>
+          </div>
+        </section>
+
+        {/* Destinations Grid */}
+        <section className="py-16 md:py-20">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">
+              {locale === 'es' ? 'Nuestros Destinos' : 'Our Destinations'}
+            </h2>
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+              {destinations.map((dest, index) => (
+                <LazySection
+                  key={dest.id}
+                  animation="slide-up"
+                  delay={index * 100}
+                >
+                  <Link
+                    href={`/${locale}/destinations/${dest.slug}`}
+                    className="group block"
+                  >
+                    <article
+                    id={dest.slug}
+                    className="h-full bg-white dark:bg-navy-900 rounded-3xl border border-navy-200 dark:border-navy-700 overflow-hidden hover:border-navy-400 dark:hover:border-navy-500 hover:shadow-xl hover:shadow-navy-100 dark:hover:shadow-navy-900/50 transition-all duration-300 scroll-mt-24"
+                  >
+                    {/* Image */}
+                    <div className="relative aspect-[16/10] overflow-hidden">
+                      {dest.image_url ? (
+                        <Image
+                          src={dest.image_url}
+                          alt={locale === 'es'
+                            ? `Traslado a ${dest.name_es} - Jetset Transfers Cancún`
+                            : `Transfer to ${dest.name_en} - Jetset Transfers Cancún`}
+                          fill
+                          sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                          className="object-cover transition-transform duration-500 group-hover:scale-110"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-navy-100 dark:bg-navy-800 flex items-center justify-center">
+                          <TruckIcon className="w-16 h-16 text-navy-300 dark:text-navy-600" />
+                        </div>
+                      )}
+                      {/* Price badge */}
+                      <div className="absolute top-4 right-4 px-4 py-2 rounded-full bg-white/95 dark:bg-navy-900/95 backdrop-blur-sm shadow-lg">
+                        <div className="font-bold text-lg text-navy-600 dark:text-navy-400">
+                          {dest.price_from ? formatPrice(dest.price_from) : '-'}
+                        </div>
+                        <div className="text-xs text-muted text-center">{currency}</div>
+                      </div>
+                    </div>
+
+                    {/* Content */}
+                    <div className="p-6">
+                      <h3 className="text-2xl font-bold mb-3 group-hover:text-navy-600 dark:group-hover:text-navy-300 transition-colors">
+                        {locale === 'es' ? dest.name_es : dest.name_en}
+                      </h3>
+
+                      <p className="text-muted mb-6 line-clamp-3">
+                        {locale === 'es' ? dest.description_es : dest.description_en}
+                      </p>
+
+                      {/* Meta info */}
+                      <div className="flex items-center gap-6 mb-6 text-sm">
+                        <div className="flex items-center gap-2 text-muted">
+                          <ClockIcon className="w-5 h-5 text-navy-400" />
+                          <span className="font-medium">{dest.travel_time || '-'}</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-muted">
+                          <UserGroupIcon className="w-5 h-5 text-navy-400" />
+                          <span className="font-medium">{t.passengersFrom} {getMinPassengers(dest.vehicle_pricing)} {t.passengersLabel}</span>
+                        </div>
+                      </div>
+
+                      {/* CTA */}
+                        <div className="flex items-center justify-center gap-2 w-full py-3 px-4 bg-navy-600 group-hover:bg-navy-700 text-white font-semibold rounded-xl transition-colors">
+                          <PhoneIcon className="w-4 h-4" />
+                          {t.bookNow}
+                        </div>
+                      </div>
+                    </article>
+                  </Link>
+                </LazySection>
+              ))}
+            </div>
+
+            {destinations.length === 0 && (
+              <div className="text-center py-20">
+                <TruckIcon className="w-16 h-16 text-navy-300 dark:text-navy-600 mx-auto mb-4" />
+                <p className="text-xl text-muted">
+                  {t.noDestinations}
+                </p>
+              </div>
+            )}
+          </div>
+        </section>
+
+        {/* Bottom CTA */}
+        <LazySection animation="fade" className="py-16 md:py-20 bg-gradient-to-r from-navy-900 to-navy-800">
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h2 className="text-2xl md:text-4xl font-bold text-white mb-4">
+              {t.customTitle}
+            </h2>
+            <p className="text-lg text-navy-300 mb-8">
+              {t.customDesc}
+            </p>
+            <Link
+              href={`/${locale}/contact`}
+              className="inline-flex items-center gap-2 px-8 py-4 bg-white text-navy-900 font-bold rounded-xl hover:bg-brand-500 hover:text-white transition-all duration-300"
+            >
+              {t.requestQuote}
+            </Link>
+          </div>
+        </LazySection>
+    </main>
+  );
+}

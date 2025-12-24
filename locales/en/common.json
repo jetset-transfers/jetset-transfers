@@ -1,0 +1,28 @@
+{
+  "nav": {
+    "home": "Home",
+    "destinations": "Destinations",
+    "services": "Services",
+    "vehicles": "Vehicles",
+    "contact": "Contact",
+    "getQuote": "Get Quote"
+  },
+  "contact": {
+    "phone": "(998) 123 4567",
+    "email": "info@jetsettransfers.com",
+    "address": "Cancún International Airport, Q.R., Mexico",
+    "title": "Contact Us",
+    "subtitle": "Ready for your next trip? Send us a message and we'll respond within 24 hours."
+  },
+  "footer": {
+    "description": "Safe and punctual private transportation from Cancun Airport to hotels and tourist destinations across the Riviera Maya.",
+    "services": "Services",
+    "legal": "Legal",
+    "contactTitle": "Contact",
+    "terms": "Terms & Conditions",
+    "privacy": "Privacy Policy",
+    "cookies": "Cookie Policy",
+    "rights": "All rights reserved",
+    "yearsExperience": "years experience"
+  }
+}

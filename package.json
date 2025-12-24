@@ -1,0 +1,40 @@
+{
+  "name": "jetset-transfers",
+  "version": "1.0.0",
+  "description": "Jetset Transfers - Private ground transportation from Cancun Airport to hotels and tourist destinations across the Riviera Maya",
+  "main": "index.js",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "keywords": [],
+  "author": "EDDCODE",
+  "license": "ISC",
+  "dependencies": {
+    "@heroicons/react": "^2.2.0",
+    "@supabase/ssr": "^0.8.0",
+    "@supabase/supabase-js": "^2.86.0",
+    "date-fns": "^4.1.0",
+    "framer-motion": "^12.23.24",
+    "lottie-react": "^2.4.1",
+    "next": "^15.5.7",
+    "next-intl": "^3.26.2",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-icons": "^5.5.0",
+    "react-markdown": "^10.1.0",
+    "resend": "^6.5.2",
+    "sonner": "^2.0.7"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "@types/react": "^18.3.18",
+    "@types/react-dom": "^18.3.5",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.4.49",
+    "tailwindcss": "^3.4.17",
+    "typescript": "^5.7.2"
+  }
+}

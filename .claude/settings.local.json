@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dir \"c:\\\\Users\\\\Diego Rmz\\\\Documents\\\\Development\\\\jetset-transfers\\\\app\\\\[locale]\\\\charter-flights\")",
+      "Bash(cd:*)",
+      "Bash(dir:*)"
+    ]
+  }
+}
