@@ -27,7 +27,7 @@ export default function AdminLayout({ children, userEmail }: AdminLayoutProps) {
           <footer className="border-t border-navy-800">
             <div className="px-6 lg:px-8 py-6">
               <div className="flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-navy-500">
-                <p>© 2025 Vuelatour. Todos los derechos reservados.</p>
+                <p>© 2025 Jetset Transfers. Todos los derechos reservados.</p>
                 <a
                   href="/es"
                   target="_blank"

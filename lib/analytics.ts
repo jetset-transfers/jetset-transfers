@@ -15,7 +15,7 @@ export function hasAnalyticsConsent(): boolean {
   if (typeof window === 'undefined') return false;
 
   try {
-    const consent = localStorage.getItem('vuelatour_cookie_consent');
+    const consent = localStorage.getItem('jetset_cookie_consent');
     if (consent) {
       const parsed = JSON.parse(consent);
       return parsed.analytics === true;
@@ -181,7 +181,7 @@ export function trackViewItemList(listType: 'destinations' | 'tours', itemCount:
   trackEvent('view_item_list', {
     event_category: 'engagement',
     item_list_id: listType,
-    item_list_name: listType === 'destinations' ? 'Charter Flights' : 'Air Tours',
+    item_list_name: listType === 'destinations' ? 'Destinations' : 'Zones',
     item_count: itemCount,
   });
 }

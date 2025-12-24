@@ -77,28 +77,28 @@ const categoryConfig: Record<string, CategoryConfigItem> = {
     label: 'Destinos',
     icon: '🗺️',
     color: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
-    description: 'Fotos de los destinos de vuelos privados',
-    location: 'Página de inicio - Sección "Vuelos Privados"',
+    description: 'Fotos de los destinos de traslados',
+    location: 'Página de inicio - Sección "Destinos"',
     hasCarousel: true,
     carouselInfo: 'Muestra tarjetas de destinos con imagen de fondo',
     dimensions: '800x600 recomendado',
-    tips: 'Imágenes de playas, ciudades o zonas arqueológicas. Cada destino tiene su propia imagen.',
+    tips: 'Imágenes de playas, hoteles, ciudades o zonas turísticas. Cada destino tiene su propia imagen.',
     preview: {
       width: 'w-48',
       height: 'h-32',
       layout: 'cards',
     },
   },
-  tours: {
-    label: 'Tours Aéreos',
-    icon: '✈️',
+  vehicles: {
+    label: 'Vehículos',
+    icon: '🚐',
     color: 'bg-green-500/20 text-green-400 border-green-500/30',
-    description: 'Fotos de los tours aéreos panorámicos',
-    location: 'Página de inicio - Sección "Tours Aéreos"',
+    description: 'Fotos de la flota de vehículos',
+    location: 'Página de inicio - Sección "Vehículos"',
     hasCarousel: true,
-    carouselInfo: 'Tarjetas con duración y precio. Scroll horizontal en móvil.',
+    carouselInfo: 'Tarjetas con capacidad y características. Scroll horizontal en móvil.',
     dimensions: '800x600 recomendado',
-    tips: 'Vistas aéreas impresionantes. Cada tour tiene su imagen destacada.',
+    tips: 'Fotos de SUVs, Vans, Sprinters. Muestra interior y exterior.',
     preview: {
       width: 'w-48',
       height: 'h-32',
@@ -114,7 +114,7 @@ const categoryConfig: Record<string, CategoryConfigItem> = {
     hasCarousel: true,
     carouselInfo: 'Carrusel automático con lightbox al hacer clic',
     dimensions: '1200x800 recomendado',
-    tips: 'Fotos de clientes, aviones, vistas panorámicas. Máximo 8-10 fotos.',
+    tips: 'Fotos de clientes, vehículos, destinos. Máximo 8-10 fotos.',
     preview: {
       width: 'w-32',
       height: 'h-24',
@@ -125,11 +125,11 @@ const categoryConfig: Record<string, CategoryConfigItem> = {
     label: 'Nosotros',
     icon: '👥',
     color: 'bg-cyan-500/20 text-cyan-400 border-cyan-500/30',
-    description: 'Fotos del equipo, aviones y empresa',
+    description: 'Fotos del equipo, vehículos y empresa',
     location: 'Sección "Sobre nosotros" / Footer',
     hasCarousel: false,
     dimensions: '800x600 recomendado',
-    tips: 'Fotos del equipo, pilotos, aviones. Transmiten confianza y profesionalismo.',
+    tips: 'Fotos del equipo, conductores, vehículos. Transmiten confianza y profesionalismo.',
     preview: {
       width: 'w-40',
       height: 'h-28',
@@ -474,7 +474,7 @@ export default function ImagesContent({ user, images: initialImages }: ImagesCon
               <div className="w-2 h-2 rounded-full bg-yellow-400" />
               <div className="w-2 h-2 rounded-full bg-green-400" />
               <div className="ml-2 flex-1 h-3 bg-navy-700 rounded text-[8px] text-navy-500 flex items-center justify-center">
-                vuelatour.com
+                jetsetcancun.com
               </div>
             </div>
 

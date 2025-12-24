@@ -294,7 +294,7 @@ export default function ServicesContent({
           }`}
         >
           <MapPinIcon className="w-5 h-5" />
-          Vuelos Privados
+          Traslados Privados
           <span className="ml-1 px-2 py-0.5 text-xs rounded-full bg-navy-700">
             {destinationServices.length}
           </span>
@@ -308,7 +308,7 @@ export default function ServicesContent({
           }`}
         >
           <GlobeAmericasIcon className="w-5 h-5" />
-          Tours Aéreos
+          Servicios Adicionales
           <span className="ml-1 px-2 py-0.5 text-xs rounded-full bg-navy-700">
             {tourServices.length}
           </span>
@@ -433,7 +433,7 @@ export default function ServicesContent({
       <div className="bg-navy-900 rounded-xl border border-navy-800 overflow-hidden">
         <div className="p-4 border-b border-navy-800 flex items-center justify-between">
           <h3 className="font-medium text-white">
-            {activeTab === 'destination' ? 'Servicios para Vuelos Privados' : 'Servicios para Tours Aéreos'}
+            {activeTab === 'destination' ? 'Servicios para Traslados Privados' : 'Servicios Adicionales'}
           </h3>
           <button
             onClick={handleCreate}

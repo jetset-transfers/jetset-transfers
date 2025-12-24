@@ -19,10 +19,10 @@ export async function generateMetadata({ params }: PageProps) {
     ? page?.title_es || 'Términos y Condiciones'
     : page?.title_en || 'Terms and Conditions';
 
-  const fullTitle = `${title} | Vuelatour`;
+  const fullTitle = `${title} | Jetset Transfers`;
   const description = locale === 'es'
-    ? 'Términos y condiciones de uso de los servicios de vuelos privados y tours aéreos de Vuelatour en Cancún.'
-    : 'Terms and conditions of use for Vuelatour private flights and air tours services in Cancún.';
+    ? 'Términos y condiciones de uso de los servicios de traslados privados de Jetset Transfers en Cancún y Riviera Maya.'
+    : 'Terms and conditions of use for Jetset Transfers private transportation services in Cancún and Riviera Maya.';
 
   return {
     title: fullTitle,
@@ -30,17 +30,17 @@ export async function generateMetadata({ params }: PageProps) {
     openGraph: {
       title: fullTitle,
       description,
-      url: `https://www.vuelatour.com/${locale}/terms`,
-      siteName: 'Vuelatour',
+      url: `https://www.jetsetcancun.com/${locale}/terms`,
+      siteName: 'Jetset Transfers',
       locale: locale === 'es' ? 'es_MX' : 'en_US',
       type: 'website',
     },
     alternates: {
-      canonical: `https://www.vuelatour.com/${locale}/terms`,
+      canonical: `https://www.jetsetcancun.com/${locale}/terms`,
       languages: {
-        'es': 'https://www.vuelatour.com/es/terms',
-        'en': 'https://www.vuelatour.com/en/terms',
-        'x-default': 'https://www.vuelatour.com/en/terms',
+        'es': 'https://www.jetsetcancun.com/es/terms',
+        'en': 'https://www.jetsetcancun.com/en/terms',
+        'x-default': 'https://www.jetsetcancun.com/en/terms',
       },
     },
     robots: {

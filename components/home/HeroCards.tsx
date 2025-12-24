@@ -40,16 +40,16 @@ interface HeroCardsProps {
 // Simulated recent bookings for social proof
 const recentBookings = {
   es: [
-    { name: 'María', city: 'CDMX', service: 'Tour a Chichén Itzá', time: 'hace 2 horas' },
-    { name: 'Carlos', city: 'Guadalajara', service: 'Vuelo a Cozumel', time: 'hace 4 horas' },
-    { name: 'Ana', city: 'Monterrey', service: 'Tour Panorámico', time: 'hace 6 horas' },
-    { name: 'Roberto', city: 'Puebla', service: 'Vuelo a Tulum', time: 'ayer' },
+    { name: 'María', city: 'CDMX', service: 'Traslado a Playa del Carmen', time: 'hace 2 horas' },
+    { name: 'Carlos', city: 'Guadalajara', service: 'Traslado a Tulum', time: 'hace 4 horas' },
+    { name: 'Ana', city: 'Monterrey', service: 'Traslado Hotel Zone', time: 'hace 6 horas' },
+    { name: 'Roberto', city: 'Puebla', service: 'Traslado a Puerto Morelos', time: 'ayer' },
   ],
   en: [
-    { name: 'John', city: 'Texas', service: 'Chichén Itzá Tour', time: '2 hours ago' },
-    { name: 'Sarah', city: 'California', service: 'Cozumel Flight', time: '4 hours ago' },
-    { name: 'Mike', city: 'New York', service: 'Panoramic Tour', time: '6 hours ago' },
-    { name: 'Emily', city: 'Florida', service: 'Tulum Flight', time: 'yesterday' },
+    { name: 'John', city: 'Texas', service: 'Transfer to Playa del Carmen', time: '2 hours ago' },
+    { name: 'Sarah', city: 'California', service: 'Transfer to Tulum', time: '4 hours ago' },
+    { name: 'Mike', city: 'New York', service: 'Transfer Hotel Zone', time: '6 hours ago' },
+    { name: 'Emily', city: 'Florida', service: 'Transfer to Puerto Morelos', time: 'yesterday' },
   ],
 };
 
@@ -101,16 +101,16 @@ export default function HeroCards({ locale, featuredTour, featuredDestination, h
     return () => clearInterval(interval);
   }, [bookings.length]);
 
-  // Use featured tour or destination
-  const featured = featuredTour || featuredDestination;
-  const featuredType = featuredTour ? 'air-tours' : 'charter-flights';
+  // Use featured destination
+  const featured = featuredDestination || featuredTour;
+  const featuredType = locale === 'es' ? 'destinos' : 'destinations';
   const featuredName = featured
     ? (locale === 'es' ? featured.name_es : featured.name_en)
     : null;
 
   return (
     <div className="grid gap-3">
-      {/* Featured Tour/Destination Card */}
+      {/* Featured Destination Card */}
       {featured && (
         <Link
           href={`/${locale}/${featuredType}/${featured.slug}`}
@@ -122,7 +122,7 @@ export default function HeroCards({ locale, featuredTour, featuredDestination, h
               {featured.image_url ? (
                 <Image
                   src={featured.image_url}
-                  alt={featuredName || (locale === 'es' ? 'Destino destacado - Vuelatour' : 'Featured destination - Vuelatour')}
+                  alt={featuredName || (locale === 'es' ? 'Destino destacado - Jetset Transfers' : 'Featured destination - Jetset Transfers')}
                   fill
                   sizes="400px"
                   className="object-cover transition-transform duration-500 group-hover:scale-110"

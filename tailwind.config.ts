@@ -10,14 +10,14 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // Vuelatour brand red (from logo)
+        // Jetset Transfers brand colors
         brand: {
           50: '#fef2f2',
           100: '#fee2e2',
           200: '#fecaca',
           300: '#fca5a5',
           400: '#f87171',
-          500: '#E63946', // Vuelatour red
+          500: '#E63946', // Jetset red
           600: '#dc2626',
           700: '#b91c1c',
           800: '#991b1b',

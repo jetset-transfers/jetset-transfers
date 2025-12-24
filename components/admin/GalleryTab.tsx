@@ -33,7 +33,7 @@ interface GalleryTabProps {
 const categoryLabels: Record<string, string> = {
   hero: 'Hero / Principal',
   destinations: 'Destinos',
-  tours: 'Tours Aéreos',
+  tours: 'Vehículos',
   gallery: 'Galería',
   about: 'Nosotros',
   fleet: 'Flota',

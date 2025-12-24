@@ -1,5 +1,5 @@
-# Robots.txt for Vuelatour
-# https://www.vuelatour.com
+# Robots.txt for Jetset Transfers
+# https://www.jetsetcancun.com
 
 User-agent: *
 Allow: /
@@ -12,5 +12,5 @@ Disallow: /admin/
 Disallow: /_next/
 Disallow: /api/
 
-# Sitemap location (use www version)
-Sitemap: https://www.vuelatour.com/sitemap.xml
+# Sitemap location
+Sitemap: https://www.jetsetcancun.com/sitemap.xml

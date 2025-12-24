@@ -105,7 +105,7 @@ INSERT INTO public.transfer_services (key, label_es, label_en, icon, display_ord
 ('wifi', 'WiFi a bordo', 'Onboard WiFi', 'WifiIcon', 2),
 ('water', 'Agua embotellada', 'Bottled water', 'BeakerIcon', 3),
 ('child_seat', 'Asiento para niños disponible', 'Child seat available', 'UserIcon', 4),
-('flight_monitoring', 'Monitoreo de vuelo', 'Flight monitoring', 'PaperAirplaneIcon', 5),
+('flight_monitoring', 'Monitoreo en tiempo real', 'Real-time monitoring', 'ClockIcon', 5),
 ('meet_greet', 'Servicio meet & greet', 'Meet & greet service', 'HandRaisedIcon', 6),
 ('luggage', 'Asistencia con equipaje', 'Luggage assistance', 'ShoppingBagIcon', 7),
 ('insurance', 'Seguro de viajero', 'Traveler insurance', 'ShieldCheckIcon', 8),
@@ -197,7 +197,7 @@ CREATE TABLE public.destinations (
   benefits jsonb DEFAULT '[
     {"key": "safety", "title_es": "Seguridad garantizada", "title_en": "Guaranteed safety", "desc_es": "Conductores verificados y vehículos con seguro completo.", "desc_en": "Verified drivers and fully insured vehicles."},
     {"key": "comfort", "title_es": "Máximo confort", "title_en": "Maximum comfort", "desc_es": "Vehículos modernos con aire acondicionado y espacio amplio.", "desc_en": "Modern vehicles with AC and ample space."},
-    {"key": "punctuality", "title_es": "Puntualidad", "title_en": "Punctuality", "desc_es": "Monitoreamos tu vuelo para estar siempre a tiempo.", "desc_en": "We monitor your flight to always be on time."},
+    {"key": "punctuality", "title_es": "Puntualidad", "title_en": "Punctuality", "desc_es": "Monitoreo en tiempo real para llegar siempre a tiempo.", "desc_en": "Real-time monitoring to always arrive on time."},
     {"key": "service", "title_es": "Atención personalizada", "title_en": "Personalized service", "desc_es": "Servicio de meet & greet y asistencia con equipaje.", "desc_en": "Meet & greet service and luggage assistance."}
   ]'::jsonb,
   vehicle_pricing jsonb DEFAULT '[

@@ -2,13 +2,11 @@
 
 import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
-import { CheckCircleIcon, ExclamationCircleIcon, PaperAirplaneIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { CheckCircleIcon, ExclamationCircleIcon, TruckIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { trackContactFormSubmit, trackBookingClick } from '@/lib/analytics';
 
 interface SearchParams {
   destination?: string;
-  tour?: string;
-  aircraft?: string;
   price?: string;
 }
 
@@ -24,16 +22,11 @@ interface Destination {
   name_en: string;
 }
 
-interface AirTour {
-  id: string;
-  slug: string;
-  name_es: string;
-  name_en: string;
-}
-
 const TIME_OPTIONS = [
+  '00:00', '01:00', '02:00', '03:00', '04:00', '05:00',
   '06:00', '07:00', '08:00', '09:00', '10:00', '11:00',
-  '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00', '20:00'
+  '12:00', '13:00', '14:00', '15:00', '16:00', '17:00',
+  '18:00', '19:00', '20:00', '21:00', '22:00', '23:00'
 ];
 
 export default function ContactForm({ locale, searchParams }: ContactFormProps) {
@@ -42,42 +35,31 @@ export default function ContactForm({ locale, searchParams }: ContactFormProps) 
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
   const [destinations, setDestinations] = useState<Destination[]>([]);
-  const [airTours, setAirTours] = useState<AirTour[]>([]);
 
   // Extract pre-selection info from URL params
   const preSelectedDestination = searchParams?.destination;
-  const preSelectedTour = searchParams?.tour;
-  const preSelectedAircraft = searchParams?.aircraft;
   const preSelectedPrice = searchParams?.price;
-
-  const hasPreSelection = preSelectedDestination || preSelectedTour;
-  const isCharterQuote = !!preSelectedDestination;
-  const isTourQuote = !!preSelectedTour;
+  const hasPreSelection = !!preSelectedDestination;
 
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     phone: '',
-    service_type: preSelectedDestination ? 'charter' : preSelectedTour ? 'tour' : '',
+    service_type: preSelectedDestination ? 'transfer' : '',
     destination: preSelectedDestination || '',
-    tour: preSelectedTour || '',
     message: '',
-    // New quote fields
     travel_date: '',
     departure_time: '',
     return_date: '',
     return_time: '',
-    departure_location: '',
-    departure_location_other: '',
-    destination_other: '',
     number_of_passengers: '2',
-    aircraft_selected: preSelectedAircraft || '',
+    pickup_location: '',
+    flight_number: '',
   });
 
-  // Load destinations and tours from database
+  // Load destinations from database
   useEffect(() => {
     const loadData = async () => {
-      // Load destinations
       const { data: destData } = await supabase
         .from('destinations')
         .select('id, slug, name_es, name_en')
@@ -85,15 +67,6 @@ export default function ContactForm({ locale, searchParams }: ContactFormProps) 
         .order('display_order');
 
       if (destData) setDestinations(destData);
-
-      // Load air tours
-      const { data: tourData } = await supabase
-        .from('air_tours')
-        .select('id, slug, name_es, name_en')
-        .eq('is_active', true)
-        .order('display_order');
-
-      if (tourData) setAirTours(tourData);
     };
 
     loadData();
@@ -101,16 +74,14 @@ export default function ContactForm({ locale, searchParams }: ContactFormProps) 
 
   // Update form when searchParams change
   useEffect(() => {
-    if (preSelectedDestination || preSelectedTour) {
+    if (preSelectedDestination) {
       setFormData(prev => ({
         ...prev,
-        service_type: preSelectedDestination ? 'charter' : 'tour',
-        destination: preSelectedDestination || '',
-        tour: preSelectedTour || '',
-        aircraft_selected: preSelectedAircraft || '',
+        service_type: 'transfer',
+        destination: preSelectedDestination,
       }));
     }
-  }, [preSelectedDestination, preSelectedTour, preSelectedAircraft]);
+  }, [preSelectedDestination]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -119,27 +90,17 @@ export default function ContactForm({ locale, searchParams }: ContactFormProps) 
     setSuccess(false);
 
     try {
-      // Find destination_id or tour_id based on slug
+      // Find destination_id based on slug
       let destination_id = null;
-      let tour_id = null;
 
-      if (formData.service_type === 'charter' && formData.destination) {
+      if (formData.destination) {
         const dest = destinations.find(d => d.slug === formData.destination);
         destination_id = dest?.id || null;
       }
 
-      if (formData.service_type === 'tour' && formData.tour) {
-        const tour = airTours.find(t => t.slug === formData.tour);
-        tour_id = tour?.id || null;
-      }
-
       // Helper to ensure dates are stored correctly without timezone shift
-      // Append time with explicit Cancun timezone offset to prevent UTC conversion issues
-      // Cancun is UTC-5 (no daylight saving), so we add +00:00 to make the date be interpreted as-is
       const formatDateForDB = (dateStr: string | null) => {
         if (!dateStr) return null;
-        // Send as ISO string with explicit timezone to prevent Supabase from shifting
-        // Using noon UTC ensures the date stays correct regardless of server timezone
         return `${dateStr}T12:00:00+00:00`;
       };
 
@@ -153,35 +114,27 @@ export default function ContactForm({ locale, searchParams }: ContactFormProps) 
           destination: formData.destination || null,
           message: formData.message || null,
           status: 'pending',
-          // New quote fields - format dates to avoid timezone issues
           travel_date: formatDateForDB(formData.travel_date),
           departure_time: formData.departure_time || null,
           return_date: formatDateForDB(formData.return_date),
           return_time: formData.return_time || null,
-          departure_location: formData.departure_location || null,
-          departure_location_other: formData.departure_location_other || null,
-          destination_other: formData.destination_other || null,
           number_of_passengers: parseInt(formData.number_of_passengers) || null,
-          aircraft_selected: formData.aircraft_selected || null,
+          departure_location: formData.pickup_location || null,
           destination_id,
-          tour_id,
         }]);
 
       if (insertError) throw insertError;
 
       // Track successful form submission
-      const formType = formData.service_type === 'charter' ? 'charter_quote' :
-                       formData.service_type === 'tour' ? 'tour_quote' : 'contact';
+      const formType = formData.service_type === 'transfer' ? 'transfer_quote' : 'contact';
       trackContactFormSubmit(formType);
 
       // Track booking click if it's a quote request
-      if (formData.service_type === 'charter' && formData.destination) {
+      if (formData.destination) {
         trackBookingClick('destination', formData.destination);
-      } else if (formData.service_type === 'tour' && formData.tour) {
-        trackBookingClick('tour', formData.tour);
       }
 
-      // Send email notification to Vuelatour team
+      // Send email notification to Jetset Transfers team
       try {
         await fetch('/api/send-notification', {
           method: 'POST',
@@ -193,27 +146,21 @@ export default function ContactForm({ locale, searchParams }: ContactFormProps) 
             message: formData.message,
             service_type: formData.service_type,
             destination: formData.destination,
-            destination_other: formData.destination_other,
-            departure_location: formData.departure_location,
-            departure_location_other: formData.departure_location_other,
+            departure_location: formData.pickup_location,
             travel_date: formData.travel_date,
             departure_time: formData.departure_time,
             return_date: formData.return_date,
             return_time: formData.return_time,
-            aircraft_selected: formData.aircraft_selected,
-            tour: formData.tour,
             number_of_passengers: parseInt(formData.number_of_passengers) || null,
+            flight_number: formData.flight_number,
             preSelectedPrice: preSelectedPrice,
           }),
         });
       } catch (emailError) {
-        // Log but don't fail the form submission if email fails
         console.error('Email notification error:', emailError);
       }
 
       setSuccess(true);
-
-      // Scroll to top of the page smoothly
       window.scrollTo({ top: 0, behavior: 'smooth' });
 
       setFormData({
@@ -222,17 +169,14 @@ export default function ContactForm({ locale, searchParams }: ContactFormProps) 
         phone: '',
         service_type: '',
         destination: '',
-        tour: '',
         message: '',
         travel_date: '',
         departure_time: '',
         return_date: '',
         return_time: '',
-        departure_location: '',
-        departure_location_other: '',
-        destination_other: '',
         number_of_passengers: '2',
-        aircraft_selected: '',
+        pickup_location: '',
+        flight_number: '',
       });
     } catch (err: any) {
       setError(locale === 'es'
@@ -248,55 +192,40 @@ export default function ContactForm({ locale, searchParams }: ContactFormProps) 
   };
 
   const labels = {
-    // Existing labels
-    name: locale === 'es' ? 'Nombre completo' : 'Your Name',
-    email: locale === 'es' ? 'Correo electrónico' : 'E-Mail Address',
-    phone: locale === 'es' ? 'Teléfono' : 'Phone Number',
-    service: locale === 'es' ? 'Tipo de servicio' : 'Service type',
-    destination: locale === 'es' ? 'Destino de interés (opcional)' : 'Destination of interest (optional)',
-    message: locale === 'es' ? 'Mensaje (opcional)' : 'Message (optional)',
-    submit: locale === 'es' ? 'Enviar cotización' : 'Send quote request',
+    name: locale === 'es' ? 'Nombre completo' : 'Full Name',
+    email: locale === 'es' ? 'Correo electrónico' : 'Email Address',
+    phone: locale === 'es' ? 'Teléfono / WhatsApp' : 'Phone / WhatsApp',
+    service: locale === 'es' ? 'Tipo de servicio' : 'Service Type',
+    destination: locale === 'es' ? 'Destino' : 'Destination',
+    message: locale === 'es' ? 'Mensaje o comentarios adicionales' : 'Message or additional comments',
+    submit: locale === 'es' ? 'Solicitar cotización' : 'Request Quote',
     sending: locale === 'es' ? 'Enviando...' : 'Sending...',
     selectService: locale === 'es' ? 'Selecciona un servicio' : 'Select a service',
-    charter: locale === 'es' ? 'Vuelo Privado' : 'Charter Flight',
-    tour: locale === 'es' ? 'Tour Aéreo' : 'Air Tour',
+    transfer: locale === 'es' ? 'Traslado Privado' : 'Private Transfer',
+    roundTrip: locale === 'es' ? 'Viaje Redondo' : 'Round Trip',
     general: locale === 'es' ? 'Consulta General' : 'General Inquiry',
-    successTitle: locale === 'es' ? '¡Cotización enviada!' : 'Quote sent!',
+    successTitle: locale === 'es' ? '¡Solicitud enviada!' : 'Request sent!',
     successMessage: locale === 'es'
-      ? 'Gracias por contactarnos. Te responderemos en menos de 24 horas.'
-      : 'Thank you for contacting us. We will respond within 24 hours.',
-    sendAnother: locale === 'es' ? 'Enviar otra cotización' : 'Send another quote',
+      ? 'Gracias por contactarnos. Te responderemos en menos de 24 horas con tu cotización.'
+      : 'Thank you for contacting us. We will respond within 24 hours with your quote.',
+    sendAnother: locale === 'es' ? 'Enviar otra solicitud' : 'Send another request',
     preSelectionTitle: locale === 'es' ? 'Tu selección' : 'Your selection',
     preSelectionDestination: locale === 'es' ? 'Destino' : 'Destination',
-    preSelectionTour: locale === 'es' ? 'Tour' : 'Tour',
-    preSelectionAircraft: locale === 'es' ? 'Aeronave' : 'Aircraft',
-    preSelectionPrice: locale === 'es' ? 'Precio' : 'Price',
-    clearSelection: locale === 'es' ? 'Cambiar selección' : 'Change selection',
-
-    // New quote labels
-    charterTitle: locale === 'es' ? 'Cotiza tu Vuelo Privado' : 'Get a quote for your Charter flight',
-    charterSubtitle: locale === 'es'
-      ? 'Nos pondremos en contacto contigo en pocas horas con una oferta sin compromiso. ¡Gracias por elegirnos!'
-      : 'We will get in touch with you within a few hours with a non-binding offer. Thank you for choosing us!',
-    tourTitle: locale === 'es' ? 'Cotiza tu Tour Aéreo' : 'Get a quote for your Air Tour',
-    tourSubtitle: locale === 'es'
-      ? 'Nos pondremos en contacto contigo con una oferta sin compromiso en 24 horas. ¡Gracias por elegirnos! ¿Quieres ver más? ¡Echa un vistazo a nuestros otros Tours Aéreos!'
-      : 'We will reach out to you with a non binding offer within 24 hours. Thank you for choosing us! Want to see more? Have a look at our other Air Tours!',
-    travelDate: locale === 'es' ? 'Fecha de viaje (YYYY-MM-DD)' : 'Travel Date (YYYY-MM-DD)',
-    departureTime: locale === 'es' ? 'Hora de salida (hora de Cancún, México)' : 'Time of departure (Cancún, Mexico time)',
-    returnDate: locale === 'es' ? 'Si es necesario, Fecha de regreso (YYYY-MM-DD)' : 'If required, Date of return (YYYY-MM-DD)',
-    returnTime: locale === 'es' ? 'Hora de regreso (hora de Cancún, México)' : 'Time of return (Cancún, Mexico time)',
-    departingFrom: locale === 'es' ? 'Saliendo desde...' : 'Departing from...',
-    departingFromOther: locale === 'es' ? 'En caso de haber seleccionado "Otra Ubicación"' : 'In case of having selected "Other Location"',
-    wantToGoTo: locale === 'es' ? 'Quiero ir a...' : 'I want to go to...',
-    destinationOther: locale === 'es' ? 'En caso de haber seleccionado "Otro Destino"' : 'In case of having selected "Other Destination"',
-    numberOfPassengers: locale === 'es' ? 'Número de Pasajeros' : 'Number of Passengers',
-    selectOption: locale === 'es' ? '—Por favor, elige una opción—' : '—Please choose an option—',
-    otherLocation: locale === 'es' ? 'Otra Ubicación' : 'Other Location',
-    otherDestination: locale === 'es' ? 'Otro Destino' : 'Other Destination',
-    selectTour: locale === 'es' ? 'Selecciona un tour' : 'Select a tour',
-    selectDestination: locale === 'es' ? 'Selecciona un destino' : 'Select a destination',
-    personalComments: locale === 'es' ? 'Comentarios personales' : 'Personal comments',
+    preSelectionPrice: locale === 'es' ? 'Precio estimado' : 'Estimated price',
+    clearSelection: locale === 'es' ? 'Cambiar' : 'Change',
+    transferTitle: locale === 'es' ? 'Cotiza tu Traslado' : 'Get a Transfer Quote',
+    transferSubtitle: locale === 'es'
+      ? 'Completa el formulario y te enviaremos una cotización sin compromiso en menos de 24 horas.'
+      : 'Complete the form and we will send you a non-binding quote within 24 hours.',
+    travelDate: locale === 'es' ? 'Fecha de llegada' : 'Arrival Date',
+    departureTime: locale === 'es' ? 'Hora de llegada' : 'Arrival Time',
+    returnDate: locale === 'es' ? 'Fecha de regreso (opcional)' : 'Return Date (optional)',
+    returnTime: locale === 'es' ? 'Hora de regreso' : 'Return Time',
+    numberOfPassengers: locale === 'es' ? 'Número de pasajeros' : 'Number of Passengers',
+    selectOption: locale === 'es' ? '— Selecciona —' : '— Select —',
+    selectDestination: locale === 'es' ? 'Selecciona tu destino' : 'Select your destination',
+    pickupLocation: locale === 'es' ? 'Nombre del hotel o dirección' : 'Hotel name or address',
+    flightNumber: locale === 'es' ? 'Info adicional (opcional)' : 'Additional info (optional)',
   };
 
   // Format slug to display name
@@ -326,14 +255,14 @@ export default function ContactForm({ locale, searchParams }: ContactFormProps) 
 
   return (
     <div>
-      {/* Title based on quote type */}
-      {(isCharterQuote || isTourQuote) && (
+      {/* Title for transfer quote */}
+      {hasPreSelection && (
         <div className="mb-6">
           <h2 className="text-2xl font-bold mb-2">
-            {isCharterQuote ? labels.charterTitle : labels.tourTitle}
+            {labels.transferTitle}
           </h2>
           <p className="text-muted text-sm">
-            {isCharterQuote ? labels.charterSubtitle : labels.tourSubtitle}
+            {labels.transferSubtitle}
           </p>
         </div>
       )}
@@ -345,7 +274,7 @@ export default function ContactForm({ locale, searchParams }: ContactFormProps) 
             <div className="flex items-start justify-between gap-3">
               <div className="flex items-center gap-3">
                 <div className="p-2 rounded-lg bg-brand-100 dark:bg-brand-900/50">
-                  <PaperAirplaneIcon className="w-5 h-5 text-brand-600 dark:text-brand-400" />
+                  <TruckIcon className="w-5 h-5 text-brand-600 dark:text-brand-400" />
                 </div>
                 <div>
                   <p className="text-xs text-brand-600 dark:text-brand-400 font-medium mb-1">
@@ -353,12 +282,8 @@ export default function ContactForm({ locale, searchParams }: ContactFormProps) 
                   </p>
                   <p className="font-semibold text-foreground">
                     {preSelectedDestination && formatSlug(preSelectedDestination)}
-                    {preSelectedTour && formatSlug(preSelectedTour)}
                   </p>
                   <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1 text-sm text-muted">
-                    {preSelectedAircraft && (
-                      <span>{labels.preSelectionAircraft}: <strong className="text-foreground">{preSelectedAircraft}</strong></span>
-                    )}
                     {preSelectedPrice && (
                       <span>{labels.preSelectionPrice}: <strong className="text-brand-600 dark:text-brand-400">{locale === 'es' ? 'Desde' : 'From'} ${preSelectedPrice} USD</strong></span>
                     )}
@@ -376,7 +301,7 @@ export default function ContactForm({ locale, searchParams }: ContactFormProps) 
           </div>
         )}
 
-        {/* SERVICE TYPE - ALWAYS FIRST */}
+        {/* SERVICE TYPE */}
         <div>
           <label htmlFor="service_type" className="block text-sm font-medium mb-2">
             {labels.service} *
@@ -391,130 +316,19 @@ export default function ContactForm({ locale, searchParams }: ContactFormProps) 
             className="w-full px-4 py-3 rounded-lg border border-default bg-white dark:bg-navy-900 text-foreground focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all disabled:opacity-70 disabled:cursor-not-allowed"
           >
             <option value="">{labels.selectService}</option>
-            <option value="charter">{labels.charter}</option>
-            <option value="tour">{labels.tour}</option>
+            <option value="transfer">{labels.transfer}</option>
+            <option value="roundtrip">{labels.roundTrip}</option>
+            <option value="general">{labels.general}</option>
           </select>
         </div>
 
-        {/* CHARTER FLIGHT SPECIFIC FIELDS */}
-        {formData.service_type === 'charter' && (
+        {/* TRANSFER SPECIFIC FIELDS */}
+        {(formData.service_type === 'transfer' || formData.service_type === 'roundtrip') && (
           <>
-            {/* Travel Date */}
-            <div>
-              <label htmlFor="travel_date" className="block text-sm font-medium mb-2">
-                {labels.travelDate} *
-              </label>
-              <input
-                type="date"
-                id="travel_date"
-                name="travel_date"
-                value={formData.travel_date}
-                onChange={handleChange}
-                required
-                className="w-full px-4 py-3 rounded-lg border border-default bg-white dark:bg-navy-900 text-foreground focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all"
-              />
-            </div>
-
-            {/* Departure Time */}
-            <div>
-              <label htmlFor="departure_time" className="block text-sm font-medium mb-2">
-                {labels.departureTime} *
-              </label>
-              <select
-                id="departure_time"
-                name="departure_time"
-                value={formData.departure_time}
-                onChange={handleChange}
-                required
-                className="w-full px-4 py-3 rounded-lg border border-default bg-white dark:bg-navy-900 text-foreground focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all"
-              >
-                <option value="">{labels.selectOption}</option>
-                {TIME_OPTIONS.map(time => (
-                  <option key={time} value={time}>{time}</option>
-                ))}
-              </select>
-            </div>
-
-            {/* Return Date (optional) */}
-            <div>
-              <label htmlFor="return_date" className="block text-sm font-medium mb-2">
-                {labels.returnDate}
-              </label>
-              <input
-                type="date"
-                id="return_date"
-                name="return_date"
-                value={formData.return_date}
-                onChange={handleChange}
-                className="w-full px-4 py-3 rounded-lg border border-default bg-white dark:bg-navy-900 text-foreground focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all"
-              />
-            </div>
-
-            {/* Return Time (conditional) */}
-            {formData.return_date && (
-              <div>
-                <label htmlFor="return_time" className="block text-sm font-medium mb-2">
-                  {labels.returnTime}
-                </label>
-                <select
-                  id="return_time"
-                  name="return_time"
-                  value={formData.return_time}
-                  onChange={handleChange}
-                  className="w-full px-4 py-3 rounded-lg border border-default bg-white dark:bg-navy-900 text-foreground focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all"
-                >
-                  <option value="">{labels.selectOption}</option>
-                  {TIME_OPTIONS.map(time => (
-                    <option key={time} value={time}>{time}</option>
-                  ))}
-                </select>
-              </div>
-            )}
-
-            {/* Departing From */}
-            <div>
-              <label htmlFor="departure_location" className="block text-sm font-medium mb-2">
-                {labels.departingFrom} *
-              </label>
-              <select
-                id="departure_location"
-                name="departure_location"
-                value={formData.departure_location}
-                onChange={handleChange}
-                required
-                className="w-full px-4 py-3 rounded-lg border border-default bg-white dark:bg-navy-900 text-foreground focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all"
-              >
-                <option value="">{labels.selectOption}</option>
-                <option value="Cancún">Cancún</option>
-                <option value="Playa del Carmen">Playa del Carmen</option>
-                <option value="Tulum">Tulum</option>
-                <option value="Cozumel">Cozumel</option>
-                <option value="other">{labels.otherLocation}</option>
-              </select>
-            </div>
-
-            {/* Departure Location Other (conditional) */}
-            {formData.departure_location === 'other' && (
-              <div>
-                <label htmlFor="departure_location_other" className="block text-sm font-medium mb-2">
-                  {labels.departingFromOther} *
-                </label>
-                <input
-                  type="text"
-                  id="departure_location_other"
-                  name="departure_location_other"
-                  value={formData.departure_location_other}
-                  onChange={handleChange}
-                  required
-                  className="w-full px-4 py-3 rounded-lg border border-default bg-white dark:bg-navy-900 text-foreground focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all"
-                />
-              </div>
-            )}
-
             {/* Destination Selection */}
             <div>
               <label htmlFor="destination" className="block text-sm font-medium mb-2">
-                {labels.wantToGoTo} *
+                {labels.destination} *
               </label>
               <select
                 id="destination"
@@ -531,54 +345,24 @@ export default function ContactForm({ locale, searchParams }: ContactFormProps) 
                     {locale === 'es' ? dest.name_es : dest.name_en}
                   </option>
                 ))}
-                <option value="other">{labels.otherDestination}</option>
               </select>
             </div>
 
-            {/* Destination Other (conditional) */}
-            {formData.destination === 'other' && (
-              <div>
-                <label htmlFor="destination_other" className="block text-sm font-medium mb-2">
-                  {labels.destinationOther} *
-                </label>
-                <input
-                  type="text"
-                  id="destination_other"
-                  name="destination_other"
-                  value={formData.destination_other}
-                  onChange={handleChange}
-                  required
-                  className="w-full px-4 py-3 rounded-lg border border-default bg-white dark:bg-navy-900 text-foreground focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all"
-                />
-              </div>
-            )}
-          </>
-        )}
-
-        {/* AIR TOUR SPECIFIC FIELDS */}
-        {formData.service_type === 'tour' && (
-          <>
-            {/* Tour Selection */}
+            {/* Pickup Location (Hotel) */}
             <div>
-              <label htmlFor="tour" className="block text-sm font-medium mb-2">
-                {labels.tour} *
+              <label htmlFor="pickup_location" className="block text-sm font-medium mb-2">
+                {labels.pickupLocation} *
               </label>
-              <select
-                id="tour"
-                name="tour"
-                value={formData.tour}
+              <input
+                type="text"
+                id="pickup_location"
+                name="pickup_location"
+                value={formData.pickup_location}
                 onChange={handleChange}
                 required
-                disabled={!!preSelectedTour}
-                className="w-full px-4 py-3 rounded-lg border border-default bg-white dark:bg-navy-900 text-foreground focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all disabled:opacity-50"
-              >
-                <option value="">{labels.selectTour}</option>
-                {airTours.map(tour => (
-                  <option key={tour.id} value={tour.slug}>
-                    {locale === 'es' ? tour.name_es : tour.name_en}
-                  </option>
-                ))}
-              </select>
+                placeholder={locale === 'es' ? 'Ej: Hotel Xcaret Arte' : 'E.g.: Hotel Xcaret Arte'}
+                className="w-full px-4 py-3 rounded-lg border border-default bg-white dark:bg-navy-900 text-foreground focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all"
+              />
             </div>
 
             {/* Number of Passengers */}
@@ -634,6 +418,63 @@ export default function ContactForm({ locale, searchParams }: ContactFormProps) 
                 ))}
               </select>
             </div>
+
+            {/* Flight Number */}
+            <div>
+              <label htmlFor="flight_number" className="block text-sm font-medium mb-2">
+                {labels.flightNumber}
+              </label>
+              <input
+                type="text"
+                id="flight_number"
+                name="flight_number"
+                value={formData.flight_number}
+                onChange={handleChange}
+                placeholder={locale === 'es' ? 'Ej: AA1234' : 'E.g.: AA1234'}
+                className="w-full px-4 py-3 rounded-lg border border-default bg-white dark:bg-navy-900 text-foreground focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all"
+              />
+            </div>
+
+            {/* Round Trip Fields */}
+            {formData.service_type === 'roundtrip' && (
+              <>
+                {/* Return Date */}
+                <div>
+                  <label htmlFor="return_date" className="block text-sm font-medium mb-2">
+                    {labels.returnDate}
+                  </label>
+                  <input
+                    type="date"
+                    id="return_date"
+                    name="return_date"
+                    value={formData.return_date}
+                    onChange={handleChange}
+                    className="w-full px-4 py-3 rounded-lg border border-default bg-white dark:bg-navy-900 text-foreground focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all"
+                  />
+                </div>
+
+                {/* Return Time */}
+                {formData.return_date && (
+                  <div>
+                    <label htmlFor="return_time" className="block text-sm font-medium mb-2">
+                      {labels.returnTime}
+                    </label>
+                    <select
+                      id="return_time"
+                      name="return_time"
+                      value={formData.return_time}
+                      onChange={handleChange}
+                      className="w-full px-4 py-3 rounded-lg border border-default bg-white dark:bg-navy-900 text-foreground focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all"
+                    >
+                      <option value="">{labels.selectOption}</option>
+                      {TIME_OPTIONS.map(time => (
+                        <option key={time} value={time}>{time}</option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+              </>
+            )}
           </>
         )}
 
@@ -684,14 +525,15 @@ export default function ContactForm({ locale, searchParams }: ContactFormProps) 
                 value={formData.phone}
                 onChange={handleChange}
                 required
+                placeholder="+52 998 123 4567"
                 className="w-full px-4 py-3 rounded-lg border border-default bg-white dark:bg-navy-900 text-foreground focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all"
               />
             </div>
 
-            {/* Personal Comments / Message */}
+            {/* Message */}
             <div>
               <label htmlFor="message" className="block text-sm font-medium mb-2">
-                {formData.service_type === 'tour' ? labels.personalComments : labels.message}
+                {labels.message}
               </label>
               <textarea
                 id="message"
@@ -699,6 +541,7 @@ export default function ContactForm({ locale, searchParams }: ContactFormProps) 
                 value={formData.message}
                 onChange={handleChange}
                 rows={4}
+                placeholder={locale === 'es' ? 'Cuéntanos más sobre tu viaje...' : 'Tell us more about your trip...'}
                 className="w-full px-4 py-3 rounded-lg border border-default bg-white dark:bg-navy-900 text-foreground focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all resize-none"
               />
             </div>
@@ -716,7 +559,7 @@ export default function ContactForm({ locale, searchParams }: ContactFormProps) 
         {/* Submit */}
         <button
           type="submit"
-          disabled={loading}
+          disabled={loading || !formData.service_type}
           className="w-full py-3 px-4 bg-brand-600 hover:bg-brand-700 disabled:bg-brand-600/50 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-colors"
         >
           {loading ? labels.sending : labels.submit}

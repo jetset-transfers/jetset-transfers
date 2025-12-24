@@ -13,8 +13,8 @@ export default function PageLoader({ message, fullScreen = true }: PageLoaderPro
   const locale = useLocale();
 
   const defaultMessage = locale === 'es'
-    ? 'Preparando tu vuelo...'
-    : 'Preparing your flight...';
+    ? 'Preparando tu traslado...'
+    : 'Preparing your transfer...';
 
   if (fullScreen) {
     return (

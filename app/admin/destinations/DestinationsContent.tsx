@@ -58,10 +58,10 @@ const ICON_MAP: { [key: string]: any } = {
 
 // Default benefits
 const DEFAULT_BENEFITS = [
-  { key: 'time', title_es: 'Ahorra tiempo', title_en: 'Save time', desc_es: 'Evita largas horas de carretera y llega en minutos', desc_en: 'Avoid long road trips and arrive in minutes' },
-  { key: 'comfort', title_es: 'Máximo confort', title_en: 'Maximum comfort', desc_es: 'Viaja en avioneta privada con todas las comodidades', desc_en: 'Travel in a private aircraft with all amenities' },
-  { key: 'views', title_es: 'Vistas increíbles', title_en: 'Incredible views', desc_es: 'Disfruta del paisaje del Caribe desde las alturas', desc_en: 'Enjoy the Caribbean landscape from above' },
-  { key: 'flexible', title_es: 'Horarios flexibles', title_en: 'Flexible schedules', desc_es: 'Elige el horario que mejor se adapte a tu itinerario', desc_en: 'Choose the time that best fits your itinerary' },
+  { key: 'safety', title_es: 'Seguridad garantizada', title_en: 'Guaranteed safety', desc_es: 'Conductores verificados y vehículos con seguro completo', desc_en: 'Verified drivers and fully insured vehicles' },
+  { key: 'comfort', title_es: 'Máximo confort', title_en: 'Maximum comfort', desc_es: 'Vehículos modernos con aire acondicionado y espacio amplio', desc_en: 'Modern vehicles with AC and ample space' },
+  { key: 'punctuality', title_es: 'Puntualidad', title_en: 'Punctuality', desc_es: 'Monitoreo en tiempo real para llegar siempre a tiempo', desc_en: 'Real-time monitoring to always arrive on time' },
+  { key: 'service', title_es: 'Atención personalizada', title_en: 'Personalized service', desc_es: 'Servicio meet & greet y asistencia con equipaje', desc_en: 'Meet & greet service and luggage assistance' },
 ];
 
 interface Benefit {
@@ -72,17 +72,19 @@ interface Benefit {
   desc_en: string;
 }
 
-interface AircraftPricing {
-  aircraft_name: string;
+interface VehiclePricing {
+  vehicle_name: string;
   max_passengers: number;
   price_usd: number;
   notes_es: string;
   notes_en: string;
 }
 
-// Default aircraft pricing
-const DEFAULT_AIRCRAFT_PRICING: AircraftPricing[] = [
-  { aircraft_name: 'Cessna 206', max_passengers: 5, price_usd: 750, notes_es: 'No incluye impuestos y posibles cargos extras*', notes_en: 'Does not include taxes and possible extra charges*' },
+// Default vehicle pricing
+const DEFAULT_VEHICLE_PRICING: VehiclePricing[] = [
+  { vehicle_name: 'SUV', max_passengers: 5, price_usd: 75, notes_es: 'Ideal para parejas o familias pequeñas', notes_en: 'Ideal for couples or small families' },
+  { vehicle_name: 'Van', max_passengers: 10, price_usd: 95, notes_es: 'Perfecto para grupos medianos', notes_en: 'Perfect for medium groups' },
+  { vehicle_name: 'Sprinter', max_passengers: 14, price_usd: 120, notes_es: 'Para grupos grandes con equipaje', notes_en: 'For large groups with luggage' },
 ];
 
 interface Destination {
@@ -101,7 +103,7 @@ interface Destination {
   display_order: number;
   services_included?: string[] | null;
   benefits?: Benefit[] | null;
-  aircraft_pricing?: AircraftPricing[] | null;
+  vehicle_pricing?: VehiclePricing[] | null;
   gallery_images?: string[] | null;
   meta_title_es?: string | null;
   meta_title_en?: string | null;
@@ -130,7 +132,7 @@ const emptyDestination: Omit<Destination, 'id'> = {
   display_order: 0,
   services_included: ['climate', 'luggage', 'water', 'photos', 'sanitizer', 'safety'],
   benefits: DEFAULT_BENEFITS,
-  aircraft_pricing: DEFAULT_AIRCRAFT_PRICING,
+  vehicle_pricing: DEFAULT_VEHICLE_PRICING,
   gallery_images: [],
   meta_title_es: '',
   meta_title_en: '',
@@ -180,7 +182,7 @@ export default function DestinationsContent({ user, destinations: initialDestina
       display_order: destination.display_order,
       services_included: destination.services_included || ['climate', 'luggage', 'water', 'photos', 'sanitizer', 'safety'],
       benefits: (destination.benefits && destination.benefits.length > 0) ? destination.benefits : DEFAULT_BENEFITS,
-      aircraft_pricing: (destination.aircraft_pricing && destination.aircraft_pricing.length > 0) ? destination.aircraft_pricing : DEFAULT_AIRCRAFT_PRICING,
+      vehicle_pricing: (destination.vehicle_pricing && destination.vehicle_pricing.length > 0) ? destination.vehicle_pricing : DEFAULT_VEHICLE_PRICING,
       gallery_images: destination.gallery_images || [],
       meta_title_es: destination.meta_title_es || '',
       meta_title_en: destination.meta_title_en || '',
@@ -349,40 +351,40 @@ export default function DestinationsContent({ user, destinations: initialDestina
     setFormData({ ...formData, benefits });
   };
 
-  // Aircraft pricing functions
+  // Vehicle pricing functions
   const getCurrentPricing = () => {
-    return (formData.aircraft_pricing && formData.aircraft_pricing.length > 0)
-      ? formData.aircraft_pricing
-      : DEFAULT_AIRCRAFT_PRICING;
+    return (formData.vehicle_pricing && formData.vehicle_pricing.length > 0)
+      ? formData.vehicle_pricing
+      : DEFAULT_VEHICLE_PRICING;
   };
 
-  const addAircraftPricing = () => {
+  const addVehiclePricing = () => {
     const currentPricing = getCurrentPricing();
-    const newPricing: AircraftPricing = {
-      aircraft_name: '',
+    const newPricing: VehiclePricing = {
+      vehicle_name: '',
       max_passengers: 5,
       price_usd: 0,
       notes_es: 'No incluye impuestos y posibles cargos extras*',
       notes_en: 'Does not include taxes and possible extra charges*',
     };
-    setFormData({ ...formData, aircraft_pricing: [...currentPricing, newPricing] });
+    setFormData({ ...formData, vehicle_pricing: [...currentPricing, newPricing] });
   };
 
-  const removeAircraftPricing = (index: number) => {
+  const removeVehiclePricing = (index: number) => {
     const currentPricing = getCurrentPricing();
     if (currentPricing.length <= 1) {
-      toast.error('Debe haber al menos un precio de avión');
+      toast.error('Debe haber al menos un precio de vehículo');
       return;
     }
     const newPricing = currentPricing.filter((_, i) => i !== index);
-    setFormData({ ...formData, aircraft_pricing: newPricing });
+    setFormData({ ...formData, vehicle_pricing: newPricing });
   };
 
-  const updateAircraftPricing = (index: number, field: keyof AircraftPricing, value: string | number) => {
+  const updateVehiclePricing = (index: number, field: keyof VehiclePricing, value: string | number) => {
     const currentPricing = getCurrentPricing();
     const newPricing = [...currentPricing];
     newPricing[index] = { ...newPricing[index], [field]: value };
-    setFormData({ ...formData, aircraft_pricing: newPricing });
+    setFormData({ ...formData, vehicle_pricing: newPricing });
   };
 
   const sortedDestinations = [...destinations].sort((a, b) => a.display_order - b.display_order);
@@ -401,7 +403,7 @@ export default function DestinationsContent({ user, destinations: initialDestina
       <div className="mb-6 flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold text-white">Destinos</h1>
-          <p className="text-navy-400 mt-1">Gestiona los destinos de vuelos privados</p>
+          <p className="text-navy-400 mt-1">Gestiona los destinos de traslados privados</p>
         </div>
         <button
           onClick={handleCreate}
@@ -625,7 +627,7 @@ export default function DestinationsContent({ user, destinations: initialDestina
 
                   <div className="grid grid-cols-3 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-navy-300 mb-1">Tiempo de vuelo</label>
+                      <label className="block text-sm font-medium text-navy-300 mb-1">Tiempo de traslado</label>
                       <input
                         type="text"
                         value={formData.flight_time || ''}
@@ -728,16 +730,16 @@ export default function DestinationsContent({ user, destinations: initialDestina
                 <div className="space-y-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <h3 className="text-sm font-semibold text-white">Precios por Avión</h3>
-                      <p className="text-xs text-navy-500 mt-1">Configura los precios según el tipo de aeronave</p>
+                      <h3 className="text-sm font-semibold text-white">Precios por Vehículo</h3>
+                      <p className="text-xs text-navy-500 mt-1">Configura los precios según el tipo de vehículo</p>
                     </div>
                     <button
                       type="button"
-                      onClick={addAircraftPricing}
+                      onClick={addVehiclePricing}
                       className="flex items-center gap-1.5 px-3 py-1.5 text-sm bg-brand-500 hover:bg-brand-600 text-white rounded-lg transition-colors"
                     >
                       <PlusIcon className="w-4 h-4" />
-                      Agregar avión
+                      Agregar vehículo
                     </button>
                   </div>
 
@@ -750,13 +752,13 @@ export default function DestinationsContent({ user, destinations: initialDestina
                               {index + 1}
                             </span>
                             <span className="text-sm font-medium text-white">
-                              {pricing.aircraft_name || 'Nuevo avión'}
+                              {pricing.vehicle_name || 'Nuevo vehículo'}
                             </span>
                           </span>
                           {getCurrentPricing().length > 1 && (
                             <button
                               type="button"
-                              onClick={() => removeAircraftPricing(index)}
+                              onClick={() => removeVehiclePricing(index)}
                               className="p-1.5 text-navy-400 hover:text-red-400 hover:bg-navy-700 rounded transition-colors"
                             >
                               <TrashIcon className="w-4 h-4" />
@@ -766,11 +768,11 @@ export default function DestinationsContent({ user, destinations: initialDestina
 
                         <div className="grid grid-cols-2 gap-4 mb-4">
                           <div>
-                            <label className="block text-xs font-medium text-navy-400 mb-1">Nombre del avión</label>
+                            <label className="block text-xs font-medium text-navy-400 mb-1">Nombre del vehículo</label>
                             <input
                               type="text"
-                              value={pricing.aircraft_name}
-                              onChange={(e) => updateAircraftPricing(index, 'aircraft_name', e.target.value)}
+                              value={pricing.vehicle_name}
+                              onChange={(e) => updateVehiclePricing(index, 'vehicle_name', e.target.value)}
                               placeholder="Ej: Cessna 206"
                               className="w-full px-3 py-2 text-sm bg-navy-900 border border-navy-600 rounded-lg text-white placeholder-navy-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
                             />
@@ -780,7 +782,7 @@ export default function DestinationsContent({ user, destinations: initialDestina
                             <input
                               type="number"
                               value={pricing.max_passengers}
-                              onChange={(e) => updateAircraftPricing(index, 'max_passengers', parseInt(e.target.value) || 0)}
+                              onChange={(e) => updateVehiclePricing(index, 'max_passengers', parseInt(e.target.value) || 0)}
                               placeholder="5"
                               min="1"
                               className="w-full px-3 py-2 text-sm bg-navy-900 border border-navy-600 rounded-lg text-white placeholder-navy-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
@@ -795,7 +797,7 @@ export default function DestinationsContent({ user, destinations: initialDestina
                             <input
                               type="number"
                               value={pricing.price_usd}
-                              onChange={(e) => updateAircraftPricing(index, 'price_usd', parseInt(e.target.value) || 0)}
+                              onChange={(e) => updateVehiclePricing(index, 'price_usd', parseInt(e.target.value) || 0)}
                               placeholder="750"
                               min="0"
                               className="w-full pl-7 pr-3 py-2 text-sm bg-navy-900 border border-navy-600 rounded-lg text-white placeholder-navy-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
@@ -811,7 +813,7 @@ export default function DestinationsContent({ user, destinations: initialDestina
                             <input
                               type="text"
                               value={pricing.notes_es}
-                              onChange={(e) => updateAircraftPricing(index, 'notes_es', e.target.value)}
+                              onChange={(e) => updateVehiclePricing(index, 'notes_es', e.target.value)}
                               placeholder="No incluye impuestos..."
                               className="w-full px-3 py-2 text-sm bg-navy-900 border border-navy-600 rounded-lg text-white placeholder-navy-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
                             />
@@ -823,7 +825,7 @@ export default function DestinationsContent({ user, destinations: initialDestina
                             <input
                               type="text"
                               value={pricing.notes_en}
-                              onChange={(e) => updateAircraftPricing(index, 'notes_en', e.target.value)}
+                              onChange={(e) => updateVehiclePricing(index, 'notes_en', e.target.value)}
                               placeholder="Does not include taxes..."
                               className="w-full px-3 py-2 text-sm bg-navy-900 border border-navy-600 rounded-lg text-white placeholder-navy-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
                             />
@@ -846,7 +848,7 @@ export default function DestinationsContent({ user, destinations: initialDestina
                             ${pricing.price_usd.toLocaleString()}
                           </p>
                           <p className="text-sm text-gray-600">USD</p>
-                          <p className="text-xs text-brand-500 mt-2">{pricing.aircraft_name || 'Avión'}</p>
+                          <p className="text-xs text-brand-500 mt-2">{pricing.vehicle_name || 'Vehículo'}</p>
                           <p className="text-[10px] text-gray-400 mt-1">{pricing.notes_es}</p>
                         </div>
                       ))}
@@ -971,9 +973,9 @@ export default function DestinationsContent({ user, destinations: initialDestina
                     <h3 className="text-sm font-semibold text-white mb-2">Vista previa en Google</h3>
                     <div className="bg-white rounded-lg p-3 text-sm">
                       <p className="text-blue-600 font-medium truncate">
-                        {formData.meta_title_es || `Vuelo Privado a ${formData.name_es}` || 'Título de la página'}
+                        {formData.meta_title_es || `Traslado a ${formData.name_es}` || 'Título de la página'}
                       </p>
-                      <p className="text-green-700 text-xs truncate">vuelatour.com/es/charter-flights/{formData.slug || 'destino'}</p>
+                      <p className="text-green-700 text-xs truncate">jetsetcancun.com/es/destinations/{formData.slug || 'destino'}</p>
                       <p className="text-gray-600 text-xs line-clamp-2">
                         {formData.meta_description_es || formData.description_es || 'Descripción de la página...'}
                       </p>
@@ -987,7 +989,7 @@ export default function DestinationsContent({ user, destinations: initialDestina
                         type="text"
                         value={formData.meta_title_es || ''}
                         onChange={(e) => setFormData({ ...formData, meta_title_es: e.target.value })}
-                        placeholder={`Vuelo Privado a ${formData.name_es || 'Destino'}`}
+                        placeholder={`Traslado a ${formData.name_es || 'Destino'}`}
                         className="w-full px-3 py-2 bg-navy-800 border border-navy-700 rounded-lg text-white placeholder-navy-500 focus:outline-none focus:ring-2 focus:ring-brand-500"
                       />
                       <p className="text-xs text-navy-500 mt-1">{(formData.meta_title_es || '').length}/60</p>

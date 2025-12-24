@@ -297,7 +297,7 @@ export default function ContactInfoContent({ user, contactInfo }: ContactInfoCon
                   type="email"
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  placeholder="info@vuelatour.com"
+                  placeholder="transportesjetset@gmail.com"
                   className="w-full max-w-md px-3 py-2 bg-navy-800 border border-navy-700 rounded-lg text-white placeholder-navy-500 focus:outline-none focus:ring-2 focus:ring-brand-500"
                 />
               </div>
@@ -432,7 +432,7 @@ export default function ContactInfoContent({ user, contactInfo }: ContactInfoCon
                       type="url"
                       value={formData.facebook_url}
                       onChange={(e) => setFormData({ ...formData, facebook_url: e.target.value })}
-                      placeholder="https://facebook.com/vuelatour"
+                      placeholder="https://facebook.com/jetsettransfers"
                       className="w-full px-3 py-2 bg-navy-800 border border-navy-700 rounded-lg text-white placeholder-navy-500 focus:outline-none focus:ring-2 focus:ring-brand-500"
                     />
                   </div>
@@ -444,7 +444,7 @@ export default function ContactInfoContent({ user, contactInfo }: ContactInfoCon
                       type="url"
                       value={formData.instagram_url}
                       onChange={(e) => setFormData({ ...formData, instagram_url: e.target.value })}
-                      placeholder="https://instagram.com/vuelatour"
+                      placeholder="https://instagram.com/jetsettransfers"
                       className="w-full px-3 py-2 bg-navy-800 border border-navy-700 rounded-lg text-white placeholder-navy-500 focus:outline-none focus:ring-2 focus:ring-brand-500"
                     />
                   </div>
@@ -456,7 +456,7 @@ export default function ContactInfoContent({ user, contactInfo }: ContactInfoCon
                       type="url"
                       value={formData.tiktok_url}
                       onChange={(e) => setFormData({ ...formData, tiktok_url: e.target.value })}
-                      placeholder="https://tiktok.com/@vuelatour"
+                      placeholder="https://tiktok.com/@jetsettransfers"
                       className="w-full px-3 py-2 bg-navy-800 border border-navy-700 rounded-lg text-white placeholder-navy-500 focus:outline-none focus:ring-2 focus:ring-brand-500"
                     />
                   </div>
@@ -468,7 +468,7 @@ export default function ContactInfoContent({ user, contactInfo }: ContactInfoCon
                       type="url"
                       value={formData.youtube_url}
                       onChange={(e) => setFormData({ ...formData, youtube_url: e.target.value })}
-                      placeholder="https://youtube.com/@vuelatour"
+                      placeholder="https://youtube.com/@jetsettransfers"
                       className="w-full px-3 py-2 bg-navy-800 border border-navy-700 rounded-lg text-white placeholder-navy-500 focus:outline-none focus:ring-2 focus:ring-brand-500"
                     />
                   </div>

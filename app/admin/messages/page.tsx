@@ -10,16 +10,11 @@ export default async function MessagesPage() {
     redirect('/admin/login');
   }
 
-  // Fetch contact requests with tour and destination names
+  // Fetch contact requests with destination names
   const { data: messages } = await supabase
     .from('contact_requests')
     .select(`
       *,
-      air_tours:tour_id (
-        name_es,
-        name_en,
-        slug
-      ),
       destinations:destination_id (
         name_es,
         name_en,

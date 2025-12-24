@@ -19,10 +19,10 @@ export async function generateMetadata({ params }: PageProps) {
     ? page?.title_es || 'Política de Cookies'
     : page?.title_en || 'Cookie Policy';
 
-  const fullTitle = `${title} | Vuelatour`;
+  const fullTitle = `${title} | Jetset Transfers`;
   const description = locale === 'es'
-    ? 'Información sobre el uso de cookies en el sitio web de Vuelatour. Conoce qué cookies utilizamos y cómo gestionarlas.'
-    : 'Information about cookie usage on Vuelatour website. Learn what cookies we use and how to manage them.';
+    ? 'Información sobre el uso de cookies en el sitio web de Jetset Transfers. Conoce qué cookies utilizamos y cómo gestionarlas.'
+    : 'Information about cookie usage on Jetset Transfers website. Learn what cookies we use and how to manage them.';
 
   return {
     title: fullTitle,
@@ -30,17 +30,17 @@ export async function generateMetadata({ params }: PageProps) {
     openGraph: {
       title: fullTitle,
       description,
-      url: `https://www.vuelatour.com/${locale}/cookies`,
-      siteName: 'Vuelatour',
+      url: `https://www.jetsetcancun.com/${locale}/cookies`,
+      siteName: 'Jetset Transfers',
       locale: locale === 'es' ? 'es_MX' : 'en_US',
       type: 'website',
     },
     alternates: {
-      canonical: `https://www.vuelatour.com/${locale}/cookies`,
+      canonical: `https://www.jetsetcancun.com/${locale}/cookies`,
       languages: {
-        'es': 'https://www.vuelatour.com/es/cookies',
-        'en': 'https://www.vuelatour.com/en/cookies',
-        'x-default': 'https://www.vuelatour.com/en/cookies',
+        'es': 'https://www.jetsetcancun.com/es/cookies',
+        'en': 'https://www.jetsetcancun.com/en/cookies',
+        'x-default': 'https://www.jetsetcancun.com/en/cookies',
       },
     },
     robots: {

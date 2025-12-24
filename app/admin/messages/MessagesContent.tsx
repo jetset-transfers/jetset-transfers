@@ -17,17 +17,11 @@ import {
   CalendarIcon,
   MapPinIcon,
   UserGroupIcon,
-  PaperAirplaneIcon,
+  TruckIcon,
   ArrowPathIcon,
   PencilIcon,
   CheckIcon,
 } from '@heroicons/react/24/outline';
-
-interface TourData {
-  name_es: string;
-  name_en: string;
-  slug: string;
-}
 
 interface DestinationData {
   name_es: string;
@@ -54,11 +48,9 @@ interface ContactRequest {
   departure_location_other: string | null;
   destination_other: string | null;
   number_of_passengers: number | null;
-  tour_id: string | null;
   destination_id: string | null;
-  aircraft_selected: string | null;
+  flight_number: string | null;
   // Joined data
-  air_tours: TourData | null;
   destinations: DestinationData | null;
 }
 
@@ -74,8 +66,8 @@ const statusConfig = {
 };
 
 const serviceTypes = {
-  charter: 'Vuelo Privado',
-  tour: 'Tour Aéreo',
+  transfer: 'Traslado Privado',
+  roundtrip: 'Viaje Redondo',
   general: 'Consulta General',
 };
 
@@ -104,7 +96,6 @@ export default function MessagesContent({ user, messages: initialMessages }: Mes
         .from('contact_requests')
         .select(`
           *,
-          air_tours:tour_id(name_es, name_en, slug),
           destinations:destination_id(name_es, name_en, slug)
         `)
         .order('created_at', { ascending: false });
@@ -430,20 +421,13 @@ export default function MessagesContent({ user, messages: initialMessages }: Mes
                     <p className="text-navy-400 text-xs font-semibold uppercase mb-2">Tipo de Servicio</p>
                     <div className="space-y-2">
                       <div className="flex items-center gap-2">
-                        <PaperAirplaneIcon className="w-5 h-5 text-brand-400" />
+                        <TruckIcon className="w-5 h-5 text-brand-400" />
                         <span className="text-white font-medium">
                           {serviceTypes[selectedMessage.service_type as keyof typeof serviceTypes] || selectedMessage.service_type}
                         </span>
                       </div>
-                      {/* Show Tour Name */}
-                      {selectedMessage.service_type === 'tour' && selectedMessage.air_tours && (
-                        <div className="pl-7">
-                          <p className="text-navy-500 text-xs mb-1">Tour seleccionado</p>
-                          <p className="text-brand-400 font-medium">{selectedMessage.air_tours.name_es}</p>
-                        </div>
-                      )}
                       {/* Show Destination Name */}
-                      {selectedMessage.service_type === 'charter' && selectedMessage.destinations && (
+                      {(selectedMessage.service_type === 'transfer' || selectedMessage.service_type === 'roundtrip') && selectedMessage.destinations && (
                         <div className="pl-7">
                           <p className="text-navy-500 text-xs mb-1">Destino seleccionado</p>
                           <p className="text-brand-400 font-medium">{selectedMessage.destinations.name_es}</p>
@@ -453,11 +437,11 @@ export default function MessagesContent({ user, messages: initialMessages }: Mes
                   </div>
                 )}
 
-                {/* Flight Details Section - Charter */}
-                {selectedMessage.service_type === 'charter' && (
+                {/* Transfer Details Section */}
+                {(selectedMessage.service_type === 'transfer' || selectedMessage.service_type === 'roundtrip') && (
                   <div className="p-4 bg-navy-800 rounded-lg space-y-3">
                     <div className="flex items-center justify-between mb-3">
-                      <p className="text-navy-400 text-xs font-semibold uppercase">Detalles del Vuelo Privado</p>
+                      <p className="text-navy-400 text-xs font-semibold uppercase">Detalles del Traslado</p>
                       {!isEditingDates ? (
                         <button
                           onClick={handleStartEditDates}
@@ -490,7 +474,7 @@ export default function MessagesContent({ user, messages: initialMessages }: Mes
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       {/* Travel Date */}
                       <div>
-                        <p className="text-navy-500 text-xs mb-1">Fecha de viaje</p>
+                        <p className="text-navy-500 text-xs mb-1">Fecha de llegada</p>
                         {isEditingDates ? (
                           <input
                             type="date"
@@ -510,7 +494,7 @@ export default function MessagesContent({ user, messages: initialMessages }: Mes
 
                       {/* Departure Time */}
                       <div>
-                        <p className="text-navy-500 text-xs mb-1">Hora de salida</p>
+                        <p className="text-navy-500 text-xs mb-1">Hora de llegada</p>
                         {isEditingDates ? (
                           <input
                             type="time"
@@ -528,53 +512,56 @@ export default function MessagesContent({ user, messages: initialMessages }: Mes
                         )}
                       </div>
 
-                      {/* Return Date */}
-                      <div>
-                        <p className="text-navy-500 text-xs mb-1">Fecha de regreso</p>
-                        {isEditingDates ? (
-                          <input
-                            type="date"
-                            value={editReturnDate}
-                            onChange={(e) => setEditReturnDate(e.target.value)}
-                            className="admin-dark-input w-full px-3 py-1.5 bg-navy-900 border border-navy-700 rounded text-white text-sm focus:outline-none focus:border-brand-500 [color-scheme:dark]"
-                          />
-                        ) : selectedMessage.return_date ? (
-                          <div className="flex items-center gap-2 text-white">
-                            <ArrowPathIcon className="w-4 h-4 text-navy-500" />
-                            <span>{formatTravelDate(selectedMessage.return_date)}</span>
+                      {/* Return Date (only for roundtrip) */}
+                      {selectedMessage.service_type === 'roundtrip' && (
+                        <>
+                          <div>
+                            <p className="text-navy-500 text-xs mb-1">Fecha de regreso</p>
+                            {isEditingDates ? (
+                              <input
+                                type="date"
+                                value={editReturnDate}
+                                onChange={(e) => setEditReturnDate(e.target.value)}
+                                className="admin-dark-input w-full px-3 py-1.5 bg-navy-900 border border-navy-700 rounded text-white text-sm focus:outline-none focus:border-brand-500 [color-scheme:dark]"
+                              />
+                            ) : selectedMessage.return_date ? (
+                              <div className="flex items-center gap-2 text-white">
+                                <ArrowPathIcon className="w-4 h-4 text-navy-500" />
+                                <span>{formatTravelDate(selectedMessage.return_date)}</span>
+                              </div>
+                            ) : (
+                              <span className="text-navy-600 text-sm">No especificada</span>
+                            )}
                           </div>
-                        ) : (
-                          <span className="text-navy-600 text-sm">No especificada</span>
-                        )}
-                      </div>
 
-                      {/* Return Time */}
-                      <div>
-                        <p className="text-navy-500 text-xs mb-1">Hora de regreso</p>
-                        {isEditingDates ? (
-                          <input
-                            type="time"
-                            value={editReturnTime}
-                            onChange={(e) => setEditReturnTime(e.target.value)}
-                            className="admin-dark-input w-full px-3 py-1.5 bg-navy-900 border border-navy-700 rounded text-white text-sm focus:outline-none focus:border-brand-500 [color-scheme:dark]"
-                          />
-                        ) : selectedMessage.return_time ? (
-                          <div className="flex items-center gap-2 text-white">
-                            <ClockIcon className="w-4 h-4 text-navy-500" />
-                            <span>{selectedMessage.return_time}</span>
+                          <div>
+                            <p className="text-navy-500 text-xs mb-1">Hora de regreso</p>
+                            {isEditingDates ? (
+                              <input
+                                type="time"
+                                value={editReturnTime}
+                                onChange={(e) => setEditReturnTime(e.target.value)}
+                                className="admin-dark-input w-full px-3 py-1.5 bg-navy-900 border border-navy-700 rounded text-white text-sm focus:outline-none focus:border-brand-500 [color-scheme:dark]"
+                              />
+                            ) : selectedMessage.return_time ? (
+                              <div className="flex items-center gap-2 text-white">
+                                <ClockIcon className="w-4 h-4 text-navy-500" />
+                                <span>{selectedMessage.return_time}</span>
+                              </div>
+                            ) : (
+                              <span className="text-navy-600 text-sm">No especificada</span>
+                            )}
                           </div>
-                        ) : (
-                          <span className="text-navy-600 text-sm">No especificada</span>
-                        )}
-                      </div>
+                        </>
+                      )}
 
-                      {/* Departure Location */}
+                      {/* Hotel/Pickup Location */}
                       {selectedMessage.departure_location && (
                         <div>
-                          <p className="text-navy-500 text-xs mb-1">Saliendo desde</p>
+                          <p className="text-navy-500 text-xs mb-1">Hotel / Ubicación</p>
                           <div className="flex items-center gap-2 text-white">
                             <MapPinIcon className="w-4 h-4 text-navy-500" />
-                            <span>{selectedMessage.departure_location_other || selectedMessage.departure_location}</span>
+                            <span>{selectedMessage.departure_location}</span>
                           </div>
                         </div>
                       )}
@@ -585,7 +572,7 @@ export default function MessagesContent({ user, messages: initialMessages }: Mes
                           <p className="text-navy-500 text-xs mb-1">Destino</p>
                           <div className="flex items-center gap-2 text-white">
                             <MapPinIcon className="w-4 h-4 text-brand-400" />
-                            <span className="font-medium">{selectedMessage.destination_other || selectedMessage.destination}</span>
+                            <span className="font-medium">{selectedMessage.destination}</span>
                           </div>
                         </div>
                       )}
@@ -601,55 +588,13 @@ export default function MessagesContent({ user, messages: initialMessages }: Mes
                         </div>
                       )}
 
-                      {/* Aircraft Selected */}
-                      {selectedMessage.aircraft_selected && (
+                      {/* Flight Number */}
+                      {selectedMessage.flight_number && (
                         <div>
-                          <p className="text-navy-500 text-xs mb-1">Aeronave seleccionada</p>
+                          <p className="text-navy-500 text-xs mb-1">Info adicional</p>
                           <div className="flex items-center gap-2 text-white">
-                            <PaperAirplaneIcon className="w-4 h-4 text-navy-500" />
-                            <span>{selectedMessage.aircraft_selected}</span>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
-
-                {/* Flight Details Section - Tour */}
-                {selectedMessage.service_type === 'tour' && (
-                  <div className="p-4 bg-navy-800 rounded-lg space-y-3">
-                    <p className="text-navy-400 text-xs font-semibold uppercase mb-3">Detalles del Tour Aéreo</p>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      {/* Travel Date */}
-                      {selectedMessage.travel_date && (
-                        <div>
-                          <p className="text-navy-500 text-xs mb-1">Fecha de viaje</p>
-                          <div className="flex items-center gap-2 text-white">
-                            <CalendarIcon className="w-4 h-4 text-navy-500" />
-                            <span>{formatTravelDate(selectedMessage.travel_date)}</span>
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Departure Time */}
-                      {selectedMessage.departure_time && (
-                        <div>
-                          <p className="text-navy-500 text-xs mb-1">Hora de salida</p>
-                          <div className="flex items-center gap-2 text-white">
-                            <ClockIcon className="w-4 h-4 text-navy-500" />
-                            <span>{selectedMessage.departure_time}</span>
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Number of Passengers */}
-                      {selectedMessage.number_of_passengers && (
-                        <div>
-                          <p className="text-navy-500 text-xs mb-1">Número de pasajeros</p>
-                          <div className="flex items-center gap-2 text-white">
-                            <UserGroupIcon className="w-4 h-4 text-navy-500" />
-                            <span>{selectedMessage.number_of_passengers} pasajero{selectedMessage.number_of_passengers > 1 ? 's' : ''}</span>
+                            <TruckIcon className="w-4 h-4 text-navy-500" />
+                            <span>{selectedMessage.flight_number}</span>
                           </div>
                         </div>
                       )}

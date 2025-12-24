@@ -11,7 +11,7 @@ interface CookieConsent {
   timestamp: number;
 }
 
-const COOKIE_CONSENT_KEY = 'vuelatour_cookie_consent';
+const COOKIE_CONSENT_KEY = 'jetset_cookie_consent';
 
 export default function CookieBanner() {
   const locale = useLocale();

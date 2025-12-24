@@ -90,7 +90,7 @@ const ICON_MAP: { [key: string]: any } = {
 const DEFAULT_BENEFITS: Benefit[] = [
   { key: 'safety', title_es: 'Seguridad', title_en: 'Safety', desc_es: 'Vehículos en perfectas condiciones y conductores certificados', desc_en: 'Vehicles in perfect condition and certified drivers' },
   { key: 'comfort', title_es: 'Comodidad', title_en: 'Comfort', desc_es: 'Viaja en vehículos espaciosos con aire acondicionado', desc_en: 'Travel in spacious vehicles with air conditioning' },
-  { key: 'punctuality', title_es: 'Puntualidad', title_en: 'Punctuality', desc_es: 'Llegamos a tiempo, siempre. Monitoreamos tu vuelo', desc_en: 'We arrive on time, always. We monitor your flight' },
+  { key: 'punctuality', title_es: 'Puntualidad', title_en: 'Punctuality', desc_es: 'Llegamos a tiempo, siempre. Monitoreo en tiempo real', desc_en: 'We arrive on time, always. Real-time monitoring' },
   { key: 'service', title_es: 'Atención personalizada', title_en: 'Personalized service', desc_es: 'Servicio dedicado y atento a tus necesidades', desc_en: 'Dedicated service attentive to your needs' },
 ];
 

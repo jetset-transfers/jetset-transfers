@@ -19,8 +19,6 @@ interface ContactPageProps {
   params: Promise<{ locale: string }>;
   searchParams: Promise<{
     destination?: string;
-    tour?: string;
-    aircraft?: string;
     price?: string;
   }>;
 }
@@ -54,8 +52,8 @@ export default async function ContactPage({ params, searchParams }: ContactPageP
     {
       icon: EnvelopeIcon,
       title: locale === 'es' ? 'Email' : 'Email',
-      content: dbContactInfo?.email || 'info@vuelatour.com',
-      href: `mailto:${dbContactInfo?.email || 'info@vuelatour.com'}`,
+      content: dbContactInfo?.email || 'transportesjetset@gmail.com',
+      href: `mailto:${dbContactInfo?.email || 'transportesjetset@gmail.com'}`,
     },
     {
       icon: ClockIcon,
@@ -153,7 +151,7 @@ export default async function ContactPage({ params, searchParams }: ContactPageP
                 <LazyMap
                   src={googleMapsEmbed}
                   height={300}
-                  title={locale === 'es' ? 'Ubicación de Vuelatour' : 'Vuelatour Location'}
+                  title={locale === 'es' ? 'Ubicación de Jetset Transfers' : 'Jetset Transfers Location'}
                 />
               </div>
             </div>
@@ -168,13 +166,13 @@ export async function generateMetadata({ params }: ContactPageProps) {
   const { locale } = await params;
 
   const titles = {
-    es: 'Contacto | Reserva tu Vuelo Privado en Cancún | Vuelatour',
-    en: 'Contact | Book Your Private Flight in Cancún | Vuelatour',
+    es: 'Contacto | Reserva tu Traslado en Cancún | Jetset Transfers',
+    en: 'Contact | Book Your Transfer in Cancún | Jetset Transfers',
   };
 
   const descriptions = {
-    es: 'Contáctanos para reservar tu vuelo privado o tour aéreo en Cancún. Atención personalizada por WhatsApp. Respondemos en menos de 24 horas.',
-    en: 'Contact us to book your charter flight or air tour in Cancún. Personalized attention via WhatsApp. We respond within 24 hours.',
+    es: 'Contáctanos para reservar tu traslado privado desde el aeropuerto de Cancún. Atención personalizada por WhatsApp. Respondemos en menos de 24 horas.',
+    en: 'Contact us to book your private transfer from Cancún Airport. Personalized attention via WhatsApp. We respond within 24 hours.',
   };
 
   const title = titles[locale as keyof typeof titles] || titles.es;
@@ -186,14 +184,14 @@ export async function generateMetadata({ params }: ContactPageProps) {
     openGraph: {
       title,
       description,
-      url: `https://www.vuelatour.com/${locale}/contact`,
-      siteName: 'Vuelatour',
+      url: `https://www.jetsetcancun.com/${locale}/contact`,
+      siteName: 'Jetset Transfers',
       images: [
         {
-          url: 'https://www.vuelatour.com/images/og/og-image.jpg',
+          url: 'https://www.jetsetcancun.com/images/og/og-image.jpg',
           width: 1200,
           height: 630,
-          alt: locale === 'es' ? 'Contacta a Vuelatour' : 'Contact Vuelatour',
+          alt: locale === 'es' ? 'Contacta a Jetset Transfers' : 'Contact Jetset Transfers',
         },
       ],
       locale: locale === 'es' ? 'es_MX' : 'en_US',
@@ -203,14 +201,14 @@ export async function generateMetadata({ params }: ContactPageProps) {
       card: 'summary_large_image',
       title,
       description,
-      images: ['https://www.vuelatour.com/images/og/og-image.jpg'],
+      images: ['https://www.jetsetcancun.com/images/og/og-image.jpg'],
     },
     alternates: {
-      canonical: `https://www.vuelatour.com/${locale}/contact`,
+      canonical: `https://www.jetsetcancun.com/${locale}/contact`,
       languages: {
-        'es': 'https://www.vuelatour.com/es/contact',
-        'en': 'https://www.vuelatour.com/en/contact',
-        'x-default': 'https://www.vuelatour.com/en/contact',
+        'es': 'https://www.jetsetcancun.com/es/contact',
+        'en': 'https://www.jetsetcancun.com/en/contact',
+        'x-default': 'https://www.jetsetcancun.com/en/contact',
       },
     },
   };

@@ -19,10 +19,10 @@ export async function generateMetadata({ params }: PageProps) {
     ? page?.title_es || 'Aviso de Privacidad'
     : page?.title_en || 'Privacy Policy';
 
-  const fullTitle = `${title} | Vuelatour`;
+  const fullTitle = `${title} | Jetset Transfers`;
   const description = locale === 'es'
-    ? 'Política de privacidad y protección de datos personales de Vuelatour. Conoce cómo protegemos tu información.'
-    : 'Privacy policy and personal data protection of Vuelatour. Learn how we protect your information.';
+    ? 'Política de privacidad y protección de datos personales de Jetset Transfers. Conoce cómo protegemos tu información.'
+    : 'Privacy policy and personal data protection of Jetset Transfers. Learn how we protect your information.';
 
   return {
     title: fullTitle,
@@ -30,17 +30,17 @@ export async function generateMetadata({ params }: PageProps) {
     openGraph: {
       title: fullTitle,
       description,
-      url: `https://www.vuelatour.com/${locale}/privacy`,
-      siteName: 'Vuelatour',
+      url: `https://www.jetsetcancun.com/${locale}/privacy`,
+      siteName: 'Jetset Transfers',
       locale: locale === 'es' ? 'es_MX' : 'en_US',
       type: 'website',
     },
     alternates: {
-      canonical: `https://www.vuelatour.com/${locale}/privacy`,
+      canonical: `https://www.jetsetcancun.com/${locale}/privacy`,
       languages: {
-        'es': 'https://www.vuelatour.com/es/privacy',
-        'en': 'https://www.vuelatour.com/en/privacy',
-        'x-default': 'https://www.vuelatour.com/en/privacy',
+        'es': 'https://www.jetsetcancun.com/es/privacy',
+        'en': 'https://www.jetsetcancun.com/en/privacy',
+        'x-default': 'https://www.jetsetcancun.com/en/privacy',
       },
     },
     robots: {
