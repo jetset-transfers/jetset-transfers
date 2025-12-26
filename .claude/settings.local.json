@@ -5,7 +5,9 @@
       "Bash(cd:*)",
       "Bash(dir:*)",
       "Bash(del \"c:\\\\Users\\\\Diego Rmz\\\\Documents\\\\Development\\\\jetset-transfers\\\\components\\\\home\\\\CharterFlightsSection.tsx\")",
-      "Bash(del \"c:\\\\Users\\\\Diego Rmz\\\\Documents\\\\Development\\\\jetset-transfers\\\\components\\\\home\\\\AirToursSection.tsx\")"
+      "Bash(del \"c:\\\\Users\\\\Diego Rmz\\\\Documents\\\\Development\\\\jetset-transfers\\\\components\\\\home\\\\AirToursSection.tsx\")",
+      "Bash(mkdir:*)",
+      "Bash(npm run build:*)"
     ]
   }
 }

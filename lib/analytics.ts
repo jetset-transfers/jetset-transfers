@@ -176,12 +176,18 @@ export function trackScrollDepth(percentage: number): void {
   });
 }
 
-// Track when users view a list of items (destinations or tours listing page)
-export function trackViewItemList(listType: 'destinations' | 'tours', itemCount: number): void {
+// Track when users view a list of items (destinations, tours, or vehicles listing page)
+export function trackViewItemList(listType: 'destinations' | 'tours' | 'vehicles', itemCount: number): void {
+  const listNames = {
+    destinations: 'Destinations',
+    tours: 'Zones',
+    vehicles: 'Vehicles',
+  };
+
   trackEvent('view_item_list', {
     event_category: 'engagement',
     item_list_id: listType,
-    item_list_name: listType === 'destinations' ? 'Destinations' : 'Zones',
+    item_list_name: listNames[listType],
     item_count: itemCount,
   });
 }
