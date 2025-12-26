@@ -29,6 +29,7 @@ import {
   PhotoIcon,
   ArrowUpIcon,
   ArrowDownIcon,
+  ClipboardDocumentListIcon,
 } from '@heroicons/react/24/outline';
 import ImageSelector from '@/components/admin/ImageSelector';
 import GalleryTab from '@/components/admin/GalleryTab';
@@ -80,6 +81,47 @@ interface VehiclePricing {
   notes_en: string;
 }
 
+interface HowItWorksStep {
+  step: number;
+  title_es: string;
+  title_en: string;
+  description_es: string;
+  description_en: string;
+  features_es: string[];
+  features_en: string[];
+}
+
+// Default how it works steps
+const DEFAULT_HOW_IT_WORKS: HowItWorksStep[] = [
+  {
+    step: 1,
+    title_es: 'Planifica tu Traslado',
+    title_en: 'Plan your Shuttle Service',
+    description_es: 'Tu familia y amigos merecen empezar sus vacaciones sin preocupaciones. En Jetset nos aseguramos de que esto suceda y somos muy flexibles para reservar tu servicio de traslado privado.',
+    description_en: 'You, your family and friends should get right to the good part when going on vacation. At Jetset we make sure that this happens and are highly flexible when it comes to reserving your private shuttle service.',
+    features_es: ['Disponibilidad 24/7 por WhatsApp', 'Nuestro equipo monitorea vuelos y organiza tu llegada', 'No te preocupes por manejar o negociar precios', 'Siempre proporcionamos la ruta más eficiente'],
+    features_en: ['24/7 availability over WhatsApp', 'Our staff checks flights and organizes your arrival', 'You dont need to worry about driving or price negotiations', 'We always provide the most efficient route'],
+  },
+  {
+    step: 2,
+    title_es: 'Llegada al Aeropuerto',
+    title_en: 'Arrival at Cancun Airport',
+    description_es: 'Te estaremos esperando a la hora de tu llegada fuera del aeropuerto, para que la transición desde bajar del avión hasta abrir la puerta de tu hotel pase en un abrir y cerrar de ojos.',
+    description_en: 'We will be expecting you at the time of arrival outside the airport, to make the transition from getting out of the plane to opening the door to hotel room pass by in the blink of an eye.',
+    features_es: ['Nuestro equipo monitorea vuelos y organiza tu llegada', 'Te esperamos justo en el aeropuerto', 'Comunicación continua con tu conductor por WhatsApp'],
+    features_en: ['Our staff checks flights and organizes your arrival', 'We expect your arrival right at the airport', 'Ongoing communication with your driver over WhatsApp or Messenger'],
+  },
+  {
+    step: 3,
+    title_es: 'Transporte a tu Destino',
+    title_en: 'Transportation to your Destination',
+    description_es: 'Nuestros conductores bilingües te llevarán a tu destino de la manera más rápida y segura posible en uno de nuestros vehículos nuevos.',
+    description_en: 'Our bilingual drivers will get you to your destiny in the fastest and safest way possible in one of our brand new shuttles.',
+    features_es: ['Vehículos nuevos con aire acondicionado de doble zona', 'Bebidas frescas incluidas', 'Conductores bilingües y certificados'],
+    features_en: ['New shuttles with Dual Zone Air Conditioning', 'Fresh beverages included', 'Bilingual and certified drivers'],
+  },
+];
+
 // Default vehicle pricing
 const DEFAULT_VEHICLE_PRICING: VehiclePricing[] = [
   { vehicle_name: 'SUV', max_passengers: 5, price_usd: 75, notes_es: 'Ideal para parejas o familias pequeñas', notes_en: 'Ideal for couples or small families' },
@@ -109,6 +151,7 @@ interface Destination {
   meta_title_en?: string | null;
   meta_description_es?: string | null;
   meta_description_en?: string | null;
+  how_it_works?: HowItWorksStep[] | null;
 }
 
 interface DestinationsContentProps {
@@ -138,9 +181,10 @@ const emptyDestination: Omit<Destination, 'id'> = {
   meta_title_en: '',
   meta_description_es: '',
   meta_description_en: '',
+  how_it_works: DEFAULT_HOW_IT_WORKS,
 };
 
-type TabKey = 'basic' | 'content' | 'pricing' | 'gallery' | 'services' | 'seo';
+type TabKey = 'basic' | 'content' | 'pricing' | 'gallery' | 'services' | 'process' | 'seo';
 
 export default function DestinationsContent({ user, destinations: initialDestinations, availableServices }: DestinationsContentProps) {
   const router = useRouter();
@@ -188,6 +232,7 @@ export default function DestinationsContent({ user, destinations: initialDestina
       meta_title_en: destination.meta_title_en || '',
       meta_description_es: destination.meta_description_es || '',
       meta_description_en: destination.meta_description_en || '',
+      how_it_works: (destination.how_it_works && destination.how_it_works.length > 0) ? destination.how_it_works : DEFAULT_HOW_IT_WORKS,
     });
     setIsCreating(false);
     setActiveTab('basic');
@@ -387,6 +432,52 @@ export default function DestinationsContent({ user, destinations: initialDestina
     setFormData({ ...formData, vehicle_pricing: newPricing });
   };
 
+  // How It Works functions
+  const getCurrentHowItWorks = (): HowItWorksStep[] => {
+    return (formData.how_it_works && formData.how_it_works.length > 0)
+      ? formData.how_it_works
+      : DEFAULT_HOW_IT_WORKS;
+  };
+
+  const updateHowItWorksStep = (stepIndex: number, field: keyof HowItWorksStep, value: string | number | string[]) => {
+    const currentSteps = getCurrentHowItWorks();
+    const newSteps = [...currentSteps];
+    newSteps[stepIndex] = { ...newSteps[stepIndex], [field]: value };
+    setFormData({ ...formData, how_it_works: newSteps });
+  };
+
+  const updateHowItWorksFeature = (stepIndex: number, featureIndex: number, value: string, lang: 'es' | 'en') => {
+    const currentSteps = getCurrentHowItWorks();
+    const newSteps = [...currentSteps];
+    const featuresKey = lang === 'es' ? 'features_es' : 'features_en';
+    const newFeatures = [...newSteps[stepIndex][featuresKey]];
+    newFeatures[featureIndex] = value;
+    newSteps[stepIndex] = { ...newSteps[stepIndex], [featuresKey]: newFeatures };
+    setFormData({ ...formData, how_it_works: newSteps });
+  };
+
+  const addFeatureToStep = (stepIndex: number, lang: 'es' | 'en') => {
+    const currentSteps = getCurrentHowItWorks();
+    const newSteps = [...currentSteps];
+    const featuresKey = lang === 'es' ? 'features_es' : 'features_en';
+    const newFeatures = [...newSteps[stepIndex][featuresKey], ''];
+    newSteps[stepIndex] = { ...newSteps[stepIndex], [featuresKey]: newFeatures };
+    setFormData({ ...formData, how_it_works: newSteps });
+  };
+
+  const removeFeatureFromStep = (stepIndex: number, featureIndex: number, lang: 'es' | 'en') => {
+    const currentSteps = getCurrentHowItWorks();
+    const newSteps = [...currentSteps];
+    const featuresKey = lang === 'es' ? 'features_es' : 'features_en';
+    if (newSteps[stepIndex][featuresKey].length <= 1) {
+      toast.error('Debe haber al menos una característica');
+      return;
+    }
+    const newFeatures = newSteps[stepIndex][featuresKey].filter((_, i) => i !== featureIndex);
+    newSteps[stepIndex] = { ...newSteps[stepIndex], [featuresKey]: newFeatures };
+    setFormData({ ...formData, how_it_works: newSteps });
+  };
+
   const sortedDestinations = [...destinations].sort((a, b) => a.display_order - b.display_order);
 
   const tabs: { key: TabKey; label: string; icon: any }[] = [
@@ -395,6 +486,7 @@ export default function DestinationsContent({ user, destinations: initialDestina
     { key: 'pricing', label: 'Precios', icon: CurrencyDollarIcon },
     { key: 'gallery', label: 'Galería', icon: PhotoIcon },
     { key: 'services', label: 'Servicios', icon: Cog6ToothIcon },
+    { key: 'process', label: 'Proceso', icon: ClipboardDocumentListIcon },
     { key: 'seo', label: 'SEO', icon: MagnifyingGlassIcon },
   ];
 
@@ -962,6 +1054,159 @@ export default function DestinationsContent({ user, destinations: initialDestina
                         </div>
                       ))}
                     </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Tab: Process (How It Works) */}
+              {activeTab === 'process' && (
+                <div className="space-y-6">
+                  <div>
+                    <h3 className="text-sm font-semibold text-white">Proceso de Reserva</h3>
+                    <p className="text-xs text-navy-500 mt-1">Sección &quot;¿Cómo funciona?&quot; en la página de detalle del destino</p>
+                  </div>
+
+                  <div className="space-y-6">
+                    {getCurrentHowItWorks().map((step, stepIndex) => (
+                      <div key={step.step} className="bg-navy-800/50 rounded-lg p-4 border border-navy-700">
+                        <div className="flex items-center gap-3 mb-4">
+                          <span className="w-8 h-8 rounded-full bg-brand-500 text-white flex items-center justify-center text-sm font-bold">
+                            {step.step}
+                          </span>
+                          <span className="text-sm font-medium text-white">Paso {step.step}</span>
+                        </div>
+
+                        {/* Titles */}
+                        <div className="grid grid-cols-2 gap-4 mb-4">
+                          <div>
+                            <label className="block text-xs font-medium text-navy-400 mb-1">
+                              <span className="mr-1">🇪🇸</span> Título (ES)
+                            </label>
+                            <input
+                              type="text"
+                              value={step.title_es}
+                              onChange={(e) => updateHowItWorksStep(stepIndex, 'title_es', e.target.value)}
+                              placeholder="Planifica tu Traslado"
+                              className="w-full px-3 py-2 text-sm bg-navy-900 border border-navy-600 rounded-lg text-white placeholder-navy-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-medium text-navy-400 mb-1">
+                              <span className="mr-1">🇺🇸</span> Title (EN)
+                            </label>
+                            <input
+                              type="text"
+                              value={step.title_en}
+                              onChange={(e) => updateHowItWorksStep(stepIndex, 'title_en', e.target.value)}
+                              placeholder="Plan your Shuttle Service"
+                              className="w-full px-3 py-2 text-sm bg-navy-900 border border-navy-600 rounded-lg text-white placeholder-navy-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
+                            />
+                          </div>
+                        </div>
+
+                        {/* Descriptions */}
+                        <div className="grid grid-cols-2 gap-4 mb-4">
+                          <div>
+                            <label className="block text-xs font-medium text-navy-400 mb-1">
+                              <span className="mr-1">🇪🇸</span> Descripción (ES)
+                            </label>
+                            <textarea
+                              value={step.description_es}
+                              onChange={(e) => updateHowItWorksStep(stepIndex, 'description_es', e.target.value)}
+                              rows={3}
+                              placeholder="Descripción del paso..."
+                              className="w-full px-3 py-2 text-sm bg-navy-900 border border-navy-600 rounded-lg text-white placeholder-navy-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-medium text-navy-400 mb-1">
+                              <span className="mr-1">🇺🇸</span> Description (EN)
+                            </label>
+                            <textarea
+                              value={step.description_en}
+                              onChange={(e) => updateHowItWorksStep(stepIndex, 'description_en', e.target.value)}
+                              rows={3}
+                              placeholder="Step description..."
+                              className="w-full px-3 py-2 text-sm bg-navy-900 border border-navy-600 rounded-lg text-white placeholder-navy-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
+                            />
+                          </div>
+                        </div>
+
+                        {/* Features ES */}
+                        <div className="mb-4">
+                          <div className="flex items-center justify-between mb-2">
+                            <label className="block text-xs font-medium text-navy-400">
+                              <span className="mr-1">🇪🇸</span> Características (ES)
+                            </label>
+                            <button
+                              type="button"
+                              onClick={() => addFeatureToStep(stepIndex, 'es')}
+                              className="flex items-center gap-1 text-xs text-brand-400 hover:text-brand-300 transition-colors"
+                            >
+                              <PlusIcon className="w-3.5 h-3.5" />
+                              Agregar
+                            </button>
+                          </div>
+                          <div className="space-y-2">
+                            {step.features_es.map((feature, featureIndex) => (
+                              <div key={featureIndex} className="flex items-center gap-2">
+                                <input
+                                  type="text"
+                                  value={feature}
+                                  onChange={(e) => updateHowItWorksFeature(stepIndex, featureIndex, e.target.value, 'es')}
+                                  placeholder="Característica..."
+                                  className="flex-1 px-3 py-1.5 text-sm bg-navy-900 border border-navy-600 rounded text-white placeholder-navy-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => removeFeatureFromStep(stepIndex, featureIndex, 'es')}
+                                  className="p-1.5 text-navy-400 hover:text-red-400 hover:bg-navy-700 rounded transition-colors"
+                                >
+                                  <TrashIcon className="w-4 h-4" />
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Features EN */}
+                        <div>
+                          <div className="flex items-center justify-between mb-2">
+                            <label className="block text-xs font-medium text-navy-400">
+                              <span className="mr-1">🇺🇸</span> Features (EN)
+                            </label>
+                            <button
+                              type="button"
+                              onClick={() => addFeatureToStep(stepIndex, 'en')}
+                              className="flex items-center gap-1 text-xs text-brand-400 hover:text-brand-300 transition-colors"
+                            >
+                              <PlusIcon className="w-3.5 h-3.5" />
+                              Add
+                            </button>
+                          </div>
+                          <div className="space-y-2">
+                            {step.features_en.map((feature, featureIndex) => (
+                              <div key={featureIndex} className="flex items-center gap-2">
+                                <input
+                                  type="text"
+                                  value={feature}
+                                  onChange={(e) => updateHowItWorksFeature(stepIndex, featureIndex, e.target.value, 'en')}
+                                  placeholder="Feature..."
+                                  className="flex-1 px-3 py-1.5 text-sm bg-navy-900 border border-navy-600 rounded text-white placeholder-navy-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => removeFeatureFromStep(stepIndex, featureIndex, 'en')}
+                                  className="p-1.5 text-navy-400 hover:text-red-400 hover:bg-navy-700 rounded transition-colors"
+                                >
+                                  <TrashIcon className="w-4 h-4" />
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
               )}

@@ -10,6 +10,7 @@ import AnalyticsProvider from '@/components/analytics/AnalyticsProvider';
 import ScrollTracker from '@/components/analytics/ScrollTracker';
 import { CurrencyProvider } from '@/contexts/CurrencyContext';
 import { LoadingProvider } from '@/contexts/LoadingContext';
+import { createClient } from '@/lib/supabase/server';
 import '../globals.css';
 
 // Modern, clean font
@@ -68,6 +69,20 @@ export default async function LocaleLayout({
 
   const messages = await getMessages();
 
+  // Check if there are any vehicles in the database
+  let hasVehicles = false;
+  try {
+    const supabase = await createClient();
+    const { count } = await supabase
+      .from('vehicles')
+      .select('*', { count: 'exact', head: true })
+      .eq('is_active', true);
+    hasVehicles = (count ?? 0) > 0;
+  } catch {
+    // If query fails, default to hiding vehicles
+    hasVehicles = false;
+  }
+
   return (
     <html lang={locale} className={inter.variable} suppressHydrationWarning>
       <body className={`${inter.className} antialiased`}>
@@ -99,7 +114,7 @@ export default async function LocaleLayout({
             <LoadingProvider>
               <AnalyticsProvider>
                 <ScrollTracker />
-                <Header />
+                <Header hasVehicles={hasVehicles} />
                 <main>{children}</main>
                 <FooterWrapper />
                 <LazyCookieBanner />

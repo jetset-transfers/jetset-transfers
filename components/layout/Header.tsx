@@ -9,7 +9,11 @@ import { Bars3Icon, XMarkIcon, SunIcon, MoonIcon } from '@heroicons/react/24/out
 import ChristmasDecoration from '@/components/decorations/ChristmasDecoration';
 import { trackLanguageChange, trackEvent, trackNavigation } from '@/lib/analytics';
 
-export default function Header() {
+interface HeaderProps {
+  hasVehicles?: boolean;
+}
+
+export default function Header({ hasVehicles = false }: HeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
@@ -54,7 +58,7 @@ export default function Header() {
 
   const navLinks = [
     { label: t('nav.destinations'), href: `/${locale}/destinations` },
-    { label: t('nav.vehicles'), href: `/${locale}/vehicles` },
+    ...(hasVehicles ? [{ label: t('nav.vehicles'), href: `/${locale}/vehicles` }] : []),
     { label: t('nav.contact'), href: `/${locale}/contact` },
   ];
 

@@ -235,6 +235,11 @@ CREATE TABLE public.destinations (
     {"vehicle_name": "Van", "max_passengers": 10, "price_usd": 95, "notes_es": "Perfecto para grupos medianos", "notes_en": "Perfect for medium groups"},
     {"vehicle_name": "Sprinter", "max_passengers": 14, "price_usd": 120, "notes_es": "Para grupos grandes con equipaje", "notes_en": "For large groups with luggage"}
   ]'::jsonb,
+  how_it_works jsonb DEFAULT '[
+    {"step": 1, "title_es": "Planifica tu Traslado", "title_en": "Plan your Shuttle Service", "description_es": "Tu familia y amigos merecen empezar sus vacaciones sin preocupaciones. En Jetset nos aseguramos de que esto suceda.", "description_en": "You, your family and friends should get right to the good part when going on vacation. At Jetset we make sure that this happens.", "features_es": ["Disponibilidad 24/7 por WhatsApp", "Nuestro equipo monitorea vuelos y organiza tu llegada"], "features_en": ["24/7 availability over WhatsApp", "Our staff checks flights and organizes your arrival"]},
+    {"step": 2, "title_es": "Llegada al Aeropuerto", "title_en": "Arrival at Cancun Airport", "description_es": "Te estaremos esperando a la hora de tu llegada fuera del aeropuerto.", "description_en": "We will be expecting you at the time of arrival outside the airport.", "features_es": ["Te esperamos justo en el aeropuerto", "Comunicación continua con tu conductor"], "features_en": ["We expect your arrival right at the airport", "Ongoing communication with your driver"]},
+    {"step": 3, "title_es": "Transporte a tu Destino", "title_en": "Transportation to your Destination", "description_es": "Nuestros conductores bilingües te llevarán a tu destino de la manera más rápida y segura.", "description_en": "Our bilingual drivers will get you to your destiny in the fastest and safest way possible.", "features_es": ["Vehículos nuevos con aire acondicionado", "Bebidas frescas incluidas"], "features_en": ["New shuttles with Air Conditioning", "Fresh beverages included"]}
+  ]'::jsonb,
   is_active boolean DEFAULT true,
   is_featured boolean DEFAULT false,
   display_order integer DEFAULT 0,
@@ -508,3 +513,79 @@ CREATE POLICY "Admin full access" ON public.contact_requests FOR ALL USING (auth
 - **completed**: Completada
 - **cancelled**: Cancelada
 - **no_show**: Cliente no se presentó
+
+## Estructuras JSONB
+
+### benefits (en destinations)
+Array de 4 beneficios para la sección "¿Por qué elegir?" en cada destino.
+
+```typescript
+interface Benefit {
+  key: string;        // Identificador único (safety, comfort, punctuality, service)
+  title_es: string;   // Título en español
+  title_en: string;   // Título en inglés
+  desc_es: string;    // Descripción en español
+  desc_en: string;    // Descripción en inglés
+}
+```
+
+### vehicle_pricing (en destinations)
+Array de opciones de vehículo con precios para cada destino.
+
+```typescript
+interface VehiclePricing {
+  vehicle_name: string;    // Nombre del vehículo (SUV, Van, Sprinter)
+  max_passengers: number;  // Capacidad máxima de pasajeros
+  price_usd: number;       // Precio en USD
+  notes_es: string;        // Notas en español
+  notes_en: string;        // Notas en inglés
+}
+```
+
+### how_it_works (en destinations)
+Array de 3 pasos explicando el proceso de reserva para cada destino.
+
+```typescript
+interface HowItWorksStep {
+  step: number;            // Número del paso (1, 2, 3)
+  title_es: string;        // Título en español
+  title_en: string;        // Título en inglés
+  description_es: string;  // Descripción en español
+  description_en: string;  // Descripción en inglés
+  features_es: string[];   // Lista de características en español
+  features_en: string[];   // Lista de características en inglés
+}
+```
+
+**Ejemplo de how_it_works:**
+```json
+[
+  {
+    "step": 1,
+    "title_es": "Planifica tu Traslado",
+    "title_en": "Plan your Shuttle Service",
+    "description_es": "Tu familia y amigos merecen empezar sus vacaciones sin preocupaciones.",
+    "description_en": "You, your family and friends should get right to the good part when going on vacation.",
+    "features_es": ["Disponibilidad 24/7 por WhatsApp", "Nuestro equipo monitorea vuelos"],
+    "features_en": ["24/7 availability over WhatsApp", "Our staff checks flights"]
+  },
+  {
+    "step": 2,
+    "title_es": "Llegada al Aeropuerto",
+    "title_en": "Arrival at Cancun Airport",
+    "description_es": "Te estaremos esperando a la hora de tu llegada fuera del aeropuerto.",
+    "description_en": "We will be expecting you at the time of arrival outside the airport.",
+    "features_es": ["Te esperamos justo en el aeropuerto", "Comunicación continua"],
+    "features_en": ["We expect your arrival right at the airport", "Ongoing communication"]
+  },
+  {
+    "step": 3,
+    "title_es": "Transporte a tu Destino",
+    "title_en": "Transportation to your Destination",
+    "description_es": "Nuestros conductores bilingües te llevarán a tu destino.",
+    "description_en": "Our bilingual drivers will get you to your destiny.",
+    "features_es": ["Vehículos nuevos con aire acondicionado", "Bebidas frescas incluidas"],
+    "features_en": ["New shuttles with Air Conditioning", "Fresh beverages included"]
+  }
+]
+```

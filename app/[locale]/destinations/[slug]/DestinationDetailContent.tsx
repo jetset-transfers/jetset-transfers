@@ -40,6 +40,16 @@ interface VehiclePricing {
   notes_en: string;
 }
 
+interface HowItWorksStep {
+  step: number;
+  title_es: string;
+  title_en: string;
+  description_es: string;
+  description_en: string;
+  features_es: string[];
+  features_en: string[];
+}
+
 interface Destination {
   id: string;
   slug: string;
@@ -56,6 +66,7 @@ interface Destination {
   benefits?: Benefit[] | null;
   vehicle_pricing?: VehiclePricing[] | null;
   gallery_images?: string[] | null;
+  how_it_works?: HowItWorksStep[] | null;
 }
 
 interface ServiceOption {
@@ -113,6 +124,8 @@ const translations = {
     pricingTitle: 'Tarifas de traslado',
     forUpTo: 'Hasta',
     moreInfoAbout: 'Más información sobre',
+    howItWorksTitle: 'Reserva tu transporte privado a',
+    step: 'Paso',
   },
   en: {
     backToDestinations: 'View all destinations',
@@ -132,6 +145,8 @@ const translations = {
     pricingTitle: 'Transfer rates',
     forUpTo: 'Up to',
     moreInfoAbout: 'More info about',
+    howItWorksTitle: 'Book your private transport to',
+    step: 'Step',
   },
 };
 
@@ -474,6 +489,67 @@ export default function DestinationDetailContent({
             </div>
           </div>
         </section>
+
+        {/* How It Works Section */}
+        {destination.how_it_works && destination.how_it_works.length > 0 && (
+          <LazySection animation="slide-up" className="py-16 md:py-20 bg-gray-50 dark:bg-navy-900/50">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="text-center mb-12">
+                <h2 className="text-2xl md:text-3xl font-bold mb-4">
+                  {t.howItWorksTitle} {name}
+                </h2>
+              </div>
+
+              <div className="grid md:grid-cols-3 gap-8">
+                {destination.how_it_works.map((step, index) => {
+                  const title = locale === 'es' ? step.title_es : step.title_en;
+                  const description = locale === 'es' ? step.description_es : step.description_en;
+                  const features = locale === 'es' ? step.features_es : step.features_en;
+
+                  return (
+                    <LazySection
+                      key={step.step}
+                      animation="scale"
+                      delay={index * 150}
+                    >
+                      <div className="bg-white dark:bg-navy-900 rounded-2xl p-6 md:p-8 border border-gray-100 dark:border-navy-800 h-full flex flex-col">
+                        {/* Step number */}
+                        <div className="flex items-center gap-4 mb-4">
+                          <div className="w-12 h-12 rounded-full bg-brand-500 text-white flex items-center justify-center text-xl font-bold shadow-lg shadow-brand-500/30">
+                            {step.step}
+                          </div>
+                          <span className="text-sm text-muted uppercase tracking-wide font-medium">
+                            {t.step} {step.step}
+                          </span>
+                        </div>
+
+                        {/* Title */}
+                        <h3 className="text-xl font-bold mb-3">{title}</h3>
+
+                        {/* Description */}
+                        <p className="text-muted text-sm leading-relaxed mb-4 flex-grow">
+                          {description}
+                        </p>
+
+                        {/* Features */}
+                        {features && features.length > 0 && (
+                          <ul className="space-y-2 mt-auto pt-4 border-t border-gray-100 dark:border-navy-800">
+                            {features.map((feature, featureIndex) => (
+                              <li key={featureIndex} className="flex items-start gap-2 text-sm">
+                                <CheckCircleIcon className="w-5 h-5 text-brand-500 flex-shrink-0 mt-0.5" />
+                                <span className="text-muted">{feature}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </div>
+                    </LazySection>
+                  );
+                })}
+              </div>
+            </div>
+          </LazySection>
+        )}
 
         {/* Other Destinations */}
         {otherDestinations.length > 0 && (
