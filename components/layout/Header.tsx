@@ -78,10 +78,10 @@ export default function Header() {
               alt={locale === 'es'
                 ? 'Jetset Transfers - Logo de empresa de transporte privado en Cancún y Riviera Maya'
                 : 'Jetset Transfers - Private transportation company logo in Cancún and Riviera Maya'}
-              width={150}
-              height={40}
-              style={{ width: 'auto', height: '2rem' }}
-              className="md:h-10"
+              width={200}
+              height={60}
+              style={{ width: 'auto', height: '2.5rem' }}
+              className="md:h-12"
               priority
               title={locale === 'es' ? 'Jetset Transfers' : 'Jetset Transfers'}
             />
