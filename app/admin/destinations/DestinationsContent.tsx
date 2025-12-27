@@ -35,6 +35,7 @@ import ImageSelector from '@/components/admin/ImageSelector';
 import GalleryTab from '@/components/admin/GalleryTab';
 import MarkdownEditor from '@/components/admin/MarkdownEditor';
 import Image from 'next/image';
+import { ZONES } from '@/lib/constants/zones';
 
 // Service interface (from database)
 interface ServiceOption {
@@ -143,6 +144,8 @@ interface Destination {
   image_url: string | null;
   is_active: boolean;
   display_order: number;
+  zone?: string | null;
+  zone_key?: string | null;
   services_included?: string[] | null;
   benefits?: Benefit[] | null;
   vehicle_pricing?: VehiclePricing[] | null;
@@ -173,6 +176,8 @@ const emptyDestination: Omit<Destination, 'id'> = {
   image_url: '',
   is_active: true,
   display_order: 0,
+  zone: 'Zona Hotelera',
+  zone_key: 'hotel-zone',
   services_included: ['climate', 'luggage', 'water', 'photos', 'sanitizer', 'safety'],
   benefits: DEFAULT_BENEFITS,
   vehicle_pricing: DEFAULT_VEHICLE_PRICING,
@@ -224,6 +229,8 @@ export default function DestinationsContent({ user, destinations: initialDestina
       image_url: destination.image_url || '',
       is_active: destination.is_active,
       display_order: destination.display_order,
+      zone: destination.zone || 'Zona Hotelera',
+      zone_key: destination.zone_key || 'hotel-zone',
       services_included: destination.services_included || ['climate', 'luggage', 'water', 'photos', 'sanitizer', 'safety'],
       benefits: (destination.benefits && destination.benefits.length > 0) ? destination.benefits : DEFAULT_BENEFITS,
       vehicle_pricing: (destination.vehicle_pricing && destination.vehicle_pricing.length > 0) ? destination.vehicle_pricing : DEFAULT_VEHICLE_PRICING,
@@ -715,6 +722,34 @@ export default function DestinationsContent({ user, destinations: initialDestina
                         className="w-full px-3 py-2 bg-navy-800 border border-navy-700 rounded-lg text-white placeholder-navy-500 focus:outline-none focus:ring-2 focus:ring-brand-500"
                       />
                     </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-navy-300 mb-1">
+                      <MapPinIcon className="w-4 h-4 inline mr-1" />
+                      Zona / Categoría
+                    </label>
+                    <select
+                      value={formData.zone_key || 'hotel-zone'}
+                      onChange={(e) => {
+                        const selectedZone = ZONES.find(z => z.key === e.target.value);
+                        setFormData({
+                          ...formData,
+                          zone_key: e.target.value,
+                          zone: selectedZone?.name_es || e.target.value
+                        });
+                      }}
+                      className="w-full px-3 py-2 bg-navy-800 border border-navy-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-brand-500"
+                    >
+                      {ZONES.map((zone) => (
+                        <option key={zone.key} value={zone.key}>
+                          {zone.name_es} / {zone.name_en}
+                        </option>
+                      ))}
+                    </select>
+                    <p className="text-xs text-navy-500 mt-1">
+                      Para filtrar destinos por zona en el sitio web
+                    </p>
                   </div>
 
                   <div className="grid grid-cols-3 gap-4">

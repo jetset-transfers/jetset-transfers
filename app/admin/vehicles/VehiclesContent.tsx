@@ -28,6 +28,7 @@ interface Vehicle {
   type: string;
   capacity: number;
   luggage_capacity: number;
+  base_price_usd?: number;
   description_es: string;
   description_en: string;
   features: string[];
@@ -46,6 +47,7 @@ const emptyVehicle: Omit<Vehicle, 'id'> = {
   type: '',
   capacity: 1,
   luggage_capacity: 1,
+  base_price_usd: 0,
   description_es: '',
   description_en: '',
   features: [],
@@ -84,6 +86,7 @@ export default function VehiclesContent({
       type: vehicle.type,
       capacity: vehicle.capacity,
       luggage_capacity: vehicle.luggage_capacity,
+      base_price_usd: vehicle.base_price_usd || 0,
       description_es: vehicle.description_es,
       description_en: vehicle.description_en,
       features: vehicle.features || [],
@@ -331,6 +334,21 @@ export default function VehiclesContent({
                 onChange={(e) => setFormData({ ...formData, luggage_capacity: parseInt(e.target.value) || 1 })}
                 className="w-full px-3 py-2 bg-navy-800 border border-navy-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-brand-500"
               />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-navy-300 mb-1">
+                Precio base (USD)
+              </label>
+              <input
+                type="number"
+                min="0"
+                step="0.01"
+                value={formData.base_price_usd || 0}
+                onChange={(e) => setFormData({ ...formData, base_price_usd: parseFloat(e.target.value) || 0 })}
+                placeholder="75.00"
+                className="w-full px-3 py-2 bg-navy-800 border border-navy-700 rounded-lg text-white placeholder-navy-500 focus:outline-none focus:ring-2 focus:ring-brand-500"
+              />
+              <p className="text-xs text-navy-500 mt-1">Precio de referencia "Desde $X USD"</p>
             </div>
             <div className="md:col-span-2">
               <label className="block text-sm font-medium text-navy-300 mb-1">

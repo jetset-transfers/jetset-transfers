@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import {
@@ -9,10 +9,13 @@ import {
   UserGroupIcon,
   ArrowLeftIcon,
   PhoneIcon,
+  MapPinIcon,
+  SparklesIcon,
 } from '@heroicons/react/24/outline';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import { trackViewItemList } from '@/lib/analytics';
 import LazySection from '@/components/ui/LazySection';
+import { ZONES, getZoneName } from '@/lib/constants/zones';
 
 interface VehiclePricing {
   vehicle_name: string;
@@ -32,6 +35,8 @@ interface Destination {
   travel_time: string | null;
   price_from: number | null;
   image_url: string | null;
+  zone?: string | null;
+  zone_key?: string | null;
   vehicle_pricing?: VehiclePricing[] | null;
 }
 
@@ -64,6 +69,11 @@ const translations = {
     customDesc: 'Ofrecemos traslados personalizados a cualquier hotel o destino en la Riviera Maya. Contáctanos para una cotización.',
     requestQuote: 'Solicitar cotización',
     travelTime: 'Tiempo de traslado',
+    filterByZone: 'Filtrar por zona',
+    allZones: 'Todas las zonas',
+    showingResults: 'Mostrando',
+    of: 'de',
+    destinations: 'destinos',
   },
   en: {
     title: 'Destinations',
@@ -78,12 +88,28 @@ const translations = {
     customDesc: 'We offer custom transfers to any hotel or destination in the Riviera Maya. Contact us for a quote.',
     requestQuote: 'Request a quote',
     travelTime: 'Travel time',
+    filterByZone: 'Filter by zone',
+    allZones: 'All zones',
+    showingResults: 'Showing',
+    of: 'of',
+    destinations: 'destinations',
   },
 };
 
 export default function DestinationsContent({ locale, destinations }: DestinationsContentProps) {
   const t = translations[locale as keyof typeof translations] || translations.es;
   const { formatPrice, currency } = useCurrency();
+  const [selectedZone, setSelectedZone] = useState<string | null>(null);
+
+  // Filter destinations by zone
+  const filteredDestinations = selectedZone
+    ? destinations.filter(dest => dest.zone_key === selectedZone)
+    : destinations;
+
+  // Get unique zones from destinations
+  const availableZones = ZONES.filter(zone =>
+    destinations.some(dest => dest.zone_key === zone.key)
+  );
 
   // Track view_item_list event when page loads
   useEffect(() => {
@@ -119,6 +145,58 @@ export default function DestinationsContent({ locale, destinations }: Destinatio
           </div>
         </section>
 
+        {/* Zone Filter */}
+        <section className="py-8 border-b border-navy-200 dark:border-navy-800">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex flex-col gap-4">
+              <h2 className="text-lg font-semibold flex items-center gap-2">
+                <MapPinIcon className="w-5 h-5 text-navy-600 dark:text-navy-400" />
+                {t.filterByZone}
+              </h2>
+              <div className="flex flex-wrap gap-3">
+                {/* All zones button */}
+                <button
+                  onClick={() => setSelectedZone(null)}
+                  className={`px-4 py-2 rounded-xl font-medium transition-all ${
+                    selectedZone === null
+                      ? 'bg-navy-600 text-white shadow-lg'
+                      : 'bg-white dark:bg-navy-900 text-navy-600 dark:text-navy-400 border border-navy-200 dark:border-navy-700 hover:border-navy-400 dark:hover:border-navy-500'
+                  }`}
+                >
+                  {t.allZones}
+                </button>
+
+                {/* Zone buttons */}
+                {availableZones.map((zone) => {
+                  const IconComponent = zone.icon === 'SparklesIcon' ? SparklesIcon : MapPinIcon;
+                  const count = destinations.filter(d => d.zone_key === zone.key).length;
+
+                  return (
+                    <button
+                      key={zone.key}
+                      onClick={() => setSelectedZone(zone.key)}
+                      className={`flex items-center gap-2 px-4 py-2 rounded-xl font-medium transition-all ${
+                        selectedZone === zone.key
+                          ? 'bg-navy-600 text-white shadow-lg'
+                          : 'bg-white dark:bg-navy-900 text-navy-600 dark:text-navy-400 border border-navy-200 dark:border-navy-700 hover:border-navy-400 dark:hover:border-navy-500'
+                      }`}
+                    >
+                      <IconComponent className="w-4 h-4" />
+                      <span>{locale === 'es' ? zone.name_es : zone.name_en}</span>
+                      <span className="text-xs opacity-70">({count})</span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Results count */}
+              <p className="text-sm text-muted">
+                {t.showingResults} <strong>{filteredDestinations.length}</strong> {t.of} {destinations.length} {t.destinations}
+              </p>
+            </div>
+          </div>
+        </section>
+
         {/* Destinations Grid */}
         <section className="py-16 md:py-20">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -126,7 +204,7 @@ export default function DestinationsContent({ locale, destinations }: Destinatio
               {locale === 'es' ? 'Nuestros Destinos' : 'Our Destinations'}
             </h2>
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-              {destinations.map((dest, index) => (
+              {filteredDestinations.map((dest, index) => (
                 <LazySection
                   key={dest.id}
                   animation="slide-up"
@@ -200,7 +278,7 @@ export default function DestinationsContent({ locale, destinations }: Destinatio
               ))}
             </div>
 
-            {destinations.length === 0 && (
+            {filteredDestinations.length === 0 && (
               <div className="text-center py-20">
                 <TruckIcon className="w-16 h-16 text-navy-300 dark:text-navy-600 mx-auto mb-4" />
                 <p className="text-xl text-muted">
