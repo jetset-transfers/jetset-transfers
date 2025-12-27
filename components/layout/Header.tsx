@@ -67,6 +67,7 @@ export default function Header({ hasVehicles = false }: HeaderProps) {
       className={`fixed top-0 left-0 right-0 z-50 bg-navy-900 transition-all duration-300 ${
         scrolled || mobileMenuOpen ? 'shadow-lg' : ''
       }`}
+      suppressHydrationWarning
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 md:h-20">
@@ -82,12 +83,13 @@ export default function Header({ hasVehicles = false }: HeaderProps) {
               alt={locale === 'es'
                 ? 'Jetset Transfers - Logo de empresa de transporte privado en Cancún y Riviera Maya'
                 : 'Jetset Transfers - Private transportation company logo in Cancún and Riviera Maya'}
-              width={200}
-              height={60}
-              style={{ width: 'auto', height: '2.5rem' }}
-              className="md:h-12"
+              width={150}
+              height={40}
+              className="h-8 md:h-10 w-auto"
               priority
+              quality={75}
               title={locale === 'es' ? 'Jetset Transfers' : 'Jetset Transfers'}
+              suppressHydrationWarning
             />
           </Link>
 

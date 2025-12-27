@@ -70,5 +70,42 @@
     "title": "Our Destinations",
     "subtitle": "Complete coverage in the Riviera Maya",
     "description": "We cover all tourist destinations in the region. From Cancun's Hotel Zone to Tulum, through Playa del Carmen, Puerto Morelos and more. Always with comfortable vehicles and professional drivers."
+  },
+  "benefits": {
+    "safety": {
+      "title": "Guaranteed Safety",
+      "description": "Certified drivers and vehicles in optimal condition"
+    },
+    "punctuality": {
+      "title": "Punctuality",
+      "description": "Real-time flight monitoring and on-time arrival"
+    },
+    "service": {
+      "title": "Personalized Service",
+      "description": "Professional and friendly service on every trip"
+    },
+    "price": {
+      "title": "Fair Prices",
+      "description": "Transparent rates with no hidden fees"
+    }
+  },
+  "whyChoose": {
+    "title": "Why choose Jetset?",
+    "reason1": {
+      "title": "Safety First",
+      "description": "All our drivers are certified and our vehicles receive regular maintenance to ensure your safety."
+    },
+    "reason2": {
+      "title": "Always On Time",
+      "description": "We monitor your flight in real-time to adjust pickup time and ensure you arrive on schedule."
+    },
+    "reason3": {
+      "title": "Exceptional Service",
+      "description": "Our team is dedicated to providing a comfortable and professional travel experience from the very first moment."
+    },
+    "reason4": {
+      "title": "Transparent Pricing",
+      "description": "No surprises. The price you see is the price you pay, with no hidden charges or additional fees."
+    }
   }
 }

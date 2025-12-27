@@ -138,7 +138,7 @@ interface Destination {
   description_en: string | null;
   long_description_es?: string | null;
   long_description_en?: string | null;
-  flight_time: string | null;
+  transfer_time: string | null;
   price_from: number | null;
   image_url: string | null;
   is_active: boolean;
@@ -168,7 +168,7 @@ const emptyDestination: Omit<Destination, 'id'> = {
   description_en: '',
   long_description_es: '',
   long_description_en: '',
-  flight_time: '',
+  transfer_time: '',
   price_from: 0,
   image_url: '',
   is_active: true,
@@ -219,7 +219,7 @@ export default function DestinationsContent({ user, destinations: initialDestina
       description_en: destination.description_en || '',
       long_description_es: destination.long_description_es || '',
       long_description_en: destination.long_description_en || '',
-      flight_time: destination.flight_time || '',
+      transfer_time: destination.transfer_time || '',
       price_from: destination.price_from || 0,
       image_url: destination.image_url || '',
       is_active: destination.is_active,
@@ -577,7 +577,7 @@ export default function DestinationsContent({ user, destinations: initialDestina
                   </div>
                 </td>
                 <td className="px-4 py-4 text-navy-300 hidden md:table-cell">
-                  {destination.flight_time || '-'}
+                  {destination.transfer_time || '-'}
                 </td>
                 <td className="px-4 py-4 text-navy-300 hidden md:table-cell">
                   {destination.price_from ? `$${destination.price_from.toLocaleString()}` : '-'}
@@ -722,8 +722,8 @@ export default function DestinationsContent({ user, destinations: initialDestina
                       <label className="block text-sm font-medium text-navy-300 mb-1">Tiempo de traslado</label>
                       <input
                         type="text"
-                        value={formData.flight_time || ''}
-                        onChange={(e) => setFormData({ ...formData, flight_time: e.target.value })}
+                        value={formData.transfer_time || ''}
+                        onChange={(e) => setFormData({ ...formData, transfer_time: e.target.value })}
                         placeholder="45 min"
                         className="w-full px-3 py-2 bg-navy-800 border border-navy-700 rounded-lg text-white placeholder-navy-500 focus:outline-none focus:ring-2 focus:ring-brand-500"
                       />

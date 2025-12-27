@@ -7,7 +7,9 @@
       "Bash(del \"c:\\\\Users\\\\Diego Rmz\\\\Documents\\\\Development\\\\jetset-transfers\\\\components\\\\home\\\\CharterFlightsSection.tsx\")",
       "Bash(del \"c:\\\\Users\\\\Diego Rmz\\\\Documents\\\\Development\\\\jetset-transfers\\\\components\\\\home\\\\AirToursSection.tsx\")",
       "Bash(mkdir:*)",
-      "Bash(npm run build:*)"
+      "Bash(npm run build:*)",
+      "Bash(cat:*)",
+      "Bash(npx supabase db inspect:*)"
     ]
   }
 }

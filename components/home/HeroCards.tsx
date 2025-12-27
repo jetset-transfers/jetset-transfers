@@ -114,11 +114,11 @@ export default function HeroCards({ locale, featuredTour, featuredDestination, h
       {featured && (
         <Link
           href={`/${locale}/${featuredType}/${featured.slug}`}
-          className="group card p-0 overflow-hidden hover:shadow-xl transition-all duration-300"
+          className="group card p-0 overflow-hidden hover:shadow-2xl transition-all duration-300 bg-white dark:bg-navy-900"
         >
           <div className="relative">
             {/* Image */}
-            <div className="relative h-32 overflow-hidden">
+            <div className="relative h-40 overflow-hidden">
               {featured.image_url ? (
                 <Image
                   src={featured.image_url}
@@ -174,42 +174,42 @@ export default function HeroCards({ locale, featuredTour, featuredDestination, h
       )}
 
       {/* Social Proof Card - Rotating */}
-      <div className="card p-4 overflow-hidden">
+      <div className="card p-4 overflow-hidden bg-white dark:bg-navy-900 backdrop-blur-sm">
         <div
           className={`flex items-center gap-3 transition-all duration-300 ${
             isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2'
           }`}
         >
-          <div className="w-10 h-10 rounded-full bg-brand-100 dark:bg-brand-900/30 flex items-center justify-center flex-shrink-0">
-            <UserGroupIcon className="w-5 h-5 text-brand-600" />
+          <div className="w-11 h-11 rounded-full bg-brand-100 dark:bg-brand-900/30 flex items-center justify-center flex-shrink-0">
+            <UserGroupIcon className="w-6 h-6 text-brand-600" />
           </div>
           <div className="flex-1 min-w-0">
-            <div className="text-sm">
+            <div className="text-sm font-medium">
               <span className="font-semibold">{bookings[currentBooking].name}</span>
               <span className="text-muted"> de {bookings[currentBooking].city}</span>
             </div>
             <div className="text-xs text-muted truncate">
-              {t.socialProof} <span className="text-brand-600">{bookings[currentBooking].service}</span> · {bookings[currentBooking].time}
+              {t.socialProof} <span className="text-brand-600 font-medium">{bookings[currentBooking].service}</span> · {bookings[currentBooking].time}
             </div>
           </div>
         </div>
       </div>
 
       {/* Certification Badge */}
-      <div className="card p-3">
+      <div className="card p-4 bg-white dark:bg-navy-900">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-            <CheckBadgeIcon className="w-5 h-5 text-green-600 dark:text-green-400" />
+          <div className="w-10 h-10 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+            <CheckBadgeIcon className="w-6 h-6 text-green-600 dark:text-green-400" />
           </div>
           <div>
-            <div className="text-sm font-medium">{t.certified}</div>
+            <div className="text-sm font-semibold">{t.certified}</div>
             <div className="text-xs text-muted">{t.certifiedDesc}</div>
           </div>
         </div>
       </div>
 
       {/* TripAdvisor Rating Widget */}
-      <div className="card p-3">
+      <div className="card p-4 bg-white dark:bg-navy-900">
         <TripAdvisorRatingWidget locale={locale} />
       </div>
     </div>

@@ -1,16 +1,25 @@
 import dynamic from 'next/dynamic';
 import HeroSection from '@/components/home/HeroSection';
+import QuickBenefitsSection from '@/components/home/QuickBenefitsSection';
 import { LocalBusinessSchema, ServiceSchema, OrganizationSchema } from '@/components/seo/SchemaMarkup';
 import { createClient } from '@/lib/supabase/server';
 import { getYearsOfExperienceFormatted } from '@/lib/constants';
 
 // Dynamic imports for below-the-fold components to reduce initial JS bundle
-const LazyServicesWrapper = dynamic(() => import('@/components/home/LazyServicesWrapper'), {
-  loading: () => <div className="min-h-[400px] bg-navy-50 dark:bg-navy-900 animate-pulse" />,
+const DestinationsSection = dynamic(() => import('@/components/home/DestinationsSection'), {
+  loading: () => <div className="min-h-[400px] bg-white dark:bg-navy-950 animate-pulse" />,
+});
+
+const FleetSection = dynamic(() => import('@/components/home/FleetSection'), {
+  loading: () => <div className="min-h-[500px] bg-gray-50 dark:bg-navy-900/50 animate-pulse" />,
+});
+
+const WhyChooseSection = dynamic(() => import('@/components/home/WhyChooseSection'), {
+  loading: () => <div className="min-h-[500px] bg-white dark:bg-navy-950 animate-pulse" />,
 });
 
 const TripAdvisorSection = dynamic(() => import('@/components/home/TripAdvisorSection'), {
-  loading: () => <div className="min-h-[300px] bg-white dark:bg-navy-950 animate-pulse" />,
+  loading: () => <div className="min-h-[300px] bg-gray-50 dark:bg-navy-950 animate-pulse" />,
 });
 
 interface HomePageProps {
@@ -105,6 +114,27 @@ export default async function HomePage({ params }: HomePageProps) {
   // Get fleet image (primary or first from fleet category)
   const fleetImage = getPrimaryImage('fleet');
 
+  // Get hero carousel images (all images from hero_carousel category, ordered by display_order)
+  const { data: carouselImages } = await supabase
+    .from('site_images')
+    .select('id, url, alt_es, alt_en, title_es, title_en, display_order, metadata')
+    .eq('category', 'hero_carousel')
+    .eq('is_active', true)
+    .order('display_order', { ascending: true });
+
+  // Transform carousel images to include price and link_url from metadata
+  const transformedCarouselImages = (carouselImages || []).map((img: any) => ({
+    id: img.id,
+    url: img.url,
+    alt_es: img.alt_es,
+    alt_en: img.alt_en,
+    title_es: img.title_es,
+    title_en: img.title_en,
+    price: img.metadata?.price || null,
+    link_url: img.metadata?.link_url || null,
+    display_order: img.display_order,
+  }));
+
   // Transform content to a key-value map
   const contentMap = (content || []).reduce((acc, item) => {
     acc[item.key] = {
@@ -130,14 +160,17 @@ export default async function HomePage({ params }: HomePageProps) {
         locale={locale}
         content={contentMap}
         heroImage={heroImage}
+        carouselImages={transformedCarouselImages}
         featuredDestination={popularItem || (destinations?.[0] || null)}
         hasPopularData={!!popularItem}
       />
-      <LazyServicesWrapper
+      <QuickBenefitsSection />
+      <DestinationsSection
         locale={locale}
         destinations={destinations || []}
-        zones={zones || []}
       />
+      <FleetSection locale={locale} />
+      <WhyChooseSection locale={locale} />
       <TripAdvisorSection locale={locale} />
     </>
   );

@@ -29,8 +29,15 @@ interface SiteImage {
   url: string;
   alt_es: string | null;
   alt_en: string | null;
+  title_es?: string | null;
+  title_en?: string | null;
   category: string | null;
   is_primary: boolean;
+  display_order?: number;
+  metadata?: {
+    price?: number | null;
+    link_url?: string | null;
+  } | null;
   file_size?: number | null; // Size in bytes
 }
 
@@ -136,15 +143,31 @@ const categoryConfig: Record<string, CategoryConfigItem> = {
       layout: 'single',
     },
   },
+  hero_carousel: {
+    label: 'Hero Carrusel',
+    icon: '🎠',
+    color: 'bg-pink-500/20 text-pink-400 border-pink-500/30',
+    description: 'Carrusel de imágenes destacadas en el Hero',
+    location: 'Página de inicio - Hero sección derecha',
+    hasCarousel: true,
+    carouselInfo: 'Auto-reproduce cada 5 segundos. Muestra título y precio si existen.',
+    dimensions: '600x800 (vertical) recomendado',
+    tips: 'Imágenes verticales atractivas de destinos o servicios. Incluye título, precio y enlace opcionales.',
+    preview: {
+      width: 'w-32',
+      height: 'h-40',
+      layout: 'vertical',
+    },
+  },
   fleet: {
     label: 'Flota',
-    icon: '🛩️',
+    icon: '🚐',
     color: 'bg-rose-500/20 text-rose-400 border-rose-500/30',
-    description: 'Fotos de los aviones de la flota',
-    location: 'Hero cards - "Nuestra Flota"',
+    description: 'Fotos de los vehículos',
+    location: 'Sección de vehículos',
     hasCarousel: false,
     dimensions: '400x400 cuadrado',
-    tips: 'Fotos profesionales de cada avión. Aparecen en tarjetas pequeñas.',
+    tips: 'Fotos profesionales de cada vehículo. Aparecen en tarjetas.',
     preview: {
       width: 'w-20',
       height: 'h-20',
@@ -178,8 +201,12 @@ const emptyImage: Omit<SiteImage, 'id'> = {
   url: '',
   alt_es: '',
   alt_en: '',
+  title_es: '',
+  title_en: '',
   category: 'other',
   is_primary: false,
+  display_order: 0,
+  metadata: null,
   file_size: null,
 };
 
@@ -234,8 +261,12 @@ export default function ImagesContent({ user, images: initialImages }: ImagesCon
       url: image.url,
       alt_es: image.alt_es || '',
       alt_en: image.alt_en || '',
+      title_es: image.title_es || '',
+      title_en: image.title_en || '',
       category: image.category || 'other',
       is_primary: image.is_primary || false,
+      display_order: image.display_order || 0,
+      metadata: image.metadata || null,
     });
     setIsCreating(false);
     setDrawerOpen(true);
@@ -526,6 +557,38 @@ export default function ImagesContent({ user, images: initialImages }: ImagesCon
                     )}
                   </div>
                 ))}
+              </div>
+            )}
+
+            {category.value === 'hero_carousel' && (
+              <div className="flex items-center gap-3">
+                <div className="w-20 h-28 bg-navy-700 rounded-xl overflow-hidden relative">
+                  {categoryImages[0] ? (
+                    <img src={categoryImages[0].url} alt="" className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <PhotoIcon className="w-6 h-6 text-navy-600" />
+                    </div>
+                  )}
+                  {/* Simula el overlay de información */}
+                  <div className="absolute top-2 left-2 right-2 bg-white/90 rounded p-1">
+                    <div className="w-full h-1.5 bg-gray-300 rounded mb-0.5" />
+                    <div className="w-1/2 h-1.5 bg-gray-200 rounded" />
+                  </div>
+                  {/* Puntos del carrusel */}
+                  <div className="absolute bottom-1 left-1/2 -translate-x-1/2 flex gap-0.5">
+                    {[...Array(Math.min(3, categoryImages.length))].map((_, i) => (
+                      <div key={i} className={`w-1 h-1 rounded-full ${i === 0 ? 'bg-white w-2' : 'bg-white/50'}`} />
+                    ))}
+                  </div>
+                </div>
+                <div className="flex-1">
+                  <div className="text-xs text-navy-400 mb-1">Auto-carrusel</div>
+                  <div className="flex items-center gap-1 text-pink-400">
+                    <RectangleStackIcon className="w-3 h-3" />
+                    <span className="text-xs">{categoryImages.length} {categoryImages.length === 1 ? 'imagen' : 'imágenes'}</span>
+                  </div>
+                </div>
               </div>
             )}
 
@@ -1023,6 +1086,118 @@ export default function ImagesContent({ user, images: initialImages }: ImagesCon
                   className="w-full px-3 py-2 bg-navy-800 border border-navy-700 rounded-lg text-white placeholder-navy-500 focus:outline-none focus:ring-2 focus:ring-brand-500"
                 />
               </div>
+
+              {/* Campos adicionales para hero_carousel */}
+              {formData.category === 'hero_carousel' && (
+                <>
+                  <div className="border-t border-navy-700 pt-4 mt-2">
+                    <div className="flex items-center gap-2 mb-3">
+                      <div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-pink-500/20 text-pink-400 border border-pink-500/30 text-xs font-medium">
+                        <RectangleStackIcon className="w-3.5 h-3.5" />
+                        Campos del Carrusel Hero
+                      </div>
+                    </div>
+                    <p className="text-xs text-navy-500 mb-4">
+                      Estos campos son opcionales y aparecen sobre la imagen en el carrusel
+                    </p>
+
+                    {/* Título Español */}
+                    <div className="mb-4">
+                      <label className="block text-sm font-medium text-navy-300 mb-1">
+                        <span className="mr-1">🇪🇸</span> Título (Español) - Opcional
+                      </label>
+                      <input
+                        type="text"
+                        value={formData.title_es || ''}
+                        onChange={(e) => setFormData({ ...formData, title_es: e.target.value })}
+                        placeholder="ej: Traslado a Tulum"
+                        className="w-full px-3 py-2 bg-navy-800 border border-navy-700 rounded-lg text-white placeholder-navy-500 focus:outline-none focus:ring-2 focus:ring-brand-500"
+                      />
+                    </div>
+
+                    {/* Título Inglés */}
+                    <div className="mb-4">
+                      <label className="block text-sm font-medium text-navy-300 mb-1">
+                        <span className="mr-1">🇺🇸</span> Título (Inglés) - Opcional
+                      </label>
+                      <input
+                        type="text"
+                        value={formData.title_en || ''}
+                        onChange={(e) => setFormData({ ...formData, title_en: e.target.value })}
+                        placeholder="ej: Transfer to Tulum"
+                        className="w-full px-3 py-2 bg-navy-800 border border-navy-700 rounded-lg text-white placeholder-navy-500 focus:outline-none focus:ring-2 focus:ring-brand-500"
+                      />
+                    </div>
+
+                    {/* Precio */}
+                    <div className="mb-4">
+                      <label className="block text-sm font-medium text-navy-300 mb-1">
+                        Precio "Desde" (USD) - Opcional
+                      </label>
+                      <p className="text-xs text-navy-500 mb-2">
+                        Se mostrará como "Desde $XX" en la tarjeta del carrusel
+                      </p>
+                      <input
+                        type="number"
+                        value={formData.metadata?.price || ''}
+                        onChange={(e) => setFormData({
+                          ...formData,
+                          metadata: {
+                            ...formData.metadata,
+                            price: e.target.value ? Number(e.target.value) : null
+                          }
+                        })}
+                        placeholder="ej: 75"
+                        min="0"
+                        step="1"
+                        className="w-full px-3 py-2 bg-navy-800 border border-navy-700 rounded-lg text-white placeholder-navy-500 focus:outline-none focus:ring-2 focus:ring-brand-500"
+                      />
+                    </div>
+
+                    {/* Link URL */}
+                    <div className="mb-4">
+                      <label className="block text-sm font-medium text-navy-300 mb-1">
+                        Enlace (URL) - Opcional
+                      </label>
+                      <p className="text-xs text-navy-500 mb-2">
+                        URL a la que se redirige al hacer clic en la imagen
+                      </p>
+                      <input
+                        type="text"
+                        value={formData.metadata?.link_url || ''}
+                        onChange={(e) => setFormData({
+                          ...formData,
+                          metadata: {
+                            ...formData.metadata,
+                            link_url: e.target.value || null
+                          }
+                        })}
+                        placeholder="ej: /es/destinations/tulum"
+                        className="w-full px-3 py-2 bg-navy-800 border border-navy-700 rounded-lg text-white placeholder-navy-500 focus:outline-none focus:ring-2 focus:ring-brand-500"
+                      />
+                    </div>
+
+                    {/* Display Order */}
+                    <div>
+                      <label className="block text-sm font-medium text-navy-300 mb-1">
+                        Orden de Aparición
+                      </label>
+                      <p className="text-xs text-navy-500 mb-2">
+                        Número que define el orden en el carrusel (menor = primero)
+                      </p>
+                      <input
+                        type="number"
+                        value={formData.display_order || 0}
+                        onChange={(e) => setFormData({ ...formData, display_order: Number(e.target.value) })}
+                        placeholder="ej: 1, 2, 3..."
+                        min="0"
+                        step="1"
+                        className="w-full px-3 py-2 bg-navy-800 border border-navy-700 rounded-lg text-white placeholder-navy-500 focus:outline-none focus:ring-2 focus:ring-brand-500"
+                      />
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
 
             {/* Footer con botones */}

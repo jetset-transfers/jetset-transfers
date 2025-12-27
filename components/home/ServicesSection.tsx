@@ -55,12 +55,12 @@ export default function ServicesSection({ locale, destinations, zones }: Service
   const hasMoreZones = (zones || []).length > MAX_ITEMS;
 
   return (
-    <section id="services" className="py-20 md:py-28 bg-gradient-to-b from-transparent via-navy-50/30 to-transparent dark:via-navy-900/20 scroll-mt-20">
+    <section id="services" className="py-20 md:py-28 bg-white dark:bg-navy-950 scroll-mt-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="text-center mb-14 md:mb-20">
           <span className="inline-block px-4 py-1.5 rounded-full text-sm font-medium bg-brand-100 text-brand-700 dark:bg-brand-900/50 dark:text-brand-300 mb-4">
-            {locale === 'es' ? 'Traslados Seguros' : 'Safe Transfers'}
+            {locale === 'es' ? 'Destinos Populares' : 'Popular Destinations'}
           </span>
           <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-5">
             {t('title')}
@@ -70,8 +70,8 @@ export default function ServicesSection({ locale, destinations, zones }: Service
           </p>
         </div>
 
-        {/* Two Column Layout */}
-        <div className="grid lg:grid-cols-2 gap-10 lg:gap-16">
+        {/* Three Column Grid for Destinations */}
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
           {/* Left Column - Popular Destinations */}
           <div>
             <div className="flex items-center gap-3 mb-8">
