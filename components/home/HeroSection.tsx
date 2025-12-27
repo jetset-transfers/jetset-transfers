@@ -205,7 +205,13 @@ export default function HeroSection({ locale, content, heroImage, carouselImages
                 <div className="text-xs text-gray-500 dark:text-gray-400">TAI & TAN</div>
               </div>
 
-              <div className="bg-white dark:bg-navy-900 rounded-xl p-4 shadow-lg border border-gray-100 dark:border-navy-800">
+              <a
+                href="https://www.tripadvisor.com.mx/Attraction_Review-g150807-d27417188-Reviews-Jetset_Transfers-Cancun_Yucatan_Peninsula.html"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-white dark:bg-navy-900 rounded-xl p-4 shadow-lg border border-gray-100 dark:border-navy-800 hover:border-[#00AA6C] hover:shadow-xl transition-all duration-300 cursor-pointer group"
+                aria-label={locale === 'es' ? 'Ver reseñas en TripAdvisor' : 'View reviews on TripAdvisor'}
+              >
                 <div className="flex items-center gap-2 mb-1">
                   <Image
                     src="https://static.tacdn.com/img2/brand_refresh_2025/logos/logo.svg"
@@ -215,9 +221,9 @@ export default function HeroSection({ locale, content, heroImage, carouselImages
                     className="w-7 h-7"
                   />
                 </div>
-                <div className="text-sm font-semibold text-gray-900 dark:text-white">4.6/5.0</div>
-                <div className="text-xs text-gray-500 dark:text-gray-400">9 {locale === 'es' ? 'reseñas' : 'reviews'}</div>
-              </div>
+                <div className="text-sm font-semibold text-[#00AA6C] group-hover:text-[#008558] transition-colors">4.6/5.0</div>
+                <div className="text-xs text-gray-500 dark:text-gray-400 group-hover:text-[#00AA6C] transition-colors">9 {locale === 'es' ? 'reseñas' : 'reviews'}</div>
+              </a>
             </div>
           </div>
         </div>
