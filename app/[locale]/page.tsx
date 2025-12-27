@@ -44,6 +44,13 @@ export default async function HomePage({ params }: HomePageProps) {
     .eq('is_active', true)
     .order('display_order', { ascending: true });
 
+  // Fetch vehicles from Supabase
+  const { data: vehicles } = await supabase
+    .from('vehicles')
+    .select('*')
+    .eq('is_active', true)
+    .order('display_order', { ascending: true });
+
   // Get most popular destination/tour based on contact requests
   // Query contact_requests grouped by destination field to find the most requested
   const { data: popularRequests } = await supabase
@@ -122,6 +129,17 @@ export default async function HomePage({ params }: HomePageProps) {
     .eq('is_active', true)
     .order('display_order', { ascending: true });
 
+  // Get Why Choose image
+  const { data: whyChooseImages } = await supabase
+    .from('site_images')
+    .select('url, alt_es, alt_en')
+    .eq('category', 'why_choose')
+    .eq('is_active', true)
+    .order('display_order', { ascending: true })
+    .limit(1);
+
+  const whyChooseImage = whyChooseImages?.[0] || null;
+
   // Transform carousel images to include price and link_url from metadata
   const transformedCarouselImages = (carouselImages || []).map((img: any) => ({
     id: img.id,
@@ -169,8 +187,8 @@ export default async function HomePage({ params }: HomePageProps) {
         locale={locale}
         destinations={destinations || []}
       />
-      <FleetSection locale={locale} />
-      <WhyChooseSection locale={locale} />
+      <FleetSection locale={locale} vehicles={vehicles || []} />
+      <WhyChooseSection locale={locale} image={whyChooseImage} />
       <TripAdvisorSection locale={locale} />
     </>
   );

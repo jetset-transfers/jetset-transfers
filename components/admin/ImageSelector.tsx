@@ -32,10 +32,11 @@ interface ImageSelectorProps {
 const categoryLabels: Record<string, string> = {
   hero: 'Hero / Principal',
   destinations: 'Destinos',
-  tours: 'Vehículos',
+  vehicles: 'Vehículos',
   gallery: 'Galería',
   about: 'Nosotros',
   fleet: 'Flota',
+  hero_carousel: 'Hero Carrusel',
   other: 'Otros',
 };
 

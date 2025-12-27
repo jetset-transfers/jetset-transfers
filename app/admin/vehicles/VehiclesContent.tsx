@@ -16,8 +16,11 @@ import {
   TruckIcon,
   UserGroupIcon,
   CameraIcon,
+  PhotoIcon,
+  XMarkIcon,
 } from '@heroicons/react/24/outline';
 import Image from 'next/image';
+import ImageSelector from '@/components/admin/ImageSelector';
 
 interface Vehicle {
   id: string;
@@ -394,7 +397,103 @@ export default function VehiclesContent({
             </div>
           </div>
 
-          <div className="flex items-center gap-3 mt-4">
+          {/* Sección de Imágenes */}
+          <div className="mt-6 pt-6 border-t border-navy-700">
+            <div className="flex items-center gap-2 mb-4">
+              <CameraIcon className="w-5 h-5 text-brand-400" />
+              <h3 className="text-lg font-medium text-white">Imágenes del Vehículo</h3>
+            </div>
+
+            <div className="space-y-4">
+              {/* Grid de imágenes actuales */}
+              {formData.images.length > 0 && (
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                  {formData.images.map((imageUrl, index) => (
+                    <div key={index} className="relative group aspect-video rounded-lg overflow-hidden border-2 border-navy-700">
+                      <Image
+                        src={imageUrl}
+                        alt={`${formData.name} - Imagen ${index + 1}`}
+                        fill
+                        className="object-cover"
+                        unoptimized={imageUrl.startsWith('http')}
+                      />
+                      {/* Badge de orden */}
+                      <div className="absolute top-2 left-2 px-2 py-1 bg-black/70 text-white text-xs font-bold rounded">
+                        #{index + 1}
+                      </div>
+                      {/* Botón de eliminar */}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const newImages = formData.images.filter((_, i) => i !== index);
+                          setFormData({ ...formData, images: newImages });
+                        }}
+                        className="absolute top-2 right-2 p-1.5 bg-red-500/80 hover:bg-red-500 text-white rounded-lg transition-colors opacity-0 group-hover:opacity-100"
+                        title="Eliminar imagen"
+                      >
+                        <XMarkIcon className="w-4 h-4" />
+                      </button>
+                      {/* Botones de reordenar */}
+                      {formData.images.length > 1 && (
+                        <div className="absolute bottom-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          {index > 0 && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const newImages = [...formData.images];
+                                [newImages[index], newImages[index - 1]] = [newImages[index - 1], newImages[index]];
+                                setFormData({ ...formData, images: newImages });
+                              }}
+                              className="p-1.5 bg-brand-500/80 hover:bg-brand-500 text-white rounded transition-colors"
+                              title="Mover a la izquierda"
+                            >
+                              ←
+                            </button>
+                          )}
+                          {index < formData.images.length - 1 && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const newImages = [...formData.images];
+                                [newImages[index], newImages[index + 1]] = [newImages[index + 1], newImages[index]];
+                                setFormData({ ...formData, images: newImages });
+                              }}
+                              className="p-1.5 bg-brand-500/80 hover:bg-brand-500 text-white rounded transition-colors"
+                              title="Mover a la derecha"
+                            >
+                              →
+                            </button>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Selector para agregar nueva imagen */}
+              <div className="bg-navy-800/50 rounded-lg p-4 border border-navy-700">
+                <ImageSelector
+                  value=""
+                  onChange={(url) => {
+                    if (url && !formData.images.includes(url)) {
+                      setFormData({ ...formData, images: [...formData.images, url] });
+                    }
+                  }}
+                  category="vehicles"
+                  label="Agregar imagen"
+                  description="Selecciona o sube una nueva imagen para este vehículo"
+                  placeholder="URL de la imagen"
+                />
+              </div>
+
+              <p className="text-xs text-navy-500">
+                💡 La primera imagen será la principal. Arrastra o usa las flechas para reordenar.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3 mt-6 pt-6 border-t border-navy-700">
             <label className="relative inline-flex items-center cursor-pointer">
               <input
                 type="checkbox"

@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import dynamic from 'next/dynamic';
 import {
   ClockIcon,
   CheckBadgeIcon,
@@ -11,12 +10,6 @@ import {
   FireIcon,
 } from '@heroicons/react/24/solid';
 import { useCurrency } from '@/contexts/CurrencyContext';
-
-// Dynamically import TripAdvisor widget to avoid SSR issues
-const TripAdvisorRatingWidget = dynamic(
-  () => import('@/components/widgets/TripAdvisorRatingWidget'),
-  { ssr: false }
-);
 
 interface FeaturedItem {
   id: string;
@@ -174,44 +167,79 @@ export default function HeroCards({ locale, featuredTour, featuredDestination, h
       )}
 
       {/* Social Proof Card - Rotating */}
-      <div className="card p-4 overflow-hidden bg-white dark:bg-navy-900 backdrop-blur-sm">
+      <div className="rounded-2xl p-4 overflow-hidden bg-white/90 dark:bg-white/[0.15] backdrop-blur-lg border border-white/30 shadow-lg">
         <div
           className={`flex items-center gap-3 transition-all duration-300 ${
             isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2'
           }`}
         >
-          <div className="w-11 h-11 rounded-full bg-brand-100 dark:bg-brand-900/30 flex items-center justify-center flex-shrink-0">
-            <UserGroupIcon className="w-6 h-6 text-brand-600" />
+          <div className="w-11 h-11 rounded-full bg-brand-100 dark:bg-brand-500/20 flex items-center justify-center flex-shrink-0">
+            <UserGroupIcon className="w-6 h-6 text-brand-600 dark:text-brand-400" />
           </div>
           <div className="flex-1 min-w-0">
-            <div className="text-sm font-medium">
+            <div className="text-sm font-medium text-gray-900 dark:text-white">
               <span className="font-semibold">{bookings[currentBooking].name}</span>
-              <span className="text-muted"> de {bookings[currentBooking].city}</span>
+              <span className="text-gray-600 dark:text-gray-200"> de {bookings[currentBooking].city}</span>
             </div>
-            <div className="text-xs text-muted truncate">
-              {t.socialProof} <span className="text-brand-600 font-medium">{bookings[currentBooking].service}</span> · {bookings[currentBooking].time}
+            <div className="text-xs text-gray-600 dark:text-gray-300 truncate">
+              {t.socialProof} <span className="text-brand-600 dark:text-brand-300 font-medium">{bookings[currentBooking].service}</span> · {bookings[currentBooking].time}
             </div>
           </div>
         </div>
       </div>
 
-      {/* Certification Badge */}
-      <div className="card p-4 bg-white dark:bg-navy-900">
+      {/* Certification Badge - Links to TripAdvisor */}
+      <a
+        href="https://www.tripadvisor.com.mx/Attraction_Review-g150807-d27417188-Reviews-Jetset_Transfers-Cancun_Yucatan_Peninsula.html"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="block rounded-2xl p-4 bg-white/90 dark:bg-white/[0.15] backdrop-blur-lg border border-white/30 hover:bg-white dark:hover:bg-white/[0.25] hover:shadow-xl transition-all cursor-pointer group shadow-lg"
+        aria-label="Ver certificaciones en TripAdvisor"
+      >
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+          <div className="w-10 h-10 rounded-full bg-green-100 dark:bg-green-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
             <CheckBadgeIcon className="w-6 h-6 text-green-600 dark:text-green-400" />
           </div>
           <div>
-            <div className="text-sm font-semibold">{t.certified}</div>
-            <div className="text-xs text-muted">{t.certifiedDesc}</div>
+            <div className="text-sm font-semibold text-gray-900 dark:text-white">{t.certified}</div>
+            <div className="text-xs text-gray-600 dark:text-gray-300">{t.certifiedDesc}</div>
           </div>
         </div>
-      </div>
+      </a>
 
-      {/* TripAdvisor Rating Widget */}
-      <div className="card p-4 bg-white dark:bg-navy-900">
-        <TripAdvisorRatingWidget locale={locale} />
-      </div>
+      {/* TripAdvisor Rating Widget - Direct link, no wrapper */}
+      <a
+        href="https://www.tripadvisor.com.mx/Attraction_Review-g150807-d27417188-Reviews-Jetset_Transfers-Cancun_Yucatan_Peninsula.html"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="flex items-center gap-3 rounded-2xl p-4 bg-white/90 dark:bg-white/[0.15] backdrop-blur-lg border border-white/30 hover:bg-white dark:hover:bg-white/[0.25] transition-all cursor-pointer group shadow-lg"
+        aria-label="Ver reseñas en TripAdvisor"
+      >
+        {/* Logo container - ALWAYS white background */}
+        <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center shadow-sm group-hover:shadow-md transition-shadow flex-shrink-0">
+          <Image
+            src="https://static.tacdn.com/img2/brand_refresh_2025/logos/logo.svg"
+            alt="TripAdvisor"
+            width={28}
+            height={28}
+            className="w-7 h-7"
+            unoptimized
+          />
+        </div>
+        <div className="flex flex-col">
+          <div className="flex gap-0.5 mb-1">
+            {[...Array(5)].map((_, i) => (
+              <div
+                key={i}
+                className="w-3 h-3 rounded-full bg-[#00AA6C]"
+              />
+            ))}
+          </div>
+          <span className="text-xs text-gray-600 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-white transition-colors">
+            {locale === 'es' ? '9 reseñas' : '9 reviews'}
+          </span>
+        </div>
+      </a>
     </div>
   );
 }

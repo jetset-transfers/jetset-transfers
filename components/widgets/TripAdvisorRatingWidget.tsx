@@ -41,20 +41,25 @@ export default function TripAdvisorRatingWidget({ locale = 'en' }: TripAdvisorRa
       href="https://www.tripadvisor.com.mx/Attraction_Review-g150807-d27417188-Reviews-Jetset_Transfers-Cancun_Yucatan_Peninsula.html"
       target="_blank"
       rel="noopener noreferrer"
-      className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-navy-800 transition-colors"
+      className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-white/5 transition-all cursor-pointer group"
+      aria-label="Ver reseñas en TripAdvisor"
     >
-      <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center shadow-sm">
+      {/* Logo container - ALWAYS white background */}
+      <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center shadow-sm group-hover:shadow-md transition-shadow flex-shrink-0">
         <Image
           src="https://static.tacdn.com/img2/brand_refresh_2025/logos/logo.svg"
           alt="TripAdvisor"
           width={28}
           height={28}
           className="w-7 h-7"
+          unoptimized
         />
       </div>
       <div className="flex flex-col">
         <TripAdvisorRating />
-        <span className="text-xs text-muted mt-1">{t.reviews}</span>
+        <span className="text-xs text-gray-600 dark:text-gray-300 mt-1 group-hover:text-gray-900 dark:group-hover:text-white transition-colors">
+          {t.reviews}
+        </span>
       </div>
     </a>
   );

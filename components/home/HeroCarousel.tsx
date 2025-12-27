@@ -26,28 +26,45 @@ interface HeroCarouselProps {
 export default function HeroCarousel({ locale, images, autoPlayInterval = 5000 }: HeroCarouselProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
+  const [isTransitioning, setIsTransitioning] = useState(false);
 
   // Auto-play functionality
   useEffect(() => {
     if (isHovered || images.length <= 1) return;
 
     const interval = setInterval(() => {
-      setCurrentIndex((prev) => (prev + 1) % images.length);
+      setIsTransitioning(true);
+      setTimeout(() => {
+        setCurrentIndex((prev) => (prev + 1) % images.length);
+        setIsTransitioning(false);
+      }, 300); // Half of transition duration for smoother effect
     }, autoPlayInterval);
 
     return () => clearInterval(interval);
   }, [images.length, autoPlayInterval, isHovered]);
 
   const goToPrevious = () => {
-    setCurrentIndex((prev) => (prev - 1 + images.length) % images.length);
+    setIsTransitioning(true);
+    setTimeout(() => {
+      setCurrentIndex((prev) => (prev - 1 + images.length) % images.length);
+      setIsTransitioning(false);
+    }, 300);
   };
 
   const goToNext = () => {
-    setCurrentIndex((prev) => (prev + 1) % images.length);
+    setIsTransitioning(true);
+    setTimeout(() => {
+      setCurrentIndex((prev) => (prev + 1) % images.length);
+      setIsTransitioning(false);
+    }, 300);
   };
 
   const goToSlide = (index: number) => {
-    setCurrentIndex(index);
+    setIsTransitioning(true);
+    setTimeout(() => {
+      setCurrentIndex(index);
+      setIsTransitioning(false);
+    }, 300);
   };
 
   if (!images || images.length === 0) {
@@ -68,25 +85,28 @@ export default function HeroCarousel({ locale, images, autoPlayInterval = 5000 }
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {/* Main Image */}
+      {/* Main Image Container with Smooth Transitions */}
       <div className="relative w-full h-full">
-        <Image
-          src={currentImage.url}
-          alt={locale === 'es' ? (currentImage.alt_es || '') : (currentImage.alt_en || '')}
-          fill
-          priority={currentIndex === 0}
-          quality={90}
-          sizes="(max-width: 1024px) 100vw, 40vw"
-          className="object-cover transition-opacity duration-500"
-          unoptimized={currentImage.url.startsWith('http')}
-        />
+        {/* Current Image */}
+        <div className={`absolute inset-0 transition-opacity duration-700 ease-in-out ${isTransitioning ? 'opacity-0' : 'opacity-100'}`}>
+          <Image
+            src={currentImage.url}
+            alt={locale === 'es' ? (currentImage.alt_es || '') : (currentImage.alt_en || '')}
+            fill
+            priority={currentIndex === 0}
+            quality={90}
+            sizes="(max-width: 1024px) 100vw, 40vw"
+            className="object-cover"
+            unoptimized={currentImage.url.startsWith('http')}
+          />
+        </div>
         {/* Subtle overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent transition-opacity duration-700" />
       </div>
 
-      {/* Content Overlay */}
+      {/* Content Overlay with Smooth Transition */}
       {(currentImage.title_es || currentImage.title_en || currentImage.price) && (
-        <div className="absolute top-6 left-6 right-6">
+        <div className={`absolute top-6 left-6 right-6 transition-opacity duration-700 ease-in-out ${isTransitioning ? 'opacity-0' : 'opacity-100'}`}>
           <div className="bg-white/95 backdrop-blur-md rounded-2xl p-4 shadow-xl">
             <div className="flex items-center justify-between gap-3">
               {(currentImage.title_es || currentImage.title_en) && (

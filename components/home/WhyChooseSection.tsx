@@ -12,9 +12,14 @@ import { getYearsOfExperienceFormatted } from '@/lib/constants';
 
 interface WhyChooseSectionProps {
   locale: string;
+  image?: {
+    url: string;
+    alt_es: string;
+    alt_en: string;
+  } | null;
 }
 
-export default function WhyChooseSection({ locale }: WhyChooseSectionProps) {
+export default function WhyChooseSection({ locale, image }: WhyChooseSectionProps) {
   const t = useTranslations('whyChoose');
 
   const reasons = [
@@ -46,15 +51,32 @@ export default function WhyChooseSection({ locale }: WhyChooseSectionProps) {
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
           {/* LEFT: Image with Stats Overlay */}
           <div className="relative order-2 lg:order-1">
-            <div className="relative h-[500px] rounded-3xl overflow-hidden shadow-2xl">
-              <Image
-                src="/images/hero/hero-aerial-cancun.jpg"
-                alt={locale === 'es' ? 'Por qué elegir Jetset Transfers' : 'Why choose Jetset Transfers'}
-                fill
-                sizes="(max-width: 1024px) 100vw, 50vw"
-                className="object-cover"
-              />
-              {/* Dark overlay */}
+            <div className="relative h-[500px] rounded-3xl overflow-hidden shadow-2xl bg-gradient-to-br from-brand-600 via-brand-700 to-navy-900">
+              {/* Image or gradient background */}
+              {image ? (
+                <Image
+                  src={image.url}
+                  alt={locale === 'es' ? image.alt_es : image.alt_en}
+                  fill
+                  sizes="(max-width: 1024px) 100vw, 50vw"
+                  className="object-cover"
+                />
+              ) : (
+                <>
+                  {/* SVG Pattern Overlay - only if no image */}
+                  <div className="absolute inset-0 opacity-10">
+                    <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+                      <defs>
+                        <pattern id="whychoose-pattern" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
+                          <circle cx="20" cy="20" r="2" fill="white" />
+                        </pattern>
+                      </defs>
+                      <rect width="100%" height="100%" fill="url(#whychoose-pattern)" />
+                    </svg>
+                  </div>
+                </>
+              )}
+              {/* Dark overlay for stats readability */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
 
               {/* Stats Overlay */}

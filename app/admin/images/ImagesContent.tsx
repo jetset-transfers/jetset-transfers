@@ -174,6 +174,21 @@ const categoryConfig: Record<string, CategoryConfigItem> = {
       layout: 'square',
     },
   },
+  why_choose: {
+    label: 'Por Qué Elegirnos',
+    icon: '⭐',
+    color: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30',
+    description: 'Imagen para la sección "Why Choose Jetset"',
+    location: 'Página de inicio - Sección "Por qué elegir Jetset"',
+    hasCarousel: false,
+    dimensions: '600x800 (vertical) recomendado',
+    tips: 'Imagen profesional del equipo, vehículos o servicio. Solo se usa la primera imagen activa.',
+    preview: {
+      width: 'w-32',
+      height: 'h-40',
+      layout: 'vertical',
+    },
+  },
   other: {
     label: 'Otros',
     icon: '📁',

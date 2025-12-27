@@ -67,33 +67,38 @@ export default function HeroSection({ locale, content, heroImage, carouselImages
     return fallback;
   };
 
-  // Hero image URL - use dynamic image from admin or fallback to static
-  const heroImageUrl = heroImage?.url || '/images/hero/hero-aerial-cancun.jpg';
+  // Hero image URL - use dynamic image from admin or fallback to gradient
+  const heroImageUrl = heroImage?.url || null;
 
   // Hero image alt text for SEO - use dynamic alt or fallback
   const heroImageAlt = heroImage
     ? (locale === 'es' ? heroImage.alt_es : heroImage.alt_en) || heroImage.key
     : locale === 'es'
-      ? 'Camioneta de transporte privado en el Aeropuerto de Cancún - Jetset Transfers'
-      : 'Private transportation van at Cancún Airport - Jetset Transfers';
+      ? 'Vista aérea de Cancún y la Riviera Maya - Jetset Transfers'
+      : 'Aerial view of Cancún and Riviera Maya - Jetset Transfers';
 
   return (
     <section className="relative min-h-screen flex items-center overflow-hidden">
       {/* Background Image */}
       <div className="absolute inset-0">
-        <Image
-          src={heroImageUrl}
-          alt={heroImageAlt}
-          fill
-          priority
-          fetchPriority="high"
-          quality={75}
-          sizes="100vw"
-          className="object-cover"
-          unoptimized={heroImageUrl.startsWith('http')}
-        />
-        {/* Overlay for better readability */}
-        <div className="absolute inset-0 bg-gradient-to-br from-navy-950/95 via-navy-900/90 to-navy-950/95 dark:from-navy-950/98 dark:via-navy-900/95 dark:to-navy-950/98" />
+        {heroImageUrl ? (
+          <Image
+            src={heroImageUrl}
+            alt={heroImageAlt}
+            fill
+            priority
+            fetchPriority="high"
+            quality={75}
+            sizes="100vw"
+            className="object-cover"
+            unoptimized={heroImageUrl.startsWith('http')}
+          />
+        ) : (
+          /* Fallback gradient if no image */
+          <div className="w-full h-full bg-gradient-to-br from-navy-950 via-navy-900 to-brand-900" />
+        )}
+        {/* Overlay for better readability - Changes based on theme */}
+        <div className="absolute inset-0 bg-gradient-to-br from-navy-950/70 via-navy-900/60 to-navy-950/70 dark:from-navy-950/95 dark:via-navy-900/90 dark:to-navy-950/95 transition-colors duration-500" />
       </div>
 
       {/* Background Pattern - Subtle */}
