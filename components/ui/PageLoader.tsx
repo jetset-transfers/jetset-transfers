@@ -2,7 +2,7 @@
 
 import Lottie from 'lottie-react';
 import { useLocale } from 'next-intl';
-import airplaneAnimation from '@/public/animations/airplane-animation.json';
+import loadingAnimation from '@/public/animations/loading-animation.json';
 
 interface PageLoaderProps {
   message?: string;
@@ -21,7 +21,7 @@ export default function PageLoader({ message, fullScreen = true }: PageLoaderPro
       <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-white dark:bg-navy-950">
         <div className="w-48 h-48 md:w-64 md:h-64">
           <Lottie
-            animationData={airplaneAnimation}
+            animationData={loadingAnimation}
             loop
             autoplay
           />
@@ -37,7 +37,7 @@ export default function PageLoader({ message, fullScreen = true }: PageLoaderPro
     <div className="flex flex-col items-center justify-center py-12">
       <div className="w-32 h-32 md:w-40 md:h-40">
         <Lottie
-          animationData={airplaneAnimation}
+          animationData={loadingAnimation}
           loop
           autoplay
         />
