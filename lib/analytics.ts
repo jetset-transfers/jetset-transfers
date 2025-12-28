@@ -1,5 +1,4 @@
 // Google Analytics 4 utilities
-// GA4 ID: G-HN7PLHRVGY
 
 declare global {
   interface Window {
@@ -8,7 +7,7 @@ declare global {
   }
 }
 
-const GA_MEASUREMENT_ID = 'G-HN7PLHRVGY';
+const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || '';
 
 // Check if analytics consent was given
 export function hasAnalyticsConsent(): boolean {
