@@ -199,3 +199,101 @@ export function trackNavigation(linkName: string, location: 'header' | 'footer')
     location: location,
   });
 }
+
+// ============================================
+// CAROUSEL & MEDIA EVENTS
+// ============================================
+
+// Track carousel slide changes
+export function trackCarouselSlide(slideIndex: number, slideName?: string): void {
+  trackEvent('carousel_slide', {
+    event_category: 'engagement',
+    slide_index: slideIndex,
+    slide_name: slideName || `slide_${slideIndex}`,
+  });
+}
+
+// ============================================
+// OUTBOUND LINKS
+// ============================================
+
+// Track clicks on external links
+export function trackOutboundLink(url: string, linkText?: string): void {
+  trackEvent('outbound_link', {
+    event_category: 'engagement',
+    link_url: url,
+    link_text: linkText || 'unknown',
+  });
+}
+
+// ============================================
+// TIME ON PAGE
+// ============================================
+
+// Track time spent on a specific page/section
+export function trackTimeOnPage(pageName: string, timeSeconds: number): void {
+  trackEvent('time_on_page', {
+    event_category: 'engagement',
+    page_name: pageName,
+    time_seconds: timeSeconds,
+  });
+}
+
+// Track engaged time (when user is actively interacting)
+export function trackEngagedTime(pageName: string, engagedSeconds: number): void {
+  trackEvent('engaged_time', {
+    event_category: 'engagement',
+    page_name: pageName,
+    engaged_seconds: engagedSeconds,
+  });
+}
+
+// ============================================
+// CTA TRACKING
+// ============================================
+
+// Track all CTA button clicks with detailed info
+export function trackCTAClick(
+  ctaType: 'primary' | 'secondary' | 'hero' | 'floating' | 'card',
+  ctaText: string,
+  location: string,
+  destinationUrl?: string
+): void {
+  trackEvent('cta_click', {
+    event_category: 'conversion',
+    cta_type: ctaType,
+    cta_text: ctaText,
+    cta_location: location,
+    destination_url: destinationUrl || 'internal',
+  });
+}
+
+// Track hero section CTA clicks specifically
+export function trackHeroCTA(buttonType: 'book_transfer' | 'view_destinations'): void {
+  trackEvent('hero_cta_click', {
+    event_category: 'conversion',
+    button_type: buttonType,
+  });
+}
+
+// ============================================
+// USER BEHAVIOR
+// ============================================
+
+// Track when user copies content (phone, email, etc.)
+export function trackCopyToClipboard(contentType: 'phone' | 'email' | 'address' | 'other', value?: string): void {
+  trackEvent('copy_to_clipboard', {
+    event_category: 'engagement',
+    content_type: contentType,
+    content_value: value || 'unknown',
+  });
+}
+
+// Track social share attempts
+export function trackSocialShare(platform: string, contentType: string): void {
+  trackEvent('social_share', {
+    event_category: 'engagement',
+    platform: platform,
+    content_type: contentType,
+  });
+}

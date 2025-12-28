@@ -1,8 +1,8 @@
 import { useTranslations } from 'next-intl';
-import Link from 'next/link';
 import Image from 'next/image';
-import { ArrowRightIcon } from '@heroicons/react/24/outline';
 import HeroCarousel from './HeroCarousel';
+import HeroCTAButtons from './HeroCTAButtons';
+import HeroTripAdvisorCard from './HeroTripAdvisorCard';
 import { getYearsOfExperienceFormatted } from '@/lib/constants';
 
 interface ContentMap {
@@ -149,21 +149,11 @@ export default function HeroSection({ locale, content, heroImage, carouselImages
             </div>
 
             {/* CTA Section */}
-            <div className="flex flex-col sm:flex-row gap-4 pt-4">
-              <Link
-                href={`/${locale}/contact`}
-                className="group inline-flex items-center justify-center gap-3 px-8 py-4 text-base font-semibold text-white bg-brand-600 hover:bg-brand-700 rounded-xl shadow-lg shadow-brand-600/50 hover:shadow-xl hover:shadow-brand-600/60 transition-all duration-300 hover:-translate-y-0.5"
-              >
-                {t('cta.primary')}
-                <ArrowRightIcon className="w-5 h-5 transition-transform group-hover:translate-x-1" />
-              </Link>
-              <a
-                href="#services"
-                className="inline-flex items-center justify-center gap-2 px-8 py-4 text-base font-semibold text-white bg-white/10 backdrop-blur-sm border-2 border-white/20 hover:bg-white/20 hover:border-white/30 rounded-xl transition-all duration-300 hover:shadow-lg"
-              >
-                {t('cta.secondary')}
-              </a>
-            </div>
+            <HeroCTAButtons
+              locale={locale}
+              primaryText={t('cta.primary')}
+              secondaryText={t('cta.secondary')}
+            />
 
             {/* Trust Stats */}
             <div className="grid grid-cols-3 gap-6 pt-8">
@@ -205,25 +195,7 @@ export default function HeroSection({ locale, content, heroImage, carouselImages
                 <div className="text-xs text-gray-500 dark:text-gray-400">TAI & TAN</div>
               </div>
 
-              <a
-                href="https://www.tripadvisor.com.mx/Attraction_Review-g150807-d27417188-Reviews-Jetset_Transfers-Cancun_Yucatan_Peninsula.html"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="bg-white dark:bg-navy-900 rounded-xl p-4 shadow-lg border border-gray-100 dark:border-navy-800 hover:border-[#00AA6C] hover:shadow-xl transition-all duration-300 cursor-pointer group"
-                aria-label={locale === 'es' ? 'Ver reseñas en TripAdvisor' : 'View reviews on TripAdvisor'}
-              >
-                <div className="flex items-center gap-2 mb-1">
-                  <Image
-                    src="https://static.tacdn.com/img2/brand_refresh_2025/logos/logo.svg"
-                    alt="TripAdvisor"
-                    width={28}
-                    height={28}
-                    className="w-7 h-7"
-                  />
-                </div>
-                <div className="text-sm font-semibold text-[#00AA6C] group-hover:text-[#008558] transition-colors">4.6/5.0</div>
-                <div className="text-xs text-gray-500 dark:text-gray-400 group-hover:text-[#00AA6C] transition-colors">9 {locale === 'es' ? 'reseñas' : 'reviews'}</div>
-              </a>
+              <HeroTripAdvisorCard locale={locale} />
             </div>
           </div>
         </div>

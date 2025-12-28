@@ -1,9 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
+import { trackCarouselSlide } from '@/lib/analytics';
 
 interface HeroCarouselImage {
   id: string;
@@ -27,6 +28,21 @@ export default function HeroCarousel({ locale, images, autoPlayInterval = 5000 }
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const hasTrackedSlide = useRef<Set<number>>(new Set([0])); // Track which slides have been viewed
+
+  // Track slide view
+  const trackSlideView = (index: number, isManual: boolean = false) => {
+    const image = images[index];
+    const slideName = locale === 'es'
+      ? (image?.title_es || image?.alt_es || `slide_${index}`)
+      : (image?.title_en || image?.alt_en || `slide_${index}`);
+
+    // Only track unique views or manual navigation
+    if (isManual || !hasTrackedSlide.current.has(index)) {
+      trackCarouselSlide(index, slideName);
+      hasTrackedSlide.current.add(index);
+    }
+  };
 
   // Auto-play functionality
   useEffect(() => {
@@ -35,18 +51,26 @@ export default function HeroCarousel({ locale, images, autoPlayInterval = 5000 }
     const interval = setInterval(() => {
       setIsTransitioning(true);
       setTimeout(() => {
-        setCurrentIndex((prev) => (prev + 1) % images.length);
+        setCurrentIndex((prev) => {
+          const newIndex = (prev + 1) % images.length;
+          trackSlideView(newIndex);
+          return newIndex;
+        });
         setIsTransitioning(false);
       }, 300); // Half of transition duration for smoother effect
     }, autoPlayInterval);
 
     return () => clearInterval(interval);
-  }, [images.length, autoPlayInterval, isHovered]);
+  }, [images.length, autoPlayInterval, isHovered, locale]);
 
   const goToPrevious = () => {
     setIsTransitioning(true);
     setTimeout(() => {
-      setCurrentIndex((prev) => (prev - 1 + images.length) % images.length);
+      setCurrentIndex((prev) => {
+        const newIndex = (prev - 1 + images.length) % images.length;
+        trackSlideView(newIndex, true);
+        return newIndex;
+      });
       setIsTransitioning(false);
     }, 300);
   };
@@ -54,13 +78,18 @@ export default function HeroCarousel({ locale, images, autoPlayInterval = 5000 }
   const goToNext = () => {
     setIsTransitioning(true);
     setTimeout(() => {
-      setCurrentIndex((prev) => (prev + 1) % images.length);
+      setCurrentIndex((prev) => {
+        const newIndex = (prev + 1) % images.length;
+        trackSlideView(newIndex, true);
+        return newIndex;
+      });
       setIsTransitioning(false);
     }, 300);
   };
 
   const goToSlide = (index: number) => {
     setIsTransitioning(true);
+    trackSlideView(index, true);
     setTimeout(() => {
       setCurrentIndex(index);
       setIsTransitioning(false);
