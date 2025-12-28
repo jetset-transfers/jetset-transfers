@@ -98,32 +98,29 @@ export default function ContactForm({ locale, searchParams }: ContactFormProps) 
         destination_id = dest?.id || null;
       }
 
-      // Helper to ensure dates are stored correctly without timezone shift
-      const formatDateForDB = (dateStr: string | null) => {
-        if (!dateStr) return null;
-        return `${dateStr}T12:00:00+00:00`;
-      };
-
       const { error: insertError } = await supabase
         .from('contact_requests')
         .insert([{
           name: formData.name,
           email: formData.email,
           phone: formData.phone || null,
+          request_type: 'quote',
           service_type: formData.service_type || null,
-          destination: formData.destination || null,
           message: formData.message || null,
           status: 'pending',
-          travel_date: formatDateForDB(formData.travel_date),
-          departure_time: formData.departure_time || null,
-          return_date: formatDateForDB(formData.return_date),
+          travel_date: formData.travel_date || null,
+          travel_time: formData.departure_time || null,
+          return_date: formData.return_date || null,
           return_time: formData.return_time || null,
-          number_of_passengers: parseInt(formData.number_of_passengers) || null,
-          departure_location: formData.pickup_location || null,
+          num_passengers: formData.number_of_passengers ? parseInt(formData.number_of_passengers) : null,
+          pickup_location: formData.pickup_location || null,
           destination_id,
         }]);
 
-      if (insertError) throw insertError;
+      if (insertError) {
+        console.error('Supabase insert error:', insertError);
+        throw insertError;
+      }
 
       // Track successful form submission
       const formType = formData.service_type === 'transfer' ? 'transfer_quote' : 'contact';
@@ -179,9 +176,11 @@ export default function ContactForm({ locale, searchParams }: ContactFormProps) 
         flight_number: '',
       });
     } catch (err: any) {
-      setError(locale === 'es'
-        ? 'Error al enviar el mensaje. Por favor intenta de nuevo.'
-        : 'Error sending message. Please try again.');
+      console.error('Form submission error:', err);
+      const errorMessage = locale === 'es'
+        ? `Error al enviar el mensaje: ${err.message || 'Por favor intenta de nuevo.'}`
+        : `Error sending message: ${err.message || 'Please try again.'}`;
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
