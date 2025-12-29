@@ -133,11 +133,11 @@ export default async function HomePage({ params }: HomePageProps) {
   // Get fleet image (primary or first from fleet category)
   const fleetImage = getPrimaryImage('fleet');
 
-  // Get hero carousel images (all images from hero_carousel category, ordered by display_order)
+  // Get hero carousel images (from hero_carousel or galeria categories, ordered by display_order)
   const { data: carouselImages } = await supabase
     .from('site_images')
     .select('id, url, alt_es, alt_en, title_es, title_en, display_order, metadata')
-    .eq('category', 'hero_carousel')
+    .in('category', ['hero_carousel', 'galeria'])
     .eq('is_active', true)
     .order('display_order', { ascending: true });
 

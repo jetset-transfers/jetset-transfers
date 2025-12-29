@@ -75,7 +75,7 @@ export default function Header({ hasVehicles = false }: HeaderProps) {
 
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-50 bg-navy-900 transition-all duration-300 ${
+      className={`fixed top-0 left-0 right-0 z-50 bg-white dark:bg-navy-900 transition-all duration-300 ${
         scrolled || mobileMenuOpen ? 'shadow-lg' : ''
       }`}
       suppressHydrationWarning
@@ -85,22 +85,24 @@ export default function Header({ hasVehicles = false }: HeaderProps) {
           {/* Logo - Fixed dimensions to prevent CLS */}
           <Link
             href={`/${locale}`}
-            className="flex-shrink-0 w-[120px] md:w-[150px] h-8 md:h-10"
+            className="flex-shrink-0"
             aria-label={locale === 'es' ? 'Jetset Transfers - Ir al inicio' : 'Jetset Transfers - Go to home'}
             title={locale === 'es' ? 'Jetset Transfers - Transporte Privado en Cancún' : 'Jetset Transfers - Private Transportation in Cancún'}
           >
-            <Image
-              src="/images/logo/jetset-logo.png"
-              alt={locale === 'es'
-                ? 'Jetset Transfers - Logo de empresa de transporte privado en Cancún y Riviera Maya'
-                : 'Jetset Transfers - Private transportation company logo in Cancún and Riviera Maya'}
-              width={150}
-              height={40}
-              className="h-8 md:h-10 w-auto"
-              priority
-              quality={75}
-              title={locale === 'es' ? 'Jetset Transfers' : 'Jetset Transfers'}
-            />
+            <span className="block w-[120px] md:w-[150px] h-8 md:h-10">
+              <Image
+                src="/images/logo/jetset-logo.png"
+                alt={locale === 'es'
+                  ? 'Jetset Transfers - Logo de empresa de transporte privado en Cancún y Riviera Maya'
+                  : 'Jetset Transfers - Private transportation company logo in Cancún and Riviera Maya'}
+                width={150}
+                height={40}
+                className="h-8 md:h-10 w-auto"
+                priority
+                quality={75}
+                title={locale === 'es' ? 'Jetset Transfers' : 'Jetset Transfers'}
+              />
+            </span>
           </Link>
 
           {/* Desktop Navigation */}
@@ -109,7 +111,7 @@ export default function Header({ hasVehicles = false }: HeaderProps) {
               <Link
                 key={link.href}
                 href={link.href}
-                className="text-sm font-medium text-gray-300 hover:text-white transition-colors"
+                className="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-brand-600 dark:hover:text-white transition-colors"
                 onClick={() => trackNavigation(link.label, 'header')}
               >
                 {link.label}
@@ -120,7 +122,7 @@ export default function Header({ hasVehicles = false }: HeaderProps) {
           {/* Right side actions */}
           <div className="flex items-center gap-2">
             {/* Language Switcher */}
-            <div className="hidden sm:flex items-center gap-1 p-1 rounded-lg bg-navy-800">
+            <div className="hidden sm:flex items-center gap-1 p-1 rounded-lg bg-gray-100 dark:bg-navy-800">
               {['es', 'en'].map((lang) => (
                 <button
                   key={lang}
@@ -128,7 +130,7 @@ export default function Header({ hasVehicles = false }: HeaderProps) {
                   className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${
                     locale === lang
                       ? 'bg-brand-600 text-white'
-                      : 'text-gray-400 hover:text-white'
+                      : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
                   }`}
                 >
                   {lang.toUpperCase()}
@@ -139,7 +141,7 @@ export default function Header({ hasVehicles = false }: HeaderProps) {
             {/* Theme Toggle */}
             <button
               onClick={toggleDarkMode}
-              className="p-2 rounded-lg bg-navy-800 text-gray-300 hover:text-white transition-colors"
+              className="p-2 rounded-lg bg-gray-100 dark:bg-navy-800 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors"
               aria-label={darkMode
                 ? (locale === 'es' ? 'Cambiar a modo claro' : 'Switch to light mode')
                 : (locale === 'es' ? 'Cambiar a modo oscuro' : 'Switch to dark mode')
@@ -164,7 +166,7 @@ export default function Header({ hasVehicles = false }: HeaderProps) {
             {/* Mobile menu button */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden p-2 rounded-lg bg-navy-800 text-gray-300 hover:text-white transition-colors"
+              className="md:hidden p-2 rounded-lg bg-gray-100 dark:bg-navy-800 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors"
               aria-label={mobileMenuOpen
                 ? (locale === 'es' ? 'Cerrar menú de navegación' : 'Close navigation menu')
                 : (locale === 'es' ? 'Abrir menú de navegación' : 'Open navigation menu')
@@ -182,13 +184,13 @@ export default function Header({ hasVehicles = false }: HeaderProps) {
 
         {/* Mobile Navigation */}
         {mobileMenuOpen && (
-          <div className="md:hidden py-4 border-t border-navy-800 animate-slide-down bg-navy-900">
+          <div className="md:hidden py-4 border-t border-gray-200 dark:border-navy-800 animate-slide-down bg-white dark:bg-navy-900">
             <nav className="flex flex-col gap-1">
               {navLinks.map((link) => (
                 <Link
                   key={link.href}
                   href={link.href}
-                  className="px-4 py-3 text-sm font-medium rounded-lg text-gray-200 hover:bg-navy-800 transition-colors"
+                  className="px-4 py-3 text-sm font-medium rounded-lg text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-navy-800 transition-colors"
                   onClick={() => {
                     trackNavigation(link.label, 'header');
                     setMobileMenuOpen(false);
@@ -199,7 +201,7 @@ export default function Header({ hasVehicles = false }: HeaderProps) {
               ))}
 
               {/* Mobile Language */}
-              <div className="px-4 pt-4 mt-2 border-t border-navy-800">
+              <div className="px-4 pt-4 mt-2 border-t border-gray-200 dark:border-navy-800">
                 <div className="flex gap-2">
                   {['es', 'en'].map((lang) => (
                     <button
@@ -211,7 +213,7 @@ export default function Header({ hasVehicles = false }: HeaderProps) {
                       className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all ${
                         locale === lang
                           ? 'bg-brand-600 text-white'
-                          : 'bg-navy-800 text-gray-300'
+                          : 'bg-gray-100 dark:bg-navy-800 text-gray-700 dark:text-gray-300'
                       }`}
                     >
                       {lang === 'es' ? 'Español' : 'English'}
