@@ -80,13 +80,6 @@ export default function DashboardContent({ user, stats }: DashboardContentProps)
       href: '/admin/destinations',
     },
     {
-      title: 'Zonas',
-      description: 'Administra zonas de servicio',
-      icon: MapPinIcon,
-      color: 'text-green-400',
-      href: '/admin/zones',
-    },
-    {
       title: 'Imágenes',
       description: 'Gestiona multimedia',
       icon: PhotoIcon,
@@ -132,7 +125,7 @@ export default function DashboardContent({ user, stats }: DashboardContentProps)
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
         <div className="p-4 bg-navy-900 rounded-xl border border-navy-800">
           <p className="text-2xl font-semibold text-white">{stats.images}</p>
           <p className="text-sm text-navy-400">Imágenes</p>
@@ -140,10 +133,6 @@ export default function DashboardContent({ user, stats }: DashboardContentProps)
         <div className="p-4 bg-navy-900 rounded-xl border border-navy-800">
           <p className="text-2xl font-semibold text-white">{stats.destinations}</p>
           <p className="text-sm text-navy-400">Destinos</p>
-        </div>
-        <div className="p-4 bg-navy-900 rounded-xl border border-navy-800">
-          <p className="text-2xl font-semibold text-white">{stats.tours}</p>
-          <p className="text-sm text-navy-400">Zonas</p>
         </div>
         <div className="p-4 bg-navy-900 rounded-xl border border-navy-800">
           <p className="text-2xl font-semibold text-white">{stats.messages}</p>

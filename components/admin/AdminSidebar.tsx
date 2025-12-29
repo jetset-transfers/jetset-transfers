@@ -24,7 +24,7 @@ import { useState } from 'react';
 
 // System version info
 const SYSTEM_VERSION = '1.0.0';
-const RELEASE_DATE = '05/12/2025';
+const RELEASE_DATE = '28/12/2025';
 
 interface AdminSidebarProps {
   userEmail: string;
@@ -40,11 +40,6 @@ const menuItems = [
     title: 'Destinos',
     icon: MapPinIcon,
     href: '/admin/destinations',
-  },
-  {
-    title: 'Zonas',
-    icon: MapPinIcon,
-    href: '/admin/zones',
   },
   {
     title: 'Vehículos',
