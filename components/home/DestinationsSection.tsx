@@ -63,8 +63,8 @@ export default function DestinationsSection({ locale, destinations }: Destinatio
                 className="group block"
               >
                 <div className="relative overflow-hidden rounded-2xl bg-white dark:bg-navy-900 border border-gray-200 dark:border-navy-800 hover:border-brand-500 dark:hover:border-brand-600 hover:shadow-2xl transition-all duration-300">
-                  {/* Image */}
-                  <div className="relative h-64 overflow-hidden">
+                  {/* Image - Fixed aspect ratio to prevent CLS */}
+                  <div className="relative aspect-[4/3] overflow-hidden">
                     {dest.image_url ? (
                       <Image
                         src={dest.image_url}
@@ -74,16 +74,19 @@ export default function DestinationsSection({ locale, destinations }: Destinatio
                         fill
                         sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                         className="object-cover transition-transform duration-700 group-hover:scale-110"
+                        loading="lazy"
+                        placeholder="blur"
+                        blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFgABAQEAAAAAAAAAAAAAAAAAAAUH/8QAIhAAAgEDAwUBAAAAAAAAAAAAAQIDAAQRBRIhBhMiMUFR/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAZEQADAAMAAAAAAAAAAAAAAAAAAQIRITH/2gAMAwEAAhEDEQA/ANF6Y1a+1DTnku0jRo5WjXaOGIGcH+0v11ySJM7dZllY/piilJ9Fs/o//9k="
                       />
                     ) : (
-                      <div className="w-full h-full bg-gradient-to-br from-navy-100 to-navy-200 dark:from-navy-800 dark:to-navy-900 flex items-center justify-center">
+                      <div className="absolute inset-0 bg-gradient-to-br from-navy-100 to-navy-200 dark:from-navy-800 dark:to-navy-900 flex items-center justify-center">
                         <MapPinIcon className="w-16 h-16 text-navy-300 dark:text-navy-600" />
                       </div>
                     )}
                     {/* Gradient Overlay */}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-60 group-hover:opacity-80 transition-opacity" />
 
-                    {/* Price Badge */}
+                    {/* Price Badge - Fixed position */}
                     {dest.price_from && (
                       <div className="absolute top-4 right-4 px-3 py-1.5 rounded-full bg-white/95 backdrop-blur-sm shadow-lg">
                         <div className="text-xs text-gray-600 font-medium">

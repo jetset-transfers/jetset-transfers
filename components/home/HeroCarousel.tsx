@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
@@ -28,42 +28,60 @@ export default function HeroCarousel({ locale, images, autoPlayInterval = 5000 }
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
-  const hasTrackedSlide = useRef<Set<number>>(new Set([0])); // Track which slides have been viewed
+  const [imagesLoaded, setImagesLoaded] = useState<Set<number>>(new Set([0]));
+  const hasTrackedSlide = useRef<Set<number>>(new Set([0]));
 
   // Track slide view
-  const trackSlideView = (index: number, isManual: boolean = false) => {
+  const trackSlideView = useCallback((index: number, isManual: boolean = false) => {
     const image = images[index];
     const slideName = locale === 'es'
       ? (image?.title_es || image?.alt_es || `slide_${index}`)
       : (image?.title_en || image?.alt_en || `slide_${index}`);
 
-    // Only track unique views or manual navigation
     if (isManual || !hasTrackedSlide.current.has(index)) {
       trackCarouselSlide(index, slideName);
       hasTrackedSlide.current.add(index);
     }
-  };
+  }, [images, locale]);
 
-  // Auto-play functionality
+  // Preload next image
+  useEffect(() => {
+    if (images.length <= 1) return;
+    const nextIndex = (currentIndex + 1) % images.length;
+    if (!imagesLoaded.has(nextIndex)) {
+      const img = new window.Image();
+      img.src = images[nextIndex].url;
+      img.onload = () => {
+        setImagesLoaded(prev => new Set([...prev, nextIndex]));
+      };
+    }
+  }, [currentIndex, images, imagesLoaded]);
+
+  // Auto-play functionality - delayed start for better LCP
   useEffect(() => {
     if (isHovered || images.length <= 1) return;
 
-    const interval = setInterval(() => {
-      setIsTransitioning(true);
-      setTimeout(() => {
-        setCurrentIndex((prev) => {
-          const newIndex = (prev + 1) % images.length;
-          trackSlideView(newIndex);
-          return newIndex;
-        });
-        setIsTransitioning(false);
-      }, 300); // Half of transition duration for smoother effect
-    }, autoPlayInterval);
+    // Delay auto-play start by 3 seconds to not affect LCP
+    const startDelay = setTimeout(() => {
+      const interval = setInterval(() => {
+        setIsTransitioning(true);
+        setTimeout(() => {
+          setCurrentIndex((prev) => {
+            const newIndex = (prev + 1) % images.length;
+            trackSlideView(newIndex);
+            return newIndex;
+          });
+          setIsTransitioning(false);
+        }, 300);
+      }, autoPlayInterval);
 
-    return () => clearInterval(interval);
-  }, [images.length, autoPlayInterval, isHovered, locale]);
+      return () => clearInterval(interval);
+    }, 3000);
 
-  const goToPrevious = () => {
+    return () => clearTimeout(startDelay);
+  }, [images.length, autoPlayInterval, isHovered, trackSlideView]);
+
+  const goToPrevious = useCallback(() => {
     setIsTransitioning(true);
     setTimeout(() => {
       setCurrentIndex((prev) => {
@@ -73,9 +91,9 @@ export default function HeroCarousel({ locale, images, autoPlayInterval = 5000 }
       });
       setIsTransitioning(false);
     }, 300);
-  };
+  }, [images.length, trackSlideView]);
 
-  const goToNext = () => {
+  const goToNext = useCallback(() => {
     setIsTransitioning(true);
     setTimeout(() => {
       setCurrentIndex((prev) => {
@@ -85,16 +103,16 @@ export default function HeroCarousel({ locale, images, autoPlayInterval = 5000 }
       });
       setIsTransitioning(false);
     }, 300);
-  };
+  }, [images.length, trackSlideView]);
 
-  const goToSlide = (index: number) => {
+  const goToSlide = useCallback((index: number) => {
     setIsTransitioning(true);
     trackSlideView(index, true);
     setTimeout(() => {
       setCurrentIndex(index);
       setIsTransitioning(false);
     }, 300);
-  };
+  }, [trackSlideView]);
 
   if (!images || images.length === 0) {
     return (
@@ -114,33 +132,41 @@ export default function HeroCarousel({ locale, images, autoPlayInterval = 5000 }
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {/* Main Image Container with Smooth Transitions */}
-      <div className="relative w-full h-full">
+      {/* Main Image Container - Fixed dimensions to prevent CLS */}
+      <div className="absolute inset-0 w-full h-full">
         {/* Current Image */}
-        <div className={`absolute inset-0 transition-opacity duration-700 ease-in-out ${isTransitioning ? 'opacity-0' : 'opacity-100'}`}>
+        <div
+          className={`absolute inset-0 transition-opacity duration-500 ease-out ${isTransitioning ? 'opacity-0' : 'opacity-100'}`}
+          style={{ willChange: 'opacity' }}
+        >
           <Image
             src={currentImage.url}
             alt={locale === 'es' ? (currentImage.alt_es || '') : (currentImage.alt_en || '')}
             fill
             priority={currentIndex === 0}
-            quality={90}
-            sizes="(max-width: 1024px) 100vw, 40vw"
+            loading={currentIndex === 0 ? 'eager' : 'lazy'}
+            quality={85}
+            sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 40vw"
             className="object-cover"
-            unoptimized={currentImage.url.startsWith('http')}
+            placeholder="blur"
+            blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFgABAQEAAAAAAAAAAAAAAAAAAAUH/8QAIhAAAgEDAwUBAAAAAAAAAAAAAQIDAAQRBRIhBhMiMUFR/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAZEQADAAMAAAAAAAAAAAAAAAAAAQIRITH/2gAMAwEAAhEDEQA/ANF6Y1a+1DTnku0jRo5WjXaOGIGcH+0v11ySJM7dZllY/piilJ9Fs/o//9k="
           />
         </div>
         {/* Subtle overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent transition-opacity duration-700" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
       </div>
 
-      {/* Content Overlay with Smooth Transition */}
-      {(currentImage.title_es || currentImage.title_en || currentImage.price) && (
-        <div className={`absolute top-6 left-6 right-6 transition-opacity duration-700 ease-in-out ${isTransitioning ? 'opacity-0' : 'opacity-100'}`}>
-          <div className="bg-white/95 backdrop-blur-md rounded-2xl p-4 shadow-xl">
+      {/* Content Overlay - Fixed height container to prevent CLS */}
+      <div className="absolute top-6 left-6 right-6 h-[88px]">
+        {(currentImage.title_es || currentImage.title_en || currentImage.price) && (
+          <div
+            className={`bg-white/95 backdrop-blur-md rounded-2xl p-4 shadow-xl transition-opacity duration-500 ease-out ${isTransitioning ? 'opacity-0' : 'opacity-100'}`}
+            style={{ willChange: 'opacity' }}
+          >
             <div className="flex items-center justify-between gap-3">
               {(currentImage.title_es || currentImage.title_en) && (
-                <div className="flex-1">
-                  <div className="font-semibold text-gray-900 line-clamp-2">
+                <div className="flex-1 min-w-0">
+                  <div className="font-semibold text-gray-900 line-clamp-2 text-sm sm:text-base">
                     {locale === 'es' ? currentImage.title_es : currentImage.title_en}
                   </div>
                 </div>
@@ -153,10 +179,10 @@ export default function HeroCarousel({ locale, images, autoPlayInterval = 5000 }
               )}
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
-      {/* Navigation Arrows (show on hover if more than 1 image) */}
+      {/* Navigation Arrows */}
       {images.length > 1 && (
         <>
           <button
@@ -176,17 +202,17 @@ export default function HeroCarousel({ locale, images, autoPlayInterval = 5000 }
         </>
       )}
 
-      {/* Dots Indicator (bottom center) */}
+      {/* Dots Indicator */}
       {images.length > 1 && (
         <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
           {images.map((_, index) => (
             <button
               key={index}
               onClick={() => goToSlide(index)}
-              className={`w-2 h-2 rounded-full transition-all ${
+              className={`h-2 rounded-full transition-all ${
                 index === currentIndex
                   ? 'bg-white w-8'
-                  : 'bg-white/50 hover:bg-white/75'
+                  : 'bg-white/50 hover:bg-white/75 w-2'
               }`}
               aria-label={`${locale === 'es' ? 'Ir a imagen' : 'Go to image'} ${index + 1}`}
             />
@@ -194,7 +220,7 @@ export default function HeroCarousel({ locale, images, autoPlayInterval = 5000 }
         </div>
       )}
 
-      {/* Click to view (if link_url exists) */}
+      {/* Click to view */}
       {currentImage.link_url && (
         <Link
           href={currentImage.link_url}

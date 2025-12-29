@@ -15,11 +15,12 @@ import { LoadingProvider } from '@/contexts/LoadingContext';
 import { createClient } from '@/lib/supabase/server';
 import '../globals.css';
 
-// Modern, clean font
+// Optimized font loading with preload
 const inter = Inter({
   subsets: ['latin'],
   variable: '--font-inter',
   display: 'swap',
+  preload: true,
 });
 
 const locales = ['es', 'en'];
@@ -38,7 +39,6 @@ export const metadata: Metadata = {
   other: {
     'msapplication-TileColor': '#102a43',
   },
-  // Preconnect links for performance
   alternates: {
     types: {
       'application/rss+xml': '/feed.xml',
@@ -88,59 +88,42 @@ export default async function LocaleLayout({
     hasVehicles = false;
   }
 
+  const gaId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
+
   return (
     <html lang={locale} className={inter.variable} suppressHydrationWarning>
-      <body className={`${inter.className} antialiased`}>
-        {/* Preconnect links for performance - placed in body for Next.js */}
+      <head>
+        {/* Preconnect to critical third-party origins */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link rel="preconnect" href="https://www.googletagmanager.com" />
-        <link rel="dns-prefetch" href="https://www.google-analytics.com" />
         <link rel="dns-prefetch" href="https://static.tacdn.com" />
-
+        {gaId && (
+          <>
+            <link rel="preconnect" href="https://www.googletagmanager.com" />
+            <link rel="dns-prefetch" href="https://www.google-analytics.com" />
+          </>
+        )}
+      </head>
+      <body className={`${inter.className} antialiased`}>
         {/* Theme detection script - must be inline to prevent FOUC */}
         <script
           dangerouslySetInnerHTML={{
-            __html: `
-              (function() {
-                try {
-                  const stored = localStorage.getItem('theme');
-                  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-                  if (stored === 'dark' || (!stored && prefersDark)) {
-                    document.documentElement.classList.add('dark');
-                  }
-                } catch (e) {}
-              })();
-            `,
+            __html: `(function(){try{var s=localStorage.getItem('theme'),d=window.matchMedia('(prefers-color-scheme:dark)').matches;if(s==='dark'||(!s&&d))document.documentElement.classList.add('dark')}catch(e){}})()`,
           }}
         />
 
-        {/* Google Analytics 4 - Load script with consent mode */}
-        <script
-          async
-          src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID}`}
-        />
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              window.dataLayer = window.dataLayer || [];
-              function gtag(){dataLayer.push(arguments);}
-
-              // Default consent to denied - will be updated when user accepts cookies
-              gtag('consent', 'default', {
-                'analytics_storage': 'denied',
-                'ad_storage': 'denied',
-                'ad_user_data': 'denied',
-                'ad_personalization': 'denied'
-              });
-
-              gtag('js', new Date());
-              gtag('config', '${process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID}', {
-                send_page_view: false
-              });
-            `,
-          }}
-        />
+        {/* Google Analytics 4 - Deferred loading for better LCP */}
+        {gaId && (
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `
+                window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}
+                gtag('consent','default',{'analytics_storage':'denied','ad_storage':'denied','ad_user_data':'denied','ad_personalization':'denied'});
+                gtag('js',new Date());gtag('config','${gaId}',{send_page_view:false});
+              `,
+            }}
+          />
+        )}
         <NextIntlClientProvider messages={messages}>
           <CurrencyProvider>
             <LoadingProvider>
@@ -154,6 +137,13 @@ export default async function LocaleLayout({
             </LoadingProvider>
           </CurrencyProvider>
         </NextIntlClientProvider>
+        {/* Load GA script after page content */}
+        {gaId && (
+          <script
+            async
+            src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`}
+          />
+        )}
         <Analytics />
         <SpeedInsights />
       </body>

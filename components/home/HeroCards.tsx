@@ -82,16 +82,21 @@ export default function HeroCards({ locale, featuredTour, featuredDestination, h
   const [currentBooking, setCurrentBooking] = useState(0);
   const [isVisible, setIsVisible] = useState(true);
 
+  // Delay animation start to not affect LCP
   useEffect(() => {
-    const interval = setInterval(() => {
-      setIsVisible(false);
-      setTimeout(() => {
-        setCurrentBooking((prev) => (prev + 1) % bookings.length);
-        setIsVisible(true);
-      }, 300);
-    }, 4000);
+    const startDelay = setTimeout(() => {
+      const interval = setInterval(() => {
+        setIsVisible(false);
+        setTimeout(() => {
+          setCurrentBooking((prev) => (prev + 1) % bookings.length);
+          setIsVisible(true);
+        }, 300);
+      }, 4000);
 
-    return () => clearInterval(interval);
+      return () => clearInterval(interval);
+    }, 3000); // Wait 3s before starting animations
+
+    return () => clearTimeout(startDelay);
   }, [bookings.length]);
 
   // Use featured destination
@@ -110,8 +115,8 @@ export default function HeroCards({ locale, featuredTour, featuredDestination, h
           className="group card p-0 overflow-hidden hover:shadow-2xl transition-all duration-300 bg-white dark:bg-navy-900"
         >
           <div className="relative">
-            {/* Image */}
-            <div className="relative h-40 overflow-hidden">
+            {/* Image - Fixed aspect ratio to prevent CLS */}
+            <div className="relative aspect-[16/9] overflow-hidden">
               {featured.image_url ? (
                 <Image
                   src={featured.image_url}
@@ -119,9 +124,12 @@ export default function HeroCards({ locale, featuredTour, featuredDestination, h
                   fill
                   sizes="400px"
                   className="object-cover transition-transform duration-500 group-hover:scale-110"
+                  loading="lazy"
+                  placeholder="blur"
+                  blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFgABAQEAAAAAAAAAAAAAAAAAAAUH/8QAIhAAAgEDAwUBAAAAAAAAAAAAAQIDAAQRBRIhBhMiMUFR/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAZEQADAAMAAAAAAAAAAAAAAAAAAQIRITH/2gAMAwEAAhEDEQA/ANF6Y1a+1DTnku0jRo5WjXaOGIGcH+0v11ySJM7dZllY/piilJ9Fs/o//9k="
                 />
               ) : (
-                <div className="w-full h-full bg-gradient-to-br from-brand-400 to-brand-600" />
+                <div className="absolute inset-0 bg-gradient-to-br from-brand-400 to-brand-600" />
               )}
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
 
@@ -166,12 +174,13 @@ export default function HeroCards({ locale, featuredTour, featuredDestination, h
         </Link>
       )}
 
-      {/* Social Proof Card - Rotating */}
-      <div className="rounded-2xl p-4 overflow-hidden bg-white/90 dark:bg-white/[0.15] backdrop-blur-lg border border-white/30 shadow-lg">
+      {/* Social Proof Card - Rotating - Fixed height to prevent CLS */}
+      <div className="rounded-2xl p-4 overflow-hidden bg-white/90 dark:bg-white/[0.15] backdrop-blur-lg border border-white/30 shadow-lg h-[76px]">
         <div
-          className={`flex items-center gap-3 transition-all duration-300 ${
-            isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2'
+          className={`flex items-center gap-3 transition-opacity duration-300 ${
+            isVisible ? 'opacity-100' : 'opacity-0'
           }`}
+          style={{ willChange: 'opacity' }}
         >
           <div className="w-11 h-11 rounded-full bg-brand-100 dark:bg-brand-500/20 flex items-center justify-center flex-shrink-0">
             <UserGroupIcon className="w-6 h-6 text-brand-600 dark:text-brand-400" />

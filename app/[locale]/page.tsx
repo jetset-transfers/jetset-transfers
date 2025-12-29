@@ -37,13 +37,6 @@ export default async function HomePage({ params }: HomePageProps) {
     .eq('is_active', true)
     .order('display_order', { ascending: true });
 
-  // Fetch zones from Supabase
-  const { data: zones } = await supabase
-    .from('zones')
-    .select('*')
-    .eq('is_active', true)
-    .order('display_order', { ascending: true });
-
   // Fetch vehicles from Supabase
   const { data: vehicles } = await supabase
     .from('vehicles')
