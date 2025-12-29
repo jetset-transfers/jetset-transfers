@@ -111,6 +111,33 @@ export default async function LocaleLayout({
             `,
           }}
         />
+
+        {/* Google Analytics 4 - Load script with consent mode */}
+        <script
+          async
+          src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID}`}
+        />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+
+              // Default consent to denied - will be updated when user accepts cookies
+              gtag('consent', 'default', {
+                'analytics_storage': 'denied',
+                'ad_storage': 'denied',
+                'ad_user_data': 'denied',
+                'ad_personalization': 'denied'
+              });
+
+              gtag('js', new Date());
+              gtag('config', '${process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID}', {
+                send_page_view: false
+              });
+            `,
+          }}
+        />
         <NextIntlClientProvider messages={messages}>
           <CurrencyProvider>
             <LoadingProvider>

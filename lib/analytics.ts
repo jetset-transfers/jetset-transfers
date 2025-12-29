@@ -26,27 +26,21 @@ export function hasAnalyticsConsent(): boolean {
 }
 
 // Initialize GA4 (called when consent is given)
+// Note: GA4 script is loaded in layout.tsx with consent mode defaulting to 'denied'
+// This function updates consent to 'granted' when user accepts cookies
 export function initializeAnalytics(): void {
   if (typeof window === 'undefined') return;
   if (!hasAnalyticsConsent()) return;
+  if (!window.gtag) return;
 
-  // Load gtag script if not already loaded
-  if (!document.querySelector(`script[src*="googletagmanager.com/gtag"]`)) {
-    const script = document.createElement('script');
-    script.src = `https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`;
-    script.async = true;
-    script.defer = true; // Defer execution for better performance
-    document.head.appendChild(script);
-  }
+  // Update consent to granted now that user has accepted
+  window.gtag('consent', 'update', {
+    'analytics_storage': 'granted',
+  });
 
-  window.dataLayer = window.dataLayer || [];
-  window.gtag = function gtag() {
-    window.dataLayer.push(arguments);
-  };
-  window.gtag('js', new Date());
+  // Send the initial page view now that consent is granted
   window.gtag('config', GA_MEASUREMENT_ID, {
     page_path: window.location.pathname,
-    // Performance optimization: send minimal data on initial load
     send_page_view: true,
   });
 }
