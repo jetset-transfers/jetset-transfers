@@ -29,6 +29,7 @@ export default function HeroCarousel({ locale, images, autoPlayInterval = 5000 }
   const [isHovered, setIsHovered] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [imagesLoaded, setImagesLoaded] = useState<Set<number>>(new Set([0]));
+  const [imageErrors, setImageErrors] = useState<Set<number>>(new Set());
   const hasTrackedSlide = useRef<Set<number>>(new Set([0]));
 
   // Track slide view
@@ -139,18 +140,30 @@ export default function HeroCarousel({ locale, images, autoPlayInterval = 5000 }
           className={`absolute inset-0 transition-opacity duration-500 ease-out ${isTransitioning ? 'opacity-0' : 'opacity-100'}`}
           style={{ willChange: 'opacity' }}
         >
-          <Image
-            src={currentImage.url}
-            alt={locale === 'es' ? (currentImage.alt_es || '') : (currentImage.alt_en || '')}
-            fill
-            priority={currentIndex === 0}
-            loading={currentIndex === 0 ? 'eager' : 'lazy'}
-            quality={85}
-            sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 40vw"
-            className="object-cover"
-            placeholder="blur"
-            blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFgABAQEAAAAAAAAAAAAAAAAAAAUH/8QAIhAAAgEDAwUBAAAAAAAAAAAAAQIDAAQRBRIhBhMiMUFR/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAZEQADAAMAAAAAAAAAAAAAAAAAAQIRITH/2gAMAwEAAhEDEQA/ANF6Y1a+1DTnku0jRo5WjXaOGIGcH+0v11ySJM7dZllY/piilJ9Fs/o//9k="
-          />
+          {imageErrors.has(currentIndex) ? (
+            /* Fallback gradient when image fails to load */
+            <div className="absolute inset-0 bg-gradient-to-br from-brand-600 via-brand-700 to-navy-900 flex items-center justify-center">
+              <div className="text-center text-white/80">
+                <svg className="w-16 h-16 mx-auto mb-2 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+              </div>
+            </div>
+          ) : (
+            <Image
+              src={currentImage.url}
+              alt={locale === 'es' ? (currentImage.alt_es || '') : (currentImage.alt_en || '')}
+              fill
+              priority={currentIndex === 0}
+              loading={currentIndex === 0 ? 'eager' : 'lazy'}
+              quality={85}
+              sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 40vw"
+              className="object-cover"
+              placeholder="blur"
+              blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFgABAQEAAAAAAAAAAAAAAAAAAAUH/8QAIhAAAgEDAwUBAAAAAAAAAAAAAQIDAAQRBRIhBhMiMUFR/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAZEQADAAMAAAAAAAAAAAAAAAAAAQIRITH/2gAMAwEAAhEDEQA/ANF6Y1a+1DTnku0jRo5WjXaOGIGcH+0v11ySJM7dZllY/piilJ9Fs/o//9k="
+              onError={() => setImageErrors(prev => new Set([...prev, currentIndex]))}
+            />
+          )}
         </div>
         {/* Subtle overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />

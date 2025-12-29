@@ -224,16 +224,11 @@ export default function HeroCards({ locale, featuredTour, featuredDestination, h
         className="flex items-center gap-3 rounded-2xl p-4 bg-white/90 dark:bg-white/[0.15] backdrop-blur-lg border border-white/30 hover:bg-white dark:hover:bg-white/[0.25] transition-all cursor-pointer group shadow-lg"
         aria-label="Ver reseñas en TripAdvisor"
       >
-        {/* Logo container - ALWAYS white background */}
+        {/* TripAdvisor owl icon - white background in both modes */}
         <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center shadow-sm group-hover:shadow-md transition-shadow flex-shrink-0">
-          <Image
-            src="https://static.tacdn.com/img2/brand_refresh_2025/logos/logo.svg"
-            alt="TripAdvisor"
-            width={28}
-            height={28}
-            className="w-7 h-7"
-            unoptimized
-          />
+          <svg className="w-6 h-6 text-[#00AA6C]" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm4-3c0 1.66 1.34 3 3 3s3-1.34 3-3-1.34-3-3-3-3 1.34-3 3zm-4-1c-.55 0-1 .45-1 1s.45 1 1 1 1-.45 1-1-.45-1-1-1zm8 0c-.55 0-1 .45-1 1s.45 1 1 1 1-.45 1-1-.45-1-1-1zM12 6c2.76 0 5 2.24 5 5h-2c0-1.65-1.35-3-3-3s-3 1.35-3 3H7c0-2.76 2.24-5 5-5z"/>
+          </svg>
         </div>
         <div className="flex flex-col">
           <div className="flex gap-0.5 mb-1">
