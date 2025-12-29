@@ -12,20 +12,20 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     .select('slug, updated_at')
     .eq('is_active', true);
 
-  // Static routes with locale-specific paths
-  const staticRoutes: { path: { es: string; en: string }; priority: number }[] = [
-    { path: { es: '', en: '' }, priority: 1 },
-    { path: { es: '/destinos', en: '/destinations' }, priority: 0.9 },
-    { path: { es: '/contacto', en: '/contact' }, priority: 0.8 },
-    { path: { es: '/privacidad', en: '/privacy' }, priority: 0.5 },
-    { path: { es: '/terminos', en: '/terms' }, priority: 0.5 },
-    { path: { es: '/cookies', en: '/cookies' }, priority: 0.5 },
+  // Static routes (same path for both locales)
+  const staticRoutes: { path: string; priority: number }[] = [
+    { path: '', priority: 1 },
+    { path: '/destinations', priority: 0.9 },
+    { path: '/contact', priority: 0.8 },
+    { path: '/privacy', priority: 0.5 },
+    { path: '/terms', priority: 0.5 },
+    { path: '/cookies', priority: 0.5 },
   ];
 
   // Generate sitemap entries for static routes (both locales)
   const staticEntries: MetadataRoute.Sitemap = staticRoutes.flatMap((route) =>
     locales.map((locale) => ({
-      url: `${baseUrl}/${locale}${route.path[locale as keyof typeof route.path]}`,
+      url: `${baseUrl}/${locale}${route.path}`,
       lastModified: new Date(),
       changeFrequency: 'monthly' as const,
       priority: route.priority,
