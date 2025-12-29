@@ -32,6 +32,9 @@ export const metadata: Metadata = {
     shortcut: '/images/logo/jetset-logo.png',
     apple: '/images/logo/jetset-logo.png',
   },
+  verification: {
+    google: '3UhDMhU9C27y23Rp894AukC-IrR-6RylxMUrjk8s75w',
+  },
   other: {
     'msapplication-TileColor': '#102a43',
   },
