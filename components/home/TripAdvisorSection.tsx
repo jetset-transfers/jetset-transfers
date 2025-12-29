@@ -156,15 +156,24 @@ export default function TripAdvisorSection({ locale }: TripAdvisorSectionProps) 
   const t = translations[locale as keyof typeof translations] || translations.en;
   const localizedReviews = reviews[locale as keyof typeof reviews] || reviews.en;
 
-  // Show 3 reviews at a time, rotating
+  // Show 3 reviews at a time, rotating with delayed start
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [isTransitioning, setIsTransitioning] = useState(false);
   const visibleReviews = 3;
 
+  // Delay animation start by 5s to not affect initial metrics
   useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentIndex((prev) => (prev + 1) % localizedReviews.length);
+    const startDelay = setTimeout(() => {
+      const interval = setInterval(() => {
+        setIsTransitioning(true);
+        setTimeout(() => {
+          setCurrentIndex((prev) => (prev + 1) % localizedReviews.length);
+          setIsTransitioning(false);
+        }, 300);
+      }, 5000);
+      return () => clearInterval(interval);
     }, 5000);
-    return () => clearInterval(interval);
+    return () => clearTimeout(startDelay);
   }, [localizedReviews.length]);
 
   const getVisibleReviews = () => {
@@ -207,12 +216,13 @@ export default function TripAdvisorSection({ locale }: TripAdvisorSectionProps) 
           </div>
         </div>
 
-        {/* Reviews Grid */}
+        {/* Reviews Grid - Fixed height to prevent CLS during rotation */}
         <div className="grid md:grid-cols-3 gap-6 mb-10">
           {getVisibleReviews().map((review, index) => (
             <div
               key={`${review.name}-${index}`}
-              className="card p-6 transition-all duration-500"
+              className={`card p-6 min-h-[220px] transition-opacity duration-300 ${isTransitioning ? 'opacity-0' : 'opacity-100'}`}
+              style={{ willChange: 'opacity' }}
             >
               {/* Reviewer Info */}
               <div className="flex items-center gap-3 mb-4">

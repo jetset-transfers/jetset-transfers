@@ -5,21 +5,40 @@ import { LocalBusinessSchema, ServiceSchema, OrganizationSchema } from '@/compon
 import { createClient } from '@/lib/supabase/server';
 import { getYearsOfExperienceFormatted } from '@/lib/constants';
 
-// Dynamic imports for below-the-fold components to reduce initial JS bundle
+// Skeleton loader component for consistent loading states
+function SectionSkeleton({ height, bg }: { height: string; bg: string }) {
+  return (
+    <div className={`${height} ${bg}`}>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+        <div className="animate-pulse">
+          <div className="h-8 w-48 bg-gray-200 dark:bg-navy-800 rounded mx-auto mb-4" />
+          <div className="h-4 w-96 max-w-full bg-gray-200 dark:bg-navy-800 rounded mx-auto mb-12" />
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="aspect-[4/3] bg-gray-200 dark:bg-navy-800 rounded-2xl" />
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Dynamic imports for below-the-fold components - with fixed height skeletons to prevent CLS
 const DestinationsSection = dynamic(() => import('@/components/home/DestinationsSection'), {
-  loading: () => <div className="min-h-[400px] bg-white dark:bg-navy-950 animate-pulse" />,
+  loading: () => <SectionSkeleton height="min-h-[800px]" bg="bg-white dark:bg-navy-950" />,
 });
 
 const FleetSection = dynamic(() => import('@/components/home/FleetSection'), {
-  loading: () => <div className="min-h-[500px] bg-gray-50 dark:bg-navy-900/50 animate-pulse" />,
+  loading: () => <SectionSkeleton height="min-h-[600px]" bg="bg-gray-50 dark:bg-navy-900/50" />,
 });
 
 const WhyChooseSection = dynamic(() => import('@/components/home/WhyChooseSection'), {
-  loading: () => <div className="min-h-[500px] bg-white dark:bg-navy-950 animate-pulse" />,
+  loading: () => <SectionSkeleton height="min-h-[500px]" bg="bg-white dark:bg-navy-950" />,
 });
 
 const TripAdvisorSection = dynamic(() => import('@/components/home/TripAdvisorSection'), {
-  loading: () => <div className="min-h-[300px] bg-gray-50 dark:bg-navy-950 animate-pulse" />,
+  loading: () => <SectionSkeleton height="min-h-[500px]" bg="bg-gray-50 dark:bg-navy-950" />,
 });
 
 interface HomePageProps {

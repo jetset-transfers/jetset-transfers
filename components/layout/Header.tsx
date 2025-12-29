@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useLocale, useTranslations } from 'next-intl';
@@ -22,6 +22,9 @@ export default function Header({ hasVehicles = false }: HeaderProps) {
   const pathname = usePathname();
   const router = useRouter();
 
+  // Ref for scroll throttling
+  const scrollTicking = useRef(false);
+
   useEffect(() => {
     // Check system preference and localStorage
     const stored = localStorage.getItem('theme');
@@ -32,10 +35,18 @@ export default function Header({ hasVehicles = false }: HeaderProps) {
       document.documentElement.classList.add('dark');
     }
 
+    // Throttled scroll handler using requestAnimationFrame for better INP
     const handleScroll = () => {
-      setScrolled(window.scrollY > 10);
+      if (!scrollTicking.current) {
+        requestAnimationFrame(() => {
+          setScrolled(window.scrollY > 10);
+          scrollTicking.current = false;
+        });
+        scrollTicking.current = true;
+      }
     };
-    window.addEventListener('scroll', handleScroll);
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
@@ -71,10 +82,10 @@ export default function Header({ hasVehicles = false }: HeaderProps) {
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 md:h-20">
-          {/* Logo */}
+          {/* Logo - Fixed dimensions to prevent CLS */}
           <Link
             href={`/${locale}`}
-            className="flex-shrink-0"
+            className="flex-shrink-0 w-[120px] md:w-[150px] h-8 md:h-10"
             aria-label={locale === 'es' ? 'Jetset Transfers - Ir al inicio' : 'Jetset Transfers - Go to home'}
             title={locale === 'es' ? 'Jetset Transfers - Transporte Privado en Cancún' : 'Jetset Transfers - Private Transportation in Cancún'}
           >
@@ -89,7 +100,6 @@ export default function Header({ hasVehicles = false }: HeaderProps) {
               priority
               quality={75}
               title={locale === 'es' ? 'Jetset Transfers' : 'Jetset Transfers'}
-              suppressHydrationWarning
             />
           </Link>
 
