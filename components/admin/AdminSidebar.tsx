@@ -101,7 +101,7 @@ export default function AdminSidebar({ userEmail }: AdminSidebarProps) {
       <div className="p-6 border-b border-navy-800">
         <Link href="/admin/dashboard" className="block">
           <Image
-            src="/images/logo/jetset-logo.png"
+            src="/images/logo/logo-jetset-dark.webp"
             alt="Jetset Transfers"
             width={130}
             height={35}
@@ -162,7 +162,7 @@ export default function AdminSidebar({ userEmail }: AdminSidebarProps) {
         <div className="flex items-center justify-between px-4 h-16">
           <Link href="/admin/dashboard">
             <Image
-              src="/images/logo/jetset-logo.png"
+              src="/images/logo/logo-jetset-dark.webp"
               alt="Jetset Transfers"
               width={120}
               height={32}

@@ -29,9 +29,9 @@ const locales = ['es', 'en'];
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.jetsettransfers.com'),
   icons: {
-    icon: '/images/logo/jetset-logo.png',
-    shortcut: '/images/logo/jetset-logo.png',
-    apple: '/images/logo/jetset-logo.png',
+    icon: '/images/logo/logo-jetset.webp',
+    shortcut: '/images/logo/logo-jetset.webp',
+    apple: '/images/logo/logo-jetset.webp',
   },
   verification: {
     google: '3UhDMhU9C27y23Rp894AukC-IrR-6RylxMUrjk8s75w',

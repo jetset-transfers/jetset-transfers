@@ -94,7 +94,7 @@ export default function Footer({ contactInfo }: FooterProps) {
               title={locale === 'es' ? 'Jetset Transfers - Transporte Privado en Cancún' : 'Jetset Transfers - Private Transportation in Cancún'}
             >
               <Image
-                src="/images/logo/jetset-logo.png"
+                src="/images/logo/logo-jetset-dark.webp"
                 alt={locale === 'es'
                   ? 'Jetset Transfers - Logo de empresa de transporte privado en Cancún y Riviera Maya'
                   : 'Jetset Transfers - Private transportation company logo in Cancún and Riviera Maya'}

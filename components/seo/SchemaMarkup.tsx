@@ -33,8 +33,8 @@ export function LocalBusinessSchema({ locale, heroImageUrl, fleetImageUrl }: Loc
     logo: {
       '@type': 'ImageObject',
       '@id': 'https://jetsettransfers.com/#logo',
-      url: 'https://jetsettransfers.com/images/logo/jetset-logo.png',
-      contentUrl: 'https://jetsettransfers.com/images/logo/jetset-logo.png',
+      url: 'https://jetsettransfers.com/images/logo/logo-jetset.webp',
+      contentUrl: 'https://jetsettransfers.com/images/logo/logo-jetset.webp',
       caption: locale === 'es'
         ? 'Jetset Transfers - Transporte privado en Cancún y Riviera Maya'
         : 'Jetset Transfers - Private transportation in Cancún and Riviera Maya',
@@ -58,7 +58,7 @@ export function LocalBusinessSchema({ locale, heroImageUrl, fleetImageUrl }: Loc
     image: [
       {
         '@type': 'ImageObject',
-        url: 'https://jetsettransfers.com/images/logo/jetset-logo.png',
+        url: 'https://jetsettransfers.com/images/logo/logo-jetset.webp',
         caption: locale === 'es' ? 'Logo de Jetset Transfers' : 'Jetset Transfers Logo',
         width: 150,
         height: 40,
@@ -238,18 +238,18 @@ export function OrganizationSchema({ locale }: OrganizationSchemaProps) {
     logo: {
       '@type': 'ImageObject',
       '@id': 'https://jetsettransfers.com/#logo',
-      url: 'https://jetsettransfers.com/images/logo/jetset-logo.png',
-      contentUrl: 'https://jetsettransfers.com/images/logo/jetset-logo.png',
+      url: 'https://jetsettransfers.com/images/logo/logo-jetset.webp',
+      contentUrl: 'https://jetsettransfers.com/images/logo/logo-jetset.webp',
       caption: locale === 'es'
         ? 'Jetset Transfers - Empresa de transporte privado en Cancún, México'
         : 'Jetset Transfers - Private transportation company in Cancún, Mexico',
       width: 150,
       height: 40,
-      encodingFormat: 'image/png',
+      encodingFormat: 'image/webp',
     },
     image: {
       '@type': 'ImageObject',
-      url: 'https://jetsettransfers.com/images/logo/jetset-logo.png',
+      url: 'https://jetsettransfers.com/images/logo/logo-jetset.webp',
       width: 150,
       height: 40,
     },

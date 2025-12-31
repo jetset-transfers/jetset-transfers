@@ -90,14 +90,28 @@ export default function Header({ hasVehicles = false }: HeaderProps) {
             title={locale === 'es' ? 'Jetset Transfers - Transporte Privado en Cancún' : 'Jetset Transfers - Private Transportation in Cancún'}
           >
             <span className="block w-[120px] md:w-[150px] h-8 md:h-10">
+              {/* Light mode logo */}
               <Image
-                src="/images/logo/jetset-logo.png"
+                src="/images/logo/logo-jetset.webp"
                 alt={locale === 'es'
                   ? 'Jetset Transfers - Logo de empresa de transporte privado en Cancún y Riviera Maya'
                   : 'Jetset Transfers - Private transportation company logo in Cancún and Riviera Maya'}
                 width={150}
                 height={40}
-                className="h-8 md:h-10 w-auto"
+                className="h-8 md:h-10 w-auto dark:hidden"
+                priority
+                quality={75}
+                title={locale === 'es' ? 'Jetset Transfers' : 'Jetset Transfers'}
+              />
+              {/* Dark mode logo */}
+              <Image
+                src="/images/logo/logo-jetset-dark.webp"
+                alt={locale === 'es'
+                  ? 'Jetset Transfers - Logo de empresa de transporte privado en Cancún y Riviera Maya'
+                  : 'Jetset Transfers - Private transportation company logo in Cancún and Riviera Maya'}
+                width={150}
+                height={40}
+                className="h-8 md:h-10 w-auto hidden dark:block"
                 priority
                 quality={75}
                 title={locale === 'es' ? 'Jetset Transfers' : 'Jetset Transfers'}

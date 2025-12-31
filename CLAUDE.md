@@ -87,7 +87,8 @@ green-500: #22c55e    // Status indicators (available badge)
 - Colors defined as CSS variables in `globals.css`
 
 ### Images & SEO
-- **Logo**: `public/images/logo/jetset-logo.png`
+- **Logo Light Mode**: `public/images/logo/logo-jetset.webp`
+- **Logo Dark Mode**: `public/images/logo/logo-jetset-dark.webp`
 - **Image Structure**: `public/images/{hero,destinations,vehicles,logo,og}/`
 - **Optimization**: Using `next/image` with lazy loading, blur placeholders
 - **SEO Schemas** (`components/seo/SchemaMarkup.tsx`):
