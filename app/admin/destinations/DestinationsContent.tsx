@@ -34,8 +34,9 @@ import {
 import ImageSelector from '@/components/admin/ImageSelector';
 import GalleryTab from '@/components/admin/GalleryTab';
 import MarkdownEditor from '@/components/admin/MarkdownEditor';
+import ZonesTab, { Zone } from '@/components/admin/ZonesTab';
 import Image from 'next/image';
-import { ZONES } from '@/lib/constants/zones';
+import { DEFAULT_ZONES } from '@/lib/constants/zones';
 
 // Service interface (from database)
 interface ServiceOption {
@@ -190,6 +191,7 @@ const emptyDestination: Omit<Destination, 'id'> = {
 };
 
 type TabKey = 'basic' | 'content' | 'pricing' | 'gallery' | 'services' | 'process' | 'seo';
+type MainView = 'destinations' | 'zones';
 
 export default function DestinationsContent({ user, destinations: initialDestinations, availableServices }: DestinationsContentProps) {
   const router = useRouter();
@@ -202,6 +204,33 @@ export default function DestinationsContent({ user, destinations: initialDestina
   const [error, setError] = useState('');
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<TabKey>('basic');
+  const [mainView, setMainView] = useState<MainView>('destinations');
+  const [zones, setZones] = useState<Zone[]>(DEFAULT_ZONES);
+  const [loadingZones, setLoadingZones] = useState(false);
+
+  // Load zones from site_settings on mount
+  useEffect(() => {
+    const loadZones = async () => {
+      setLoadingZones(true);
+      try {
+        const { data, error } = await supabase
+          .from('site_settings')
+          .select('value')
+          .eq('key', 'destination_zones')
+          .single();
+
+        if (!error && data?.value) {
+          const parsedZones = JSON.parse(data.value);
+          setZones(parsedZones);
+        }
+      } catch (err) {
+        console.error('Error loading zones:', err);
+      } finally {
+        setLoadingZones(false);
+      }
+    };
+    loadZones();
+  }, []);
 
   // Close drawer with Escape
   useEffect(() => {
@@ -485,6 +514,46 @@ export default function DestinationsContent({ user, destinations: initialDestina
     setFormData({ ...formData, how_it_works: newSteps });
   };
 
+  // Zones management
+  const handleUpdateZones = async (updatedZones: Zone[]) => {
+    try {
+      const zonesJson = JSON.stringify(updatedZones);
+
+      // Check if record exists
+      const { data: existing } = await supabase
+        .from('site_settings')
+        .select('id')
+        .eq('key', 'destination_zones')
+        .single();
+
+      if (existing) {
+        // Update existing
+        const { error } = await supabase
+          .from('site_settings')
+          .update({ value: zonesJson, updated_at: new Date().toISOString() })
+          .eq('key', 'destination_zones');
+
+        if (error) throw error;
+      } else {
+        // Insert new
+        const { error } = await supabase
+          .from('site_settings')
+          .insert({
+            key: 'destination_zones',
+            value: zonesJson,
+            description: 'Destination zones/categories for filtering transfers'
+          });
+
+        if (error) throw error;
+      }
+
+      setZones(updatedZones);
+      router.refresh();
+    } catch (error: any) {
+      throw new Error(error.message || 'Error al guardar zonas');
+    }
+  };
+
   const sortedDestinations = [...destinations].sort((a, b) => a.display_order - b.display_order);
 
   const tabs: { key: TabKey; label: string; icon: any }[] = [
@@ -499,19 +568,47 @@ export default function DestinationsContent({ user, destinations: initialDestina
 
   return (
     <AdminLayout userEmail={user.email || ''}>
-      <div className="mb-6 flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold text-white">Destinos</h1>
-          <p className="text-navy-400 mt-1">Gestiona los destinos de traslados privados</p>
+      <div className="mb-6">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h1 className="text-2xl font-semibold text-white">Destinos</h1>
+            <p className="text-navy-400 mt-1">Gestiona los destinos de traslados privados</p>
+          </div>
+          {mainView === 'destinations' && (
+            <button
+              onClick={handleCreate}
+              disabled={isCreating || editingId !== null}
+              className="flex items-center gap-2 px-4 py-2 bg-brand-500 hover:bg-brand-600 disabled:bg-navy-700 text-white rounded-lg transition-colors"
+            >
+              <PlusIcon className="w-5 h-5" />
+              Nuevo Destino
+            </button>
+          )}
         </div>
-        <button
-          onClick={handleCreate}
-          disabled={isCreating || editingId !== null}
-          className="flex items-center gap-2 px-4 py-2 bg-brand-500 hover:bg-brand-600 disabled:bg-navy-700 text-white rounded-lg transition-colors"
-        >
-          <PlusIcon className="w-5 h-5" />
-          Nuevo Destino
-        </button>
+
+        {/* Main View Tabs */}
+        <div className="flex gap-2 border-b border-navy-800">
+          <button
+            onClick={() => setMainView('destinations')}
+            className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+              mainView === 'destinations'
+                ? 'border-brand-500 text-brand-400'
+                : 'border-transparent text-navy-400 hover:text-white'
+            }`}
+          >
+            Destinos
+          </button>
+          <button
+            onClick={() => setMainView('zones')}
+            className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+              mainView === 'zones'
+                ? 'border-brand-500 text-brand-400'
+                : 'border-transparent text-navy-400 hover:text-white'
+            }`}
+          >
+            Zonas
+          </button>
+        </div>
       </div>
 
       {error && !drawerOpen && (
@@ -520,8 +617,23 @@ export default function DestinationsContent({ user, destinations: initialDestina
         </div>
       )}
 
+      {/* Zones View */}
+      {mainView === 'zones' && (
+        <div className="bg-navy-900 rounded-xl border border-navy-800 p-6">
+          {loadingZones ? (
+            <div className="text-center py-8">
+              <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-brand-500 border-r-transparent"></div>
+              <p className="text-navy-400 mt-2">Cargando zonas...</p>
+            </div>
+          ) : (
+            <ZonesTab zones={zones} onUpdate={handleUpdateZones} />
+          )}
+        </div>
+      )}
+
       {/* Destinations List */}
-      <div className="bg-navy-900 rounded-xl border border-navy-800 overflow-hidden">
+      {mainView === 'destinations' && (
+        <div className="bg-navy-900 rounded-xl border border-navy-800 overflow-hidden">
         <table className="w-full">
           <thead className="bg-navy-800">
             <tr>
@@ -626,7 +738,8 @@ export default function DestinationsContent({ user, destinations: initialDestina
             )}
           </tbody>
         </table>
-      </div>
+        </div>
+      )}
 
       {/* Drawer lateral con tabs */}
       {drawerOpen && (
@@ -732,7 +845,7 @@ export default function DestinationsContent({ user, destinations: initialDestina
                     <select
                       value={formData.zone_key || 'hotel-zone'}
                       onChange={(e) => {
-                        const selectedZone = ZONES.find(z => z.key === e.target.value);
+                        const selectedZone = zones.find(z => z.key === e.target.value);
                         setFormData({
                           ...formData,
                           zone_key: e.target.value,
@@ -741,7 +854,7 @@ export default function DestinationsContent({ user, destinations: initialDestina
                       }}
                       className="w-full px-3 py-2 bg-navy-800 border border-navy-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-brand-500"
                     >
-                      {ZONES.map((zone) => (
+                      {zones.map((zone) => (
                         <option key={zone.key} value={zone.key}>
                           {zone.name_es} / {zone.name_en}
                         </option>

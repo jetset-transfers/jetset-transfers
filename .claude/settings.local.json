@@ -10,7 +10,8 @@
       "Bash(npm run build:*)",
       "Bash(cat:*)",
       "Bash(npx supabase db inspect:*)",
-      "Bash(npm install:*)"
+      "Bash(npm install:*)",
+      "Bash(npm run dev:*)"
     ]
   }
 }

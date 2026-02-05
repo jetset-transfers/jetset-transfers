@@ -15,7 +15,7 @@ import {
 import { useCurrency } from '@/contexts/CurrencyContext';
 import { trackViewItemList } from '@/lib/analytics';
 import LazySection from '@/components/ui/LazySection';
-import { ZONES, getZoneName } from '@/lib/constants/zones';
+import { Zone, getZoneName } from '@/lib/constants/zones';
 
 interface VehiclePricing {
   vehicle_name: string;
@@ -53,6 +53,7 @@ function getMinPassengers(vehiclePricing?: VehiclePricing[] | null): number {
 interface DestinationsContentProps {
   locale: string;
   destinations: Destination[];
+  zones: Zone[];
 }
 
 const translations = {
@@ -96,7 +97,7 @@ const translations = {
   },
 };
 
-export default function DestinationsContent({ locale, destinations }: DestinationsContentProps) {
+export default function DestinationsContent({ locale, destinations, zones }: DestinationsContentProps) {
   const t = translations[locale as keyof typeof translations] || translations.es;
   const { formatPrice, currency } = useCurrency();
   const [selectedZone, setSelectedZone] = useState<string | null>(null);
@@ -107,7 +108,7 @@ export default function DestinationsContent({ locale, destinations }: Destinatio
     : destinations;
 
   // Get unique zones from destinations
-  const availableZones = ZONES.filter(zone =>
+  const availableZones = zones.filter(zone =>
     destinations.some(dest => dest.zone_key === zone.key)
   );
 

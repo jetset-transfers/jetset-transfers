@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import { createClient } from '@/lib/supabase/server';
+import { getZones } from '@/lib/constants/zones';
 import DestinationsContent from './DestinationsContent';
 
 interface DestinationsPageProps {
@@ -72,5 +73,8 @@ export default async function DestinationsPage({ params }: DestinationsPageProps
     .eq('is_active', true)
     .order('display_order', { ascending: true });
 
-  return <DestinationsContent locale={locale} destinations={destinations || []} />;
+  // Fetch zones from database with fallback to defaults
+  const zones = await getZones(supabase);
+
+  return <DestinationsContent locale={locale} destinations={destinations || []} zones={zones} />;
 }

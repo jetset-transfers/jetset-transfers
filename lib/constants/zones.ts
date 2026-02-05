@@ -1,4 +1,5 @@
 // Destination zones/categories for filtering
+import type { SupabaseClient } from '@supabase/supabase-js';
 
 export interface Zone {
   key: string;
@@ -9,7 +10,8 @@ export interface Zone {
   icon?: string;
 }
 
-export const ZONES: Zone[] = [
+// Default zones (used as fallback)
+export const DEFAULT_ZONES: Zone[] = [
   {
     key: 'hotel-zone',
     name_es: 'Zona Hotelera',
@@ -76,12 +78,44 @@ export const ZONES: Zone[] = [
   },
 ];
 
-export function getZoneByKey(key: string): Zone | undefined {
-  return ZONES.find(zone => zone.key === key);
+// Legacy export for backwards compatibility
+export const ZONES = DEFAULT_ZONES;
+
+/**
+ * Get zones from database with fallback to DEFAULT_ZONES
+ * Server component only - requires Supabase client to be passed
+ */
+export async function getZones(supabase: SupabaseClient): Promise<Zone[]> {
+  try {
+    const { data, error } = await supabase
+      .from('site_settings')
+      .select('value')
+      .eq('key', 'destination_zones')
+      .single();
+
+    if (error) {
+      // No zones in database, use defaults
+      return DEFAULT_ZONES;
+    }
+
+    if (data?.value) {
+      const zones = JSON.parse(data.value) as Zone[];
+      return zones;
+    }
+  } catch (err) {
+    console.error('[getZones] Error loading zones from database:', err);
+  }
+
+  // Fallback to default zones
+  return DEFAULT_ZONES;
 }
 
-export function getZoneName(key: string, locale: string): string {
-  const zone = getZoneByKey(key);
+export function getZoneByKey(key: string, zones: Zone[] = DEFAULT_ZONES): Zone | undefined {
+  return zones.find(zone => zone.key === key);
+}
+
+export function getZoneName(key: string, locale: string, zones: Zone[] = DEFAULT_ZONES): string {
+  const zone = getZoneByKey(key, zones);
   if (!zone) return key;
   return locale === 'es' ? zone.name_es : zone.name_en;
 }
