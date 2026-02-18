@@ -14,7 +14,7 @@ interface QuoteRequestData {
   message?: string;
 
   // Service type
-  service_type: 'transfer' | 'private';
+  service_type: 'transfer' | 'roundtrip' | 'private' | 'general';
 
   // Transfer specific
   destination?: string;
@@ -26,6 +26,7 @@ interface QuoteRequestData {
   return_date?: string;
   return_time?: string;
   vehicle_selected?: string;
+  flight_number?: string;
 
   // Number of passengers
   number_of_passengers?: number;
@@ -60,9 +61,172 @@ function formatSlug(slug: string): string {
   ).join(' ');
 }
 
+function generateCustomerConfirmationHTML(data: QuoteRequestData): string {
+  const serviceTypeLabel = data.service_type === 'roundtrip' ? 'Viaje Redondo' : 'Traslado Privado';
+
+  const pickupLocation = data.pickup_location === 'other'
+    ? data.pickup_location_other
+    : data.pickup_location;
+
+  const destination = data.destination === 'other'
+    ? data.destination_other
+    : data.destination ? formatSlug(data.destination) : '';
+
+  return `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Confirmación de Solicitud - Jetset Transfers</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #f4f4f5; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;">
+  <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #f4f4f5;">
+    <tr>
+      <td style="padding: 40px 20px;">
+        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="600" style="margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+
+          <!-- Header -->
+          <tr>
+            <td style="background-color: #102a43; padding: 30px 40px; text-align: center;">
+              <h1 style="margin: 0; color: #ffffff; font-size: 24px; font-weight: 600;">
+                ¡Gracias por tu solicitud!
+              </h1>
+              <p style="margin: 10px 0 0 0; color: #94a3b8; font-size: 14px;">
+                Hemos recibido tu cotización
+              </p>
+            </td>
+          </tr>
+
+          <!-- Greeting Section -->
+          <tr>
+            <td style="padding: 30px 40px 20px 40px;">
+              <p style="margin: 0 0 15px 0; color: #1e293b; font-size: 16px; line-height: 1.6;">
+                Hola <strong>${data.name}</strong>,
+              </p>
+              <p style="margin: 0 0 15px 0; color: #475569; font-size: 14px; line-height: 1.6;">
+                Hemos recibido tu solicitud de cotización para un <strong>${serviceTypeLabel}</strong>.
+                Nuestro equipo revisará los detalles y se pondrá en contacto contigo a la brevedad para
+                confirmar disponibilidad y precio final.
+              </p>
+              <div style="background-color: #dbeafe; border-radius: 8px; padding: 15px; margin: 20px 0;">
+                <p style="margin: 0; color: #1e40af; font-size: 14px; font-weight: 500;">
+                  ⏰ Tiempo de respuesta: Generalmente respondemos en menos de 2 horas durante horario laboral.
+                </p>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Trip Summary Section -->
+          <tr>
+            <td style="padding: 0 40px 20px 40px;">
+              <h2 style="margin: 0 0 15px 0; color: #102a43; font-size: 16px; font-weight: 600; border-bottom: 2px solid #e63946; padding-bottom: 8px;">
+                📋 Resumen de tu solicitud
+              </h2>
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                <tr>
+                  <td style="padding: 8px 0; color: #64748b; font-size: 14px; width: 140px;">Servicio:</td>
+                  <td style="padding: 8px 0; color: #1e293b; font-size: 14px; font-weight: 500;">${serviceTypeLabel}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 0; color: #64748b; font-size: 14px;">Origen:</td>
+                  <td style="padding: 8px 0; color: #1e293b; font-size: 14px;">${pickupLocation || 'Aeropuerto de Cancún'}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 0; color: #64748b; font-size: 14px;">Destino:</td>
+                  <td style="padding: 8px 0; color: #1e293b; font-size: 14px;">${destination || 'No especificado'}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 0; color: #64748b; font-size: 14px;">Pasajeros:</td>
+                  <td style="padding: 8px 0; color: #1e293b; font-size: 14px;">${data.number_of_passengers || 'No especificado'}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 0; color: #64748b; font-size: 14px;">Fecha:</td>
+                  <td style="padding: 8px 0; color: #1e293b; font-size: 14px;">${formatDate(data.travel_date)}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 0; color: #64748b; font-size: 14px;">Hora:</td>
+                  <td style="padding: 8px 0; color: #1e293b; font-size: 14px;">${data.departure_time || 'No especificada'}</td>
+                </tr>
+                ${data.flight_number ? `
+                <tr>
+                  <td style="padding: 8px 0; color: #64748b; font-size: 14px;">Vuelo:</td>
+                  <td style="padding: 8px 0; color: #1e293b; font-size: 14px;">✈️ ${data.flight_number}</td>
+                </tr>
+                ` : ''}
+                ${data.return_date ? `
+                <tr>
+                  <td style="padding: 8px 0; color: #64748b; font-size: 14px;">Regreso:</td>
+                  <td style="padding: 8px 0; color: #1e293b; font-size: 14px;">${formatDate(data.return_date)}${data.return_time ? ` a las ${data.return_time}` : ''}</td>
+                </tr>
+                ` : ''}
+                ${data.vehicle_selected ? `
+                <tr>
+                  <td style="padding: 8px 0; color: #64748b; font-size: 14px;">Vehículo:</td>
+                  <td style="padding: 8px 0; color: #1e293b; font-size: 14px;">${data.vehicle_selected}</td>
+                </tr>
+                ` : ''}
+                ${data.preSelectedPrice ? `
+                <tr>
+                  <td style="padding: 8px 0; color: #64748b; font-size: 14px;">Precio estimado:</td>
+                  <td style="padding: 8px 0; color: #e63946; font-size: 14px; font-weight: 600;">Desde $${data.preSelectedPrice} USD</td>
+                </tr>
+                ` : ''}
+              </table>
+            </td>
+          </tr>
+
+          <!-- Contact Section -->
+          <tr>
+            <td style="padding: 0 40px 30px 40px;">
+              <h2 style="margin: 0 0 15px 0; color: #102a43; font-size: 16px; font-weight: 600; border-bottom: 2px solid #e63946; padding-bottom: 8px;">
+                📞 ¿Tienes alguna pregunta?
+              </h2>
+              <p style="margin: 0 0 15px 0; color: #475569; font-size: 14px; line-height: 1.6;">
+                Si necesitas modificar tu solicitud o tienes alguna duda, no dudes en contactarnos:
+              </p>
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                <tr>
+                  <td align="center" style="padding-top: 10px;">
+                    <a href="https://wa.me/529981234567" style="display: inline-block; background-color: #25d366; color: #ffffff; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 500; font-size: 14px;">
+                      💬 WhatsApp
+                    </a>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="background-color: #f8fafc; padding: 20px 40px; text-align: center; border-top: 1px solid #e2e8f0;">
+              <p style="margin: 0 0 10px 0; color: #64748b; font-size: 13px;">
+                ¡Gracias por elegir Jetset Transfers!
+              </p>
+              <p style="margin: 0; color: #94a3b8; font-size: 12px;">
+                Transporte privado seguro y puntual desde el Aeropuerto de Cancún
+              </p>
+              <p style="margin: 15px 0 0 0; color: #cbd5e1; font-size: 11px;">
+                <a href="https://jetsetcancun.com" style="color: #e63946; text-decoration: none;">jetsetcancun.com</a>
+                <br>
+                © ${new Date().getFullYear()} Jetset Transfers. Todos los derechos reservados.
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+  `;
+}
+
 function generateEmailHTML(data: QuoteRequestData): string {
-  const isPrivate = data.service_type === 'private';
-  const serviceTypeLabel = isPrivate ? 'Traslado Privado' : 'Traslado Compartido';
+  // All transfer services are private (transfer, roundtrip, private)
+  const isTransfer = data.service_type === 'transfer' || data.service_type === 'roundtrip' || data.service_type === 'private';
+  const serviceTypeLabel = data.service_type === 'roundtrip' ? 'Viaje Redondo (Privado)' : 'Traslado Privado';
 
   const pickupLocation = data.pickup_location === 'other'
     ? data.pickup_location_other
@@ -103,8 +267,8 @@ function generateEmailHTML(data: QuoteRequestData): string {
             <td style="padding: 20px 40px 0 40px;">
               <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
                 <tr>
-                  <td style="background-color: ${isPrivate ? '#dbeafe' : '#dcfce7'}; color: ${isPrivate ? '#1e40af' : '#166534'}; padding: 8px 16px; border-radius: 20px; font-size: 12px; font-weight: 600; text-align: center;">
-                    ${isPrivate ? '🚐 TRASLADO PRIVADO' : '🚌 TRASLADO COMPARTIDO'}
+                  <td style="background-color: #dbeafe; color: #1e40af; padding: 8px 16px; border-radius: 20px; font-size: 12px; font-weight: 600; text-align: center;">
+                    ${data.service_type === 'roundtrip' ? '🔄 VIAJE REDONDO' : '🚐 TRASLADO PRIVADO'}
                   </td>
                 </tr>
               </table>
@@ -165,6 +329,12 @@ function generateEmailHTML(data: QuoteRequestData): string {
                   <td style="padding: 8px 0; color: #64748b; font-size: 14px;">Hora:</td>
                   <td style="padding: 8px 0; color: #1e293b; font-size: 14px;">${data.departure_time || 'No especificada'}</td>
                 </tr>
+                ${data.flight_number ? `
+                <tr>
+                  <td style="padding: 8px 0; color: #64748b; font-size: 14px;">Número de vuelo:</td>
+                  <td style="padding: 8px 0; color: #1e293b; font-size: 14px; font-weight: 500;">✈️ ${data.flight_number}</td>
+                </tr>
+                ` : ''}
                 ${data.return_date ? `
                 <tr>
                   <td style="padding: 8px 0; color: #64748b; font-size: 14px;">Fecha de regreso:</td>
@@ -274,6 +444,21 @@ export async function POST(request: NextRequest) {
         { error: 'Error al enviar notificación' },
         { status: 500 }
       );
+    }
+
+    // Send confirmation email to customer
+    const customerSubject = `Confirmación: Hemos recibido tu solicitud - Jetset Transfers`;
+
+    const { error: customerError } = await resend.emails.send({
+      from: 'Jetset Transfers <notificaciones@notify.jetsetcancun.com>',
+      to: [data.email],
+      subject: customerSubject,
+      html: generateCustomerConfirmationHTML(data),
+    });
+
+    if (customerError) {
+      // Log error but don't fail the request - internal notification was already sent
+      console.error('Customer confirmation email error:', customerError);
     }
 
     return NextResponse.json({ success: true, id: emailData?.id });

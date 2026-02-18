@@ -78,6 +78,7 @@ interface Benefit {
 interface VehiclePricing {
   vehicle_name: string;
   max_passengers: number;
+  max_passengers_no_luggage?: number; // Optional: capacity without luggage
   price_usd: number;
   notes_es: string;
   notes_en: string;

@@ -8,6 +8,7 @@ import { trackContactFormSubmit, trackBookingClick } from '@/lib/analytics';
 interface SearchParams {
   destination?: string;
   price?: string;
+  vehicle?: string;
 }
 
 interface ContactFormProps {
@@ -15,11 +16,20 @@ interface ContactFormProps {
   searchParams?: SearchParams;
 }
 
+interface VehiclePricing {
+  vehicle_name: string;
+  max_passengers: number;
+  price_usd: number;
+  notes_es?: string;
+  notes_en?: string;
+}
+
 interface Destination {
   id: string;
   slug: string;
   name_es: string;
   name_en: string;
+  vehicle_pricing?: VehiclePricing[];
 }
 
 const TIME_OPTIONS = [
@@ -39,6 +49,7 @@ export default function ContactForm({ locale, searchParams }: ContactFormProps) 
   // Extract pre-selection info from URL params
   const preSelectedDestination = searchParams?.destination;
   const preSelectedPrice = searchParams?.price;
+  const preSelectedVehicle = searchParams?.vehicle;
   const hasPreSelection = !!preSelectedDestination;
 
   const [formData, setFormData] = useState({
@@ -55,14 +66,21 @@ export default function ContactForm({ locale, searchParams }: ContactFormProps) 
     number_of_passengers: '2',
     pickup_location: '',
     flight_number: '',
+    vehicle_selected: preSelectedVehicle || '',
   });
+
+  // Get vehicles for selected destination
+  const selectedDestination = destinations.find(d => d.slug === formData.destination);
+  const availableVehicles = selectedDestination?.vehicle_pricing || [];
+  const selectedVehicle = availableVehicles.find(v => v.vehicle_name === formData.vehicle_selected);
+  const maxPassengers = selectedVehicle?.max_passengers || 20;
 
   // Load destinations from database
   useEffect(() => {
     const loadData = async () => {
       const { data: destData } = await supabase
         .from('destinations')
-        .select('id, slug, name_es, name_en')
+        .select('id, slug, name_es, name_en, vehicle_pricing')
         .eq('is_active', true)
         .order('display_order');
 
@@ -79,9 +97,30 @@ export default function ContactForm({ locale, searchParams }: ContactFormProps) 
         ...prev,
         service_type: 'transfer',
         destination: preSelectedDestination,
+        vehicle_selected: preSelectedVehicle || prev.vehicle_selected,
       }));
     }
-  }, [preSelectedDestination]);
+  }, [preSelectedDestination, preSelectedVehicle]);
+
+  // Ensure vehicle is selected and adjust passengers when destinations load
+  useEffect(() => {
+    if (preSelectedVehicle && destinations.length > 0) {
+      const dest = destinations.find(d => d.slug === preSelectedDestination);
+      const vehicle = dest?.vehicle_pricing?.find(v => v.vehicle_name === preSelectedVehicle);
+      if (vehicle) {
+        setFormData(prev => {
+          const currentPax = parseInt(prev.number_of_passengers) || 2;
+          return {
+            ...prev,
+            vehicle_selected: preSelectedVehicle,
+            number_of_passengers: currentPax > vehicle.max_passengers
+              ? String(vehicle.max_passengers)
+              : prev.number_of_passengers
+          };
+        });
+      }
+    }
+  }, [destinations, preSelectedVehicle, preSelectedDestination]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -114,6 +153,7 @@ export default function ContactForm({ locale, searchParams }: ContactFormProps) 
           return_time: formData.return_time || null,
           num_passengers: formData.number_of_passengers ? parseInt(formData.number_of_passengers) : null,
           pickup_location: formData.pickup_location || null,
+          flight_number: formData.flight_number || null,
           destination_id,
         }]);
 
@@ -143,13 +183,14 @@ export default function ContactForm({ locale, searchParams }: ContactFormProps) 
             message: formData.message,
             service_type: formData.service_type,
             destination: formData.destination,
-            departure_location: formData.pickup_location,
+            pickup_location: formData.pickup_location,
             travel_date: formData.travel_date,
             departure_time: formData.departure_time,
             return_date: formData.return_date,
             return_time: formData.return_time,
             number_of_passengers: parseInt(formData.number_of_passengers) || null,
             flight_number: formData.flight_number,
+            vehicle_selected: formData.vehicle_selected || null,
             preSelectedPrice: preSelectedPrice,
           }),
         });
@@ -174,6 +215,7 @@ export default function ContactForm({ locale, searchParams }: ContactFormProps) 
         number_of_passengers: '2',
         pickup_location: '',
         flight_number: '',
+        vehicle_selected: '',
       });
     } catch (err: any) {
       console.error('Form submission error:', err);
@@ -187,7 +229,45 @@ export default function ContactForm({ locale, searchParams }: ContactFormProps) 
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+
+    // When destination changes, reset vehicle selection
+    if (name === 'destination') {
+      setFormData(prev => ({
+        ...prev,
+        destination: value,
+        vehicle_selected: '',
+        number_of_passengers: '2'
+      }));
+      return;
+    }
+
+    // When vehicle changes, adjust passengers if over max
+    if (name === 'vehicle_selected') {
+      const vehicle = availableVehicles.find(v => v.vehicle_name === value);
+      const maxPax = vehicle?.max_passengers || 20;
+      const currentPax = parseInt(formData.number_of_passengers) || 2;
+
+      setFormData(prev => ({
+        ...prev,
+        vehicle_selected: value,
+        number_of_passengers: currentPax > maxPax ? String(maxPax) : prev.number_of_passengers
+      }));
+      return;
+    }
+
+    // When passengers change, validate against vehicle max
+    if (name === 'number_of_passengers' && selectedVehicle) {
+      const maxPax = selectedVehicle.max_passengers;
+      const newPax = parseInt(value) || 1;
+      setFormData(prev => ({
+        ...prev,
+        number_of_passengers: newPax > maxPax ? String(maxPax) : value
+      }));
+      return;
+    }
+
+    setFormData({ ...formData, [name]: value });
   };
 
   const labels = {
@@ -224,7 +304,10 @@ export default function ContactForm({ locale, searchParams }: ContactFormProps) 
     selectOption: locale === 'es' ? '— Selecciona —' : '— Select —',
     selectDestination: locale === 'es' ? 'Selecciona tu destino' : 'Select your destination',
     pickupLocation: locale === 'es' ? 'Nombre del hotel o dirección' : 'Hotel name or address',
-    flightNumber: locale === 'es' ? 'Info adicional (opcional)' : 'Additional info (optional)',
+    flightNumber: locale === 'es' ? 'Número de vuelo (opcional)' : 'Flight Number (optional)',
+    vehicleType: locale === 'es' ? 'Tipo de vehículo' : 'Vehicle Type',
+    selectVehicle: locale === 'es' ? 'Selecciona un vehículo' : 'Select a vehicle',
+    maxPassengersLabel: locale === 'es' ? 'máx.' : 'max.',
   };
 
   // Format slug to display name
@@ -283,8 +366,11 @@ export default function ContactForm({ locale, searchParams }: ContactFormProps) 
                     {preSelectedDestination && formatSlug(preSelectedDestination)}
                   </p>
                   <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1 text-sm text-muted">
+                    {preSelectedVehicle && (
+                      <span>{labels.vehicleType}: <strong className="text-foreground">{preSelectedVehicle}</strong></span>
+                    )}
                     {preSelectedPrice && (
-                      <span>{labels.preSelectionPrice}: <strong className="text-brand-600 dark:text-brand-400">{locale === 'es' ? 'Desde' : 'From'} ${preSelectedPrice} USD</strong></span>
+                      <span>{labels.preSelectionPrice}: <strong className="text-brand-600 dark:text-brand-400">${preSelectedPrice} USD</strong></span>
                     )}
                   </div>
                 </div>
@@ -347,6 +433,31 @@ export default function ContactForm({ locale, searchParams }: ContactFormProps) 
               </select>
             </div>
 
+            {/* Vehicle Selection */}
+            {availableVehicles.length > 0 && (
+              <div>
+                <label htmlFor="vehicle_selected" className="block text-sm font-medium mb-2">
+                  {labels.vehicleType} *
+                </label>
+                <select
+                  id="vehicle_selected"
+                  name="vehicle_selected"
+                  value={formData.vehicle_selected}
+                  onChange={handleChange}
+                  required
+                  disabled={!!preSelectedVehicle}
+                  className="w-full px-4 py-3 rounded-lg border border-default bg-white dark:bg-navy-900 text-foreground focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all disabled:opacity-50"
+                >
+                  <option value="">{labels.selectVehicle}</option>
+                  {availableVehicles.map(vehicle => (
+                    <option key={vehicle.vehicle_name} value={vehicle.vehicle_name}>
+                      {vehicle.vehicle_name} ({labels.maxPassengersLabel} {vehicle.max_passengers} pax) - ${vehicle.price_usd} USD
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+
             {/* Pickup Location (Hotel) */}
             <div>
               <label htmlFor="pickup_location" className="block text-sm font-medium mb-2">
@@ -368,6 +479,11 @@ export default function ContactForm({ locale, searchParams }: ContactFormProps) 
             <div>
               <label htmlFor="number_of_passengers" className="block text-sm font-medium mb-2">
                 {labels.numberOfPassengers} *
+                {selectedVehicle && (
+                  <span className="text-muted font-normal ml-2">
+                    ({labels.maxPassengersLabel} {selectedVehicle.max_passengers})
+                  </span>
+                )}
               </label>
               <input
                 type="number"
@@ -376,7 +492,7 @@ export default function ContactForm({ locale, searchParams }: ContactFormProps) 
                 value={formData.number_of_passengers}
                 onChange={handleChange}
                 min="1"
-                max="20"
+                max={maxPassengers}
                 required
                 className="w-full px-4 py-3 rounded-lg border border-default bg-white dark:bg-navy-900 text-foreground focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all"
               />
@@ -429,7 +545,7 @@ export default function ContactForm({ locale, searchParams }: ContactFormProps) 
                 name="flight_number"
                 value={formData.flight_number}
                 onChange={handleChange}
-                placeholder={locale === 'es' ? 'Ej: AA1234' : 'E.g.: AA1234'}
+                placeholder={locale === 'es' ? 'Ej: AA1234, UA567' : 'E.g.: AA1234, UA567'}
                 className="w-full px-4 py-3 rounded-lg border border-default bg-white dark:bg-navy-900 text-foreground focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all"
               />
             </div>

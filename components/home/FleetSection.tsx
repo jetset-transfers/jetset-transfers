@@ -13,9 +13,10 @@ import {
 interface Vehicle {
   id: string;
   name: string;
-  category: string;
-  max_passengers: number;
-  max_luggage: number;
+  type: string;
+  capacity: number;
+  capacity_no_luggage?: number;
+  luggage_capacity: number;
   description_es: string | null;
   description_en: string | null;
   features: string[];
@@ -33,13 +34,13 @@ export default function FleetSection({ locale, vehicles }: FleetSectionProps) {
   const [activeTab, setActiveTab] = useState(0);
 
   // Fallback data if no vehicles in database
-  const fallbackVehicles = [
+  const fallbackVehicles: Vehicle[] = [
     {
       id: 'fallback-1',
       name: 'Suburban / Escalade',
-      category: 'SUV',
-      max_passengers: 6,
-      max_luggage: 6,
+      type: 'suv',
+      capacity: 6,
+      luggage_capacity: 6,
       description_es: 'SUV de lujo ideal para familias pequeñas o parejas con equipaje.',
       description_en: 'Luxury SUV ideal for small families or couples with luggage.',
       features: locale === 'es'
@@ -85,7 +86,7 @@ export default function FleetSection({ locale, vehicles }: FleetSectionProps) {
                     : 'bg-white dark:bg-navy-950 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-navy-800 border border-gray-200 dark:border-navy-800'
                 }`}
               >
-                {vehicle.category || vehicle.name.split(' ')[0] || 'Vehicle'}
+                {vehicle.type || vehicle.name.split(' ')[0] || 'Vehicle'}
               </button>
             ))}
           </div>
@@ -115,7 +116,7 @@ export default function FleetSection({ locale, vehicles }: FleetSectionProps) {
               {/* Overlay Badge */}
               <div className="absolute top-6 left-6 px-4 py-2 rounded-full bg-white/95 backdrop-blur-sm shadow-lg">
                 <div className="text-sm font-bold text-brand-600">
-                  {currentVehicle.category || currentVehicle.name.split(' ')[0] || 'Vehicle'}
+                  {currentVehicle.type || currentVehicle.name.split(' ')[0] || 'Vehicle'}
                 </div>
               </div>
             </div>
@@ -144,7 +145,7 @@ export default function FleetSection({ locale, vehicles }: FleetSectionProps) {
                   </span>
                 </div>
                 <div className="text-xl font-bold">
-                  {currentVehicle.max_passengers} {locale === 'es' ? 'pasajeros' : 'passengers'}
+                  {currentVehicle.capacity} {locale === 'es' ? 'pasajeros' : 'passengers'}
                 </div>
               </div>
 
@@ -156,7 +157,7 @@ export default function FleetSection({ locale, vehicles }: FleetSectionProps) {
                   </span>
                 </div>
                 <div className="text-xl font-bold">
-                  {currentVehicle.max_luggage} {locale === 'es' ? 'maletas' : 'suitcases'}
+                  {currentVehicle.luggage_capacity} {locale === 'es' ? 'maletas' : 'suitcases'}
                 </div>
               </div>
             </div>

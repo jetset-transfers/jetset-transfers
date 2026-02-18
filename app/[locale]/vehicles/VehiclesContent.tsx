@@ -19,6 +19,7 @@ interface Vehicle {
   name: string;
   type: string;
   capacity: number;
+  capacity_no_luggage?: number;
   luggage_capacity: number;
   base_price_usd?: number;
   description_es: string;
@@ -49,6 +50,7 @@ const translations = {
     contactUs: 'Contáctanos',
     upTo: 'Hasta',
     from: 'Desde',
+    noLuggage: 'sin equipaje',
   },
   en: {
     title: 'Our Fleet',
@@ -64,6 +66,7 @@ const translations = {
     contactUs: 'Contact us',
     upTo: 'Up to',
     from: 'From',
+    noLuggage: 'no luggage',
   },
 };
 
@@ -175,15 +178,23 @@ export default function VehiclesContent({ locale, vehicles }: VehiclesContentPro
                       )}
 
                       {/* Meta info */}
-                      <div className="flex items-center gap-6 mb-6 text-sm">
-                        <div className="flex items-center gap-2 text-muted">
-                          <UserGroupIcon className="w-5 h-5 text-navy-400" />
-                          <span className="font-medium">{t.upTo} {vehicle.capacity}</span>
+                      <div className="flex flex-col gap-2 mb-6 text-sm">
+                        <div className="flex items-center gap-6">
+                          <div className="flex items-center gap-2 text-muted">
+                            <UserGroupIcon className="w-5 h-5 text-navy-400" />
+                            <span className="font-medium">{t.upTo} {vehicle.capacity}</span>
+                          </div>
+                          <div className="flex items-center gap-2 text-muted">
+                            <ShoppingBagIcon className="w-5 h-5 text-navy-400" />
+                            <span className="font-medium">{vehicle.luggage_capacity} {t.luggage}</span>
+                          </div>
                         </div>
-                        <div className="flex items-center gap-2 text-muted">
-                          <ShoppingBagIcon className="w-5 h-5 text-navy-400" />
-                          <span className="font-medium">{vehicle.luggage_capacity} {t.luggage}</span>
-                        </div>
+                        {vehicle.capacity_no_luggage && (
+                          <div className="flex items-center gap-2 text-muted">
+                            <UserGroupIcon className="w-5 h-5 text-brand-400" />
+                            <span className="font-medium text-brand-500">{t.upTo} {vehicle.capacity_no_luggage} ({t.noLuggage})</span>
+                          </div>
+                        )}
                       </div>
 
                       {/* Features */}

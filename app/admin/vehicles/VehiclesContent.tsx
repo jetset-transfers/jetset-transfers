@@ -27,6 +27,7 @@ interface Vehicle {
   name: string;
   type: string;
   capacity: number;
+  capacity_no_luggage?: number; // Capacidad sin equipaje (opcional)
   luggage_capacity: number;
   base_price_usd?: number;
   description_es: string;
@@ -46,6 +47,7 @@ const emptyVehicle: Omit<Vehicle, 'id'> = {
   name: '',
   type: '',
   capacity: 1,
+  capacity_no_luggage: undefined,
   luggage_capacity: 1,
   base_price_usd: 0,
   description_es: '',
@@ -85,6 +87,7 @@ export default function VehiclesContent({
       name: vehicle.name,
       type: vehicle.type,
       capacity: vehicle.capacity,
+      capacity_no_luggage: vehicle.capacity_no_luggage,
       luggage_capacity: vehicle.luggage_capacity,
       base_price_usd: vehicle.base_price_usd || 0,
       description_es: vehicle.description_es,
@@ -322,6 +325,20 @@ export default function VehiclesContent({
                 onChange={(e) => setFormData({ ...formData, capacity: parseInt(e.target.value) || 1 })}
                 className="w-full px-3 py-2 bg-navy-800 border border-navy-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-brand-500"
               />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-navy-300 mb-1">
+                Pasajeros sin equipaje <span className="text-navy-500 font-normal">(opcional)</span>
+              </label>
+              <input
+                type="number"
+                min="1"
+                value={formData.capacity_no_luggage || ''}
+                onChange={(e) => setFormData({ ...formData, capacity_no_luggage: e.target.value ? parseInt(e.target.value) : undefined })}
+                placeholder="Ej: 7"
+                className="w-full px-3 py-2 bg-navy-800 border border-navy-700 rounded-lg text-white placeholder-navy-500 focus:outline-none focus:ring-2 focus:ring-brand-500"
+              />
+              <p className="text-xs text-navy-500 mt-1">Capacidad cuando los pasajeros no llevan equipaje</p>
             </div>
             <div>
               <label className="block text-sm font-medium text-navy-300 mb-1">
@@ -602,6 +619,9 @@ export default function VehiclesContent({
                         <span className="text-sm text-navy-400 flex items-center gap-1">
                           <UserGroupIcon className="w-4 h-4" />
                           {vehicle.capacity} pasajeros
+                          {vehicle.capacity_no_luggage && (
+                            <span className="text-navy-500">({vehicle.capacity_no_luggage} sin equipaje)</span>
+                          )}
                         </span>
                         <span className="text-navy-600">•</span>
                         <span className="text-sm text-navy-400">
