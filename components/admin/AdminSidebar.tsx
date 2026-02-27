@@ -19,6 +19,8 @@ import {
   XMarkIcon,
   WrenchScrewdriverIcon,
   ShieldCheckIcon,
+  GlobeAltIcon,
+  CurrencyDollarIcon,
 } from '@heroicons/react/24/outline';
 import { useState } from 'react';
 
@@ -50,6 +52,16 @@ const menuItems = [
     title: 'Servicios',
     icon: WrenchScrewdriverIcon,
     href: '/admin/services',
+  },
+  {
+    title: 'Zonas',
+    icon: GlobeAltIcon,
+    href: '/admin/zones',
+  },
+  {
+    title: 'Precios Zonas',
+    icon: CurrencyDollarIcon,
+    href: '/admin/zone-pricing',
   },
   {
     title: 'Imágenes',

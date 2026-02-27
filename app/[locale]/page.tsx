@@ -1,5 +1,6 @@
 import dynamic from 'next/dynamic';
 import HeroSection from '@/components/home/HeroSection';
+import QuickBookingSearch from '@/components/home/QuickBookingSearch';
 import QuickBenefitsSection from '@/components/home/QuickBenefitsSection';
 import { LocalBusinessSchema, ServiceSchema, OrganizationSchema } from '@/components/seo/SchemaMarkup';
 import { createClient } from '@/lib/supabase/server';
@@ -193,6 +194,10 @@ export default async function HomePage({ params }: HomePageProps) {
         carouselImages={transformedCarouselImages}
         featuredDestination={popularItem || (destinations?.[0] || null)}
         hasPopularData={!!popularItem}
+      />
+      <QuickBookingSearch
+        locale={locale}
+        destinations={destinations || []}
       />
       <QuickBenefitsSection />
       <DestinationsSection

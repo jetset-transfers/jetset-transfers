@@ -9,6 +9,9 @@ interface SearchParams {
   destination?: string;
   price?: string;
   vehicle?: string;
+  date?: string;
+  time?: string;
+  type?: string; // 'private' | 'roundtrip' | 'oneway'
 }
 
 interface ContactFormProps {
@@ -50,17 +53,27 @@ export default function ContactForm({ locale, searchParams }: ContactFormProps) 
   const preSelectedDestination = searchParams?.destination;
   const preSelectedPrice = searchParams?.price;
   const preSelectedVehicle = searchParams?.vehicle;
+  const preSelectedDate = searchParams?.date;
+  const preSelectedTime = searchParams?.time;
+  const preSelectedType = searchParams?.type; // 'private' | 'roundtrip'
   const hasPreSelection = !!preSelectedDestination;
+
+  // Map URL type to form service_type
+  const getServiceType = () => {
+    if (preSelectedType === 'roundtrip') return 'roundtrip';
+    if (preSelectedDestination) return 'transfer';
+    return '';
+  };
 
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     phone: '',
-    service_type: preSelectedDestination ? 'transfer' : '',
+    service_type: getServiceType(),
     destination: preSelectedDestination || '',
     message: '',
-    travel_date: '',
-    departure_time: '',
+    travel_date: preSelectedDate || '',
+    departure_time: preSelectedTime || '',
     return_date: '',
     return_time: '',
     number_of_passengers: '2',
@@ -95,12 +108,14 @@ export default function ContactForm({ locale, searchParams }: ContactFormProps) 
     if (preSelectedDestination) {
       setFormData(prev => ({
         ...prev,
-        service_type: 'transfer',
+        service_type: preSelectedType === 'roundtrip' ? 'roundtrip' : 'transfer',
         destination: preSelectedDestination,
         vehicle_selected: preSelectedVehicle || prev.vehicle_selected,
+        travel_date: preSelectedDate || prev.travel_date,
+        departure_time: preSelectedTime || prev.departure_time,
       }));
     }
-  }, [preSelectedDestination, preSelectedVehicle]);
+  }, [preSelectedDestination, preSelectedVehicle, preSelectedDate, preSelectedTime, preSelectedType]);
 
   // Ensure vehicle is selected and adjust passengers when destinations load
   useEffect(() => {
