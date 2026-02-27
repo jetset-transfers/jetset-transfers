@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { User } from '@supabase/supabase-js';
+import AdminLayout from '@/components/admin/AdminLayout';
 import { createClient } from '@/lib/supabase/client';
 import {
   PlusIcon,
@@ -10,6 +12,10 @@ import {
   XMarkIcon,
   ArrowRightIcon,
 } from '@heroicons/react/24/outline';
+
+interface ZonePricingContentProps {
+  user: User;
+}
 
 interface TransferZone {
   id: string;
@@ -45,7 +51,7 @@ const DEFAULT_VEHICLES: VehiclePricing[] = [
   { vehicle_name: 'Sprinter', max_passengers: 14, price_usd: 0 },
 ];
 
-export default function ZonePricingContent() {
+export default function ZonePricingContent({ user }: ZonePricingContentProps) {
   const supabase = createClient();
   const [zones, setZones] = useState<TransferZone[]>([]);
   const [pricings, setPricings] = useState<ZonePricing[]>([]);
@@ -213,14 +219,17 @@ export default function ZonePricingContent() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-500" />
-      </div>
+      <AdminLayout userEmail={user.email || ''}>
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-500" />
+        </div>
+      </AdminLayout>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <AdminLayout userEmail={user.email || ''}>
+      <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -527,6 +536,7 @@ export default function ZonePricingContent() {
           </p>
         </div>
       )}
-    </div>
+      </div>
+    </AdminLayout>
   );
 }

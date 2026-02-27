@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
-import AdminLayout from '@/components/admin/AdminLayout';
+import { redirect } from 'next/navigation';
+import { createClient } from '@/lib/supabase/server';
 import ZonesContent from './ZonesContent';
 
 export const metadata: Metadata = {
@@ -7,10 +8,13 @@ export const metadata: Metadata = {
   description: 'Gestión de zonas geográficas para transfers',
 };
 
-export default function ZonesPage() {
-  return (
-    <AdminLayout>
-      <ZonesContent />
-    </AdminLayout>
-  );
+export default async function ZonesPage() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect('/admin/login');
+  }
+
+  return <ZonesContent user={user} />;
 }

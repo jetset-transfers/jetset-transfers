@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { User } from '@supabase/supabase-js';
+import AdminLayout from '@/components/admin/AdminLayout';
 import { createClient } from '@/lib/supabase/client';
 import {
   PlusIcon,
@@ -10,6 +12,10 @@ import {
   CheckIcon,
   XMarkIcon,
 } from '@heroicons/react/24/outline';
+
+interface ZonesContentProps {
+  user: User;
+}
 
 interface TransferZone {
   id: string;
@@ -47,7 +53,7 @@ const PRESET_COLORS = [
   '#EC4899', // Pink
 ];
 
-export default function ZonesContent() {
+export default function ZonesContent({ user }: ZonesContentProps) {
   const supabase = createClient();
   const [zones, setZones] = useState<TransferZone[]>([]);
   const [loading, setLoading] = useState(true);
@@ -165,14 +171,17 @@ export default function ZonesContent() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-500" />
-      </div>
+      <AdminLayout userEmail={user.email || ''}>
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-500" />
+        </div>
+      </AdminLayout>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <AdminLayout userEmail={user.email || ''}>
+      <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -435,6 +444,7 @@ export default function ZonesContent() {
           <li>3. Configura los precios entre zonas en la sección de "Precios por Zona"</li>
         </ul>
       </div>
-    </div>
+      </div>
+    </AdminLayout>
   );
 }

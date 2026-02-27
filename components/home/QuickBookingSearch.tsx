@@ -47,6 +47,8 @@ export default function QuickBookingSearch({ locale, destinations }: QuickBookin
     pickup_date: '',
     pickup_time: '',
     destination: '',
+    return_date: '',
+    return_time: '',
   });
 
   const labels = {
@@ -64,6 +66,8 @@ export default function QuickBookingSearch({ locale, destinations }: QuickBookin
       airportCancun: 'Aeropuerto Cancún',
       comingSoon: 'Próximamente',
       oneWayDescription: 'Traslados entre hoteles y zonas turísticas',
+      returnDate: 'Regreso',
+      returnTime: 'Hora regreso',
     },
     en: {
       privateTransfer: 'Private Transfer',
@@ -79,6 +83,8 @@ export default function QuickBookingSearch({ locale, destinations }: QuickBookin
       airportCancun: 'Cancun Airport',
       comingSoon: 'Coming soon',
       oneWayDescription: 'Transfers between hotels and tourist areas',
+      returnDate: 'Return',
+      returnTime: 'Return time',
     },
   };
 
@@ -90,18 +96,28 @@ export default function QuickBookingSearch({ locale, destinations }: QuickBookin
     if (serviceType === 'oneway') return;
     if (!formData.destination || !formData.pickup_date) return;
 
-    const selectedDest = destinations.find(d => d.slug === formData.destination);
-    const minPrice = selectedDest?.vehicle_pricing?.[0]?.price_usd || '';
-
+    // Build URL params for booking page
     const params = new URLSearchParams({
       destination: formData.destination,
       date: formData.pickup_date,
-      time: formData.pickup_time,
       type: serviceType,
-      ...(minPrice && { price: String(minPrice) }),
     });
 
-    router.push(`/${locale}/contact?${params.toString()}`);
+    if (formData.pickup_time) {
+      params.set('time', formData.pickup_time);
+    }
+
+    // Add return date/time for round trip
+    if (serviceType === 'roundtrip') {
+      if (formData.return_date) {
+        params.set('return_date', formData.return_date);
+      }
+      if (formData.return_time) {
+        params.set('return_time', formData.return_time);
+      }
+    }
+
+    router.push(`/${locale}/booking?${params.toString()}`);
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -155,100 +171,170 @@ export default function QuickBookingSearch({ locale, destinations }: QuickBookin
           {/* Form */}
           <form onSubmit={handleSubmit} className="p-4">
             {(serviceType === 'private' || serviceType === 'roundtrip') && (
-              <div className="flex flex-col sm:flex-row gap-3">
-                {/* Origin */}
-                <div className="flex-1 min-w-0">
-                  <label className="block text-[10px] font-semibold text-gray-400 dark:text-gray-500 mb-1 uppercase tracking-wider">
-                    {t.origin}
-                  </label>
-                  <div className="flex items-center gap-2 px-3 py-2.5 bg-gray-100 dark:bg-navy-800 rounded-lg">
-                    <MapPinIcon className="w-4 h-4 text-brand-500 flex-shrink-0" />
-                    <span className="text-sm text-gray-600 dark:text-gray-300 truncate">
-                      {t.airportCancun}
-                    </span>
+              <div className="space-y-3">
+                {/* First row: Origin, Destination, Date, Time */}
+                <div className="flex flex-col sm:flex-row gap-3">
+                  {/* Origin */}
+                  <div className="flex-1 min-w-0">
+                    <label className="block text-[10px] font-semibold text-gray-400 dark:text-gray-500 mb-1 uppercase tracking-wider">
+                      {t.origin}
+                    </label>
+                    <div className="flex items-center gap-2 px-3 py-2.5 bg-gray-100 dark:bg-navy-800 rounded-lg">
+                      <MapPinIcon className="w-4 h-4 text-brand-500 flex-shrink-0" />
+                      <span className="text-sm text-gray-600 dark:text-gray-300 truncate">
+                        {t.airportCancun}
+                      </span>
+                    </div>
                   </div>
+
+                  {/* Destination */}
+                  <div className="flex-1 min-w-0">
+                    <label className="block text-[10px] font-semibold text-gray-400 dark:text-gray-500 mb-1 uppercase tracking-wider">
+                      {t.destination}
+                    </label>
+                    <div className="relative">
+                      <MapPinIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                      <select
+                        name="destination"
+                        value={formData.destination}
+                        onChange={handleChange}
+                        required
+                        className="w-full pl-9 pr-8 py-2.5 bg-white dark:bg-navy-800 border border-gray-200 dark:border-navy-700 rounded-lg text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent appearance-none cursor-pointer"
+                      >
+                        <option value="">{t.selectDestination}</option>
+                        {destinations.map(dest => (
+                          <option key={dest.id} value={dest.slug}>
+                            {locale === 'es' ? dest.name_es : dest.name_en}
+                          </option>
+                        ))}
+                      </select>
+                      <svg className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </div>
+                  </div>
+
+                  {/* Date */}
+                  <div className="w-full sm:w-36">
+                    <label className="block text-[10px] font-semibold text-gray-400 dark:text-gray-500 mb-1 uppercase tracking-wider">
+                      {t.pickupDate}
+                    </label>
+                    <div className="relative">
+                      <CalendarDaysIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                      <input
+                        type="date"
+                        name="pickup_date"
+                        value={formData.pickup_date}
+                        onChange={handleChange}
+                        min={today}
+                        required
+                        className="w-full pl-9 pr-2 py-2.5 bg-white dark:bg-navy-800 border border-gray-200 dark:border-navy-700 rounded-lg text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Time */}
+                  <div className="w-full sm:w-28">
+                    <label className="block text-[10px] font-semibold text-gray-400 dark:text-gray-500 mb-1 uppercase tracking-wider">
+                      {t.pickupTime}
+                    </label>
+                    <div className="relative">
+                      <ClockIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                      <select
+                        name="pickup_time"
+                        value={formData.pickup_time}
+                        onChange={handleChange}
+                        className="w-full pl-9 pr-6 py-2.5 bg-white dark:bg-navy-800 border border-gray-200 dark:border-navy-700 rounded-lg text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent appearance-none cursor-pointer"
+                      >
+                        <option value="">{t.selectTime}</option>
+                        {TIME_OPTIONS.map(time => (
+                          <option key={time} value={time}>{time}</option>
+                        ))}
+                      </select>
+                      <svg className="absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </div>
+                  </div>
+
+                  {/* Button - Only show on private transfer */}
+                  {serviceType === 'private' && (
+                    <div className="w-full sm:w-auto flex items-end">
+                      <button
+                        type="submit"
+                        className="w-full sm:w-auto px-6 py-2.5 bg-brand-500 hover:bg-brand-600 text-white font-semibold rounded-lg transition-colors flex items-center justify-center gap-2"
+                      >
+                        <MagnifyingGlassIcon className="w-4 h-4" />
+                        <span>{t.search}</span>
+                      </button>
+                    </div>
+                  )}
                 </div>
 
-                {/* Destination */}
-                <div className="flex-1 min-w-0">
-                  <label className="block text-[10px] font-semibold text-gray-400 dark:text-gray-500 mb-1 uppercase tracking-wider">
-                    {t.destination}
-                  </label>
-                  <div className="relative">
-                    <MapPinIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                    <select
-                      name="destination"
-                      value={formData.destination}
-                      onChange={handleChange}
-                      required
-                      className="w-full pl-9 pr-8 py-2.5 bg-white dark:bg-navy-800 border border-gray-200 dark:border-navy-700 rounded-lg text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent appearance-none cursor-pointer"
-                    >
-                      <option value="">{t.selectDestination}</option>
-                      {destinations.map(dest => (
-                        <option key={dest.id} value={dest.slug}>
-                          {locale === 'es' ? dest.name_es : dest.name_en}
-                        </option>
-                      ))}
-                    </select>
-                    <svg className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </div>
-                </div>
+                {/* Second row: Return Date, Return Time, Button - Only for round trip */}
+                {serviceType === 'roundtrip' && (
+                  <div className="flex flex-col sm:flex-row gap-3 pt-2 border-t border-gray-200 dark:border-navy-700">
+                    <div className="flex-1 min-w-0 flex items-center">
+                      <ArrowsRightLeftIcon className="w-4 h-4 text-brand-500 mr-2" />
+                      <span className="text-xs text-gray-500 dark:text-gray-400">
+                        {locale === 'es' ? 'Viaje de regreso' : 'Return trip'}
+                      </span>
+                    </div>
 
-                {/* Date */}
-                <div className="w-full sm:w-36">
-                  <label className="block text-[10px] font-semibold text-gray-400 dark:text-gray-500 mb-1 uppercase tracking-wider">
-                    {t.pickupDate}
-                  </label>
-                  <div className="relative">
-                    <CalendarDaysIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                    <input
-                      type="date"
-                      name="pickup_date"
-                      value={formData.pickup_date}
-                      onChange={handleChange}
-                      min={today}
-                      required
-                      className="w-full pl-9 pr-2 py-2.5 bg-white dark:bg-navy-800 border border-gray-200 dark:border-navy-700 rounded-lg text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent"
-                    />
-                  </div>
-                </div>
+                    {/* Return Date */}
+                    <div className="w-full sm:w-36">
+                      <label className="block text-[10px] font-semibold text-gray-400 dark:text-gray-500 mb-1 uppercase tracking-wider">
+                        {t.returnDate}
+                      </label>
+                      <div className="relative">
+                        <CalendarDaysIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                        <input
+                          type="date"
+                          name="return_date"
+                          value={formData.return_date}
+                          onChange={handleChange}
+                          min={formData.pickup_date || today}
+                          className="w-full pl-9 pr-2 py-2.5 bg-white dark:bg-navy-800 border border-gray-200 dark:border-navy-700 rounded-lg text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                        />
+                      </div>
+                    </div>
 
-                {/* Time */}
-                <div className="w-full sm:w-28">
-                  <label className="block text-[10px] font-semibold text-gray-400 dark:text-gray-500 mb-1 uppercase tracking-wider">
-                    {t.pickupTime}
-                  </label>
-                  <div className="relative">
-                    <ClockIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                    <select
-                      name="pickup_time"
-                      value={formData.pickup_time}
-                      onChange={handleChange}
-                      className="w-full pl-9 pr-6 py-2.5 bg-white dark:bg-navy-800 border border-gray-200 dark:border-navy-700 rounded-lg text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent appearance-none cursor-pointer"
-                    >
-                      <option value="">{t.selectTime}</option>
-                      {TIME_OPTIONS.map(time => (
-                        <option key={time} value={time}>{time}</option>
-                      ))}
-                    </select>
-                    <svg className="absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </div>
-                </div>
+                    {/* Return Time */}
+                    <div className="w-full sm:w-28">
+                      <label className="block text-[10px] font-semibold text-gray-400 dark:text-gray-500 mb-1 uppercase tracking-wider">
+                        {t.returnTime}
+                      </label>
+                      <div className="relative">
+                        <ClockIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                        <select
+                          name="return_time"
+                          value={formData.return_time}
+                          onChange={handleChange}
+                          className="w-full pl-9 pr-6 py-2.5 bg-white dark:bg-navy-800 border border-gray-200 dark:border-navy-700 rounded-lg text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent appearance-none cursor-pointer"
+                        >
+                          <option value="">{t.selectTime}</option>
+                          {TIME_OPTIONS.map(time => (
+                            <option key={time} value={time}>{time}</option>
+                          ))}
+                        </select>
+                        <svg className="absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </div>
+                    </div>
 
-                {/* Button */}
-                <div className="w-full sm:w-auto flex items-end">
-                  <button
-                    type="submit"
-                    className="w-full sm:w-auto px-6 py-2.5 bg-brand-500 hover:bg-brand-600 text-white font-semibold rounded-lg transition-colors flex items-center justify-center gap-2"
-                  >
-                    <MagnifyingGlassIcon className="w-4 h-4" />
-                    <span>{t.search}</span>
-                  </button>
-                </div>
+                    {/* Button */}
+                    <div className="w-full sm:w-auto flex items-end">
+                      <button
+                        type="submit"
+                        className="w-full sm:w-auto px-6 py-2.5 bg-brand-500 hover:bg-brand-600 text-white font-semibold rounded-lg transition-colors flex items-center justify-center gap-2"
+                      >
+                        <MagnifyingGlassIcon className="w-4 h-4" />
+                        <span>{t.search}</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
