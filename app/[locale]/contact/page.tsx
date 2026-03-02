@@ -17,15 +17,10 @@ interface Phone {
 
 interface ContactPageProps {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{
-    destination?: string;
-    price?: string;
-  }>;
 }
 
-export default async function ContactPage({ params, searchParams }: ContactPageProps) {
+export default async function ContactPage({ params }: ContactPageProps) {
   const { locale } = await params;
-  const urlParams = await searchParams;
   const t = await getTranslations('contact');
   const supabase = await createClient();
 
@@ -92,10 +87,7 @@ export default async function ContactPage({ params, searchParams }: ContactPageP
           {/* Contact Form */}
           <div className="order-1 lg:order-1">
             <div className="card p-6 md:p-8">
-              <h2 className="text-xl font-semibold mb-6">
-                {locale === 'es' ? 'Envíanos un mensaje' : 'Send us a message'}
-              </h2>
-              <ContactForm locale={locale} searchParams={urlParams} />
+              <ContactForm locale={locale} />
             </div>
           </div>
 

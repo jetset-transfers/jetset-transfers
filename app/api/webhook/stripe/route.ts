@@ -44,9 +44,9 @@ export async function POST(request: NextRequest) {
           .from('bookings')
           .update({
             payment_status: 'paid',
-            booking_status: 'confirmed',
-            stripe_payment_intent_id: session.payment_intent as string,
-            paid_at: new Date().toISOString(),
+            status: 'confirmed',
+            payment_reference: session.payment_intent as string,
+            confirmed_at: new Date().toISOString(),
           })
           .eq('id', bookingId);
 
@@ -81,7 +81,8 @@ export async function POST(request: NextRequest) {
           .from('bookings')
           .update({
             payment_status: 'failed',
-            booking_status: 'cancelled',
+            status: 'cancelled',
+            cancelled_at: new Date().toISOString(),
           })
           .eq('id', bookingId);
       }
@@ -113,22 +114,21 @@ async function sendConfirmationEmails(booking: any) {
       body: JSON.stringify({
         type: 'booking_confirmation',
         booking: {
-          confirmation_code: booking.confirmation_code,
+          booking_number: booking.booking_number,
           customer_name: booking.customer_name,
           customer_email: booking.customer_email,
           customer_phone: booking.customer_phone,
           destination: booking.pickup_location,
           vehicle_name: booking.vehicle_name,
-          travel_date: booking.travel_date,
-          travel_time: booking.travel_time,
+          travel_date: booking.pickup_date,
+          travel_time: booking.pickup_time,
           return_date: booking.return_date,
           return_time: booking.return_time,
           num_passengers: booking.num_passengers,
-          flight_number: booking.flight_number,
+          flight_number: booking.pickup_flight_number,
           price_usd: booking.price_usd,
           service_type: booking.service_type,
-          special_requests: booking.customer_notes,
-          locale: booking.locale,
+          special_requests: booking.special_requests,
         },
       }),
     });

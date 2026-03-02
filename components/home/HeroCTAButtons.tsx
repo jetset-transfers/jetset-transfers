@@ -1,7 +1,6 @@
 'use client';
 
-import Link from 'next/link';
-import { ArrowRightIcon } from '@heroicons/react/24/outline';
+import { ArrowRightIcon, ArrowDownIcon } from '@heroicons/react/24/outline';
 import { trackHeroCTA } from '@/lib/analytics';
 
 interface HeroCTAButtonsProps {
@@ -11,16 +10,23 @@ interface HeroCTAButtonsProps {
 }
 
 export default function HeroCTAButtons({ locale, primaryText, secondaryText }: HeroCTAButtonsProps) {
+  const handleScrollToBooking = () => {
+    trackHeroCTA('book_transfer');
+    const bookingSection = document.getElementById('booking');
+    if (bookingSection) {
+      bookingSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  };
+
   return (
     <div className="flex flex-col sm:flex-row gap-4 pt-4">
-      <Link
-        href={`/${locale}/contact`}
+      <button
+        onClick={handleScrollToBooking}
         className="group inline-flex items-center justify-center gap-3 px-8 py-4 text-base font-semibold text-white bg-brand-600 hover:bg-brand-700 rounded-xl shadow-lg shadow-brand-600/50 hover:shadow-xl hover:shadow-brand-600/60 transition-all duration-300 hover:-translate-y-0.5"
-        onClick={() => trackHeroCTA('book_transfer')}
       >
         {primaryText}
-        <ArrowRightIcon className="w-5 h-5 transition-transform group-hover:translate-x-1" />
-      </Link>
+        <ArrowDownIcon className="w-5 h-5 transition-transform group-hover:translate-y-1" />
+      </button>
       <a
         href="#services"
         className="inline-flex items-center justify-center gap-2 px-8 py-4 text-base font-semibold text-white bg-white/10 backdrop-blur-sm border-2 border-white/20 hover:bg-white/20 hover:border-white/30 rounded-xl transition-all duration-300 hover:shadow-lg"

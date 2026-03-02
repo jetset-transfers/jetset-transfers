@@ -61,18 +61,18 @@ export async function POST(request: NextRequest) {
         service_type: body.serviceType,
         destination_id: body.destinationId,
         pickup_location: body.destinationName,
-        travel_date: body.travelDate,
-        travel_time: body.travelTime || '12:00',
+        pickup_date: body.travelDate,
+        pickup_time: body.travelTime || '12:00',
         return_date: body.returnDate || null,
         return_time: body.returnTime || null,
         num_passengers: body.numPassengers,
-        flight_number: body.flightNumber || null,
+        pickup_flight_number: body.flightNumber || null,
         vehicle_name: body.vehicleName,
         price_usd: body.priceUsd,
+        total_usd: body.priceUsd,
         payment_status: 'pending',
-        booking_status: 'pending',
-        customer_notes: body.specialRequests || null,
-        locale: body.locale,
+        status: 'pending',
+        special_requests: body.specialRequests || null,
       })
       .select()
       .single();
@@ -120,7 +120,7 @@ export async function POST(request: NextRequest) {
       customer_email: body.customerEmail,
       metadata: {
         booking_id: booking.id,
-        confirmation_code: booking.confirmation_code,
+        booking_number: booking.booking_number,
         destination_name: body.destinationName,
         travel_date: body.travelDate,
         travel_time: body.travelTime || '',
@@ -131,10 +131,13 @@ export async function POST(request: NextRequest) {
       locale: body.locale === 'es' ? 'es' : 'en',
     });
 
-    // Update booking with Stripe session ID
+    // Update booking with Stripe session ID (using payment_reference column)
     await supabase
       .from('bookings')
-      .update({ stripe_session_id: session.id })
+      .update({
+        payment_reference: session.id,
+        payment_method: 'stripe'
+      })
       .eq('id', booking.id);
 
     return NextResponse.json({

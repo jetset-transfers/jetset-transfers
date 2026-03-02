@@ -322,7 +322,7 @@ export default function DestinationDetailContent({
                         {locale === 'es' ? pricing.notes_es : pricing.notes_en}
                       </p>
                       <Link
-                        href={`/${locale}/contact?destination=${destination.slug}&vehicle=${encodeURIComponent(pricing.vehicle_name)}&price=${pricing.price_usd}`}
+                        href={`/${locale}/booking?destination=${destination.slug}&type=private&vehicle=${encodeURIComponent(pricing.vehicle_name)}`}
                         className="inline-flex items-center justify-center gap-2 w-full py-3 px-4 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl transition-colors"
                         onClick={() => trackBookingClick('destination', name)}
                       >
@@ -619,10 +619,10 @@ export default function DestinationDetailContent({
               {t.ctaDesc}
             </p>
             <Link
-              href={`/${locale}/contact?destination=${destination.slug}`}
+              href={`/${locale}/booking?destination=${destination.slug}&type=private`}
               className="inline-flex items-center gap-2 px-8 py-4 bg-white text-brand-600 font-bold rounded-xl hover:bg-navy-900 hover:text-white transition-all duration-300"
             >
-              {t.contactNow}
+              {t.bookNow}
             </Link>
           </div>
         </LazySection>

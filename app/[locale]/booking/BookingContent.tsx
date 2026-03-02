@@ -155,13 +155,14 @@ export default function BookingContent({ locale, searchParams }: BookingContentP
   const { formatPrice } = useCurrency();
   const t = translations[locale as keyof typeof translations] || translations.es;
 
-  // URL params
+  // URL params (Next.js already decodes searchParams)
   const destinationSlug = searchParams.destination;
   const serviceType = (searchParams.type as ServiceType) || 'private';
   const travelDate = searchParams.date || '';
   const travelTime = searchParams.time || '';
   const returnDate = searchParams.return_date || '';
   const returnTime = searchParams.return_time || '';
+  const preSelectedVehicle = searchParams.vehicle || '';
 
   // State
   const [loading, setLoading] = useState(true);
@@ -171,10 +172,34 @@ export default function BookingContent({ locale, searchParams }: BookingContentP
   const [processing, setProcessing] = useState(false);
   const [paymentError, setPaymentError] = useState<string | null>(null);
 
+  // Country codes for phone dropdown
+  const countryCodes = [
+    { code: '+1', country: 'US', flag: '🇺🇸', label: 'USA (+1)' },
+    { code: '+52', country: 'MX', flag: '🇲🇽', label: 'México (+52)' },
+    { code: '+1', country: 'CA', flag: '🇨🇦', label: 'Canadá (+1)' },
+    { code: '+44', country: 'GB', flag: '🇬🇧', label: 'UK (+44)' },
+    { code: '+34', country: 'ES', flag: '🇪🇸', label: 'España (+34)' },
+    { code: '+33', country: 'FR', flag: '🇫🇷', label: 'Francia (+33)' },
+    { code: '+49', country: 'DE', flag: '🇩🇪', label: 'Alemania (+49)' },
+    { code: '+39', country: 'IT', flag: '🇮🇹', label: 'Italia (+39)' },
+    { code: '+55', country: 'BR', flag: '🇧🇷', label: 'Brasil (+55)' },
+    { code: '+54', country: 'AR', flag: '🇦🇷', label: 'Argentina (+54)' },
+    { code: '+57', country: 'CO', flag: '🇨🇴', label: 'Colombia (+57)' },
+    { code: '+56', country: 'CL', flag: '🇨🇱', label: 'Chile (+56)' },
+    { code: '+51', country: 'PE', flag: '🇵🇪', label: 'Perú (+51)' },
+    { code: '+58', country: 'VE', flag: '🇻🇪', label: 'Venezuela (+58)' },
+    { code: '+507', country: 'PA', flag: '🇵🇦', label: 'Panamá (+507)' },
+    { code: '+506', country: 'CR', flag: '🇨🇷', label: 'Costa Rica (+506)' },
+    { code: '+31', country: 'NL', flag: '🇳🇱', label: 'Países Bajos (+31)' },
+    { code: '+41', country: 'CH', flag: '🇨🇭', label: 'Suiza (+41)' },
+    { code: '+61', country: 'AU', flag: '🇦🇺', label: 'Australia (+61)' },
+  ];
+
   // Form state
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
+    countryCode: '+1',
     phone: '',
     flightNumber: '',
     numPassengers: 1,
@@ -201,12 +226,22 @@ export default function BookingContent({ locale, searchParams }: BookingContentP
         console.error('Error loading destination:', error);
       } else {
         setDestination(data);
+
+        // Pre-select vehicle if specified in URL
+        if (preSelectedVehicle && data?.vehicle_pricing) {
+          const vehicle = data.vehicle_pricing.find(
+            (v: VehiclePricing) => v.vehicle_name === preSelectedVehicle
+          );
+          if (vehicle) {
+            setSelectedVehicle(vehicle);
+          }
+        }
       }
       setLoading(false);
     };
 
     loadDestination();
-  }, [destinationSlug]);
+  }, [destinationSlug, preSelectedVehicle]);
 
   // Calculate price
   const calculatePrice = () => {
@@ -232,7 +267,7 @@ export default function BookingContent({ locale, searchParams }: BookingContentP
     }
     if (!formData.phone.trim()) {
       errors.phone = t.requiredField;
-    } else if (!/^[+]?[\d\s-()]{8,}$/.test(formData.phone)) {
+    } else if (!/^[\d\s-()]{7,}$/.test(formData.phone)) {
       errors.phone = t.invalidPhone;
     }
 
@@ -284,7 +319,7 @@ export default function BookingContent({ locale, searchParams }: BookingContentP
           priceUsd: calculatePrice(),
           customerName: formData.fullName,
           customerEmail: formData.email,
-          customerPhone: formData.phone,
+          customerPhone: `${formData.countryCode} ${formData.phone}`,
           flightNumber: formData.flightNumber || undefined,
           numPassengers: formData.numPassengers,
           specialRequests: formData.specialRequests || undefined,
@@ -572,21 +607,35 @@ export default function BookingContent({ locale, searchParams }: BookingContentP
                     )}
                   </div>
 
-                  {/* Phone */}
+                  {/* Phone with Country Code */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                       {t.phone} *
                     </label>
-                    <input
-                      type="tel"
-                      value={formData.phone}
-                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                      className={`w-full px-4 py-3 rounded-lg border ${
-                        formErrors.phone
-                          ? 'border-red-500'
-                          : 'border-gray-300 dark:border-navy-600'
-                      } bg-white dark:bg-navy-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent`}
-                    />
+                    <div className="flex gap-2">
+                      <select
+                        value={formData.countryCode}
+                        onChange={(e) => setFormData({ ...formData, countryCode: e.target.value })}
+                        className="w-32 sm:w-40 px-2 py-3 rounded-lg border border-gray-300 dark:border-navy-600 bg-white dark:bg-navy-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent text-sm"
+                      >
+                        {countryCodes.map((country) => (
+                          <option key={`${country.country}-${country.code}`} value={country.code}>
+                            {country.flag} {country.code}
+                          </option>
+                        ))}
+                      </select>
+                      <input
+                        type="tel"
+                        value={formData.phone}
+                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                        placeholder="555 123 4567"
+                        className={`flex-1 px-4 py-3 rounded-lg border ${
+                          formErrors.phone
+                            ? 'border-red-500'
+                            : 'border-gray-300 dark:border-navy-600'
+                        } bg-white dark:bg-navy-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent`}
+                      />
+                    </div>
                     {formErrors.phone && (
                       <p className="text-red-500 text-sm mt-1">{formErrors.phone}</p>
                     )}

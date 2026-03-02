@@ -23,21 +23,21 @@ interface SuccessContentProps {
 
 interface BookingDetails {
   id: string;
-  confirmation_code: string;
+  booking_number: string;
   customer_name: string;
   customer_email: string;
   customer_phone: string;
   service_type: string;
   pickup_location: string;
-  travel_date: string;
-  travel_time: string;
+  pickup_date: string;
+  pickup_time: string;
   return_date: string | null;
   return_time: string | null;
   num_passengers: number;
-  flight_number: string | null;
+  pickup_flight_number: string | null;
   vehicle_name: string;
   price_usd: number;
-  booking_status: string;
+  status: string;
 }
 
 const translations = {
@@ -193,7 +193,7 @@ export default function SuccessContent({
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-navy-950 py-8 sm:py-12">
+    <div className="min-h-screen bg-gray-50 dark:bg-navy-950 pt-24 sm:pt-28 pb-12 sm:pb-16">
       <div className="max-w-3xl mx-auto px-4 sm:px-6">
         {/* Success Header */}
         <div className="text-center mb-8">
@@ -210,7 +210,7 @@ export default function SuccessContent({
         <div className="bg-brand-500 text-white rounded-xl p-6 text-center mb-6">
           <p className="text-sm opacity-90 mb-1">{t.confirmationCode}</p>
           <p className="text-3xl font-bold tracking-wider">
-            {booking.confirmation_code}
+            {booking.booking_number}
           </p>
         </div>
 
@@ -249,7 +249,7 @@ export default function SuccessContent({
                     {t.date}
                   </p>
                   <p className="font-medium text-gray-900 dark:text-white">
-                    {formatDate(booking.travel_date)}
+                    {formatDate(booking.pickup_date)}
                   </p>
                 </div>
               </div>
@@ -262,7 +262,7 @@ export default function SuccessContent({
                     {t.time}
                   </p>
                   <p className="font-medium text-gray-900 dark:text-white">
-                    {booking.travel_time}
+                    {booking.pickup_time}
                   </p>
                 </div>
               </div>
@@ -333,13 +333,13 @@ export default function SuccessContent({
             </div>
 
             {/* Flight Number */}
-            {booking.flight_number && (
+            {booking.pickup_flight_number && (
               <div className="pt-4 border-t border-gray-200 dark:border-navy-700">
                 <p className="text-xs text-gray-500 dark:text-gray-400">
                   {t.flightNumber}
                 </p>
                 <p className="font-medium text-gray-900 dark:text-white">
-                  {booking.flight_number}
+                  {booking.pickup_flight_number}
                 </p>
               </div>
             )}

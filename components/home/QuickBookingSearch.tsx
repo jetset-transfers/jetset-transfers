@@ -134,7 +134,7 @@ export default function QuickBookingSearch({ locale, destinations }: QuickBookin
   ];
 
   return (
-    <section className="relative z-20 bg-gray-50 dark:bg-navy-900/50 pb-8 pt-4">
+    <section id="booking" className="relative z-20 bg-gray-50 dark:bg-navy-900/50 pb-8 pt-4">
       <div className="relative -mt-16 sm:-mt-20 max-w-4xl mx-auto px-4 sm:px-6">
         <div className="bg-white dark:bg-navy-900 rounded-xl shadow-xl border border-gray-200 dark:border-navy-800 overflow-hidden">
           {/* Tabs */}
