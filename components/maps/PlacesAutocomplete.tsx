@@ -350,7 +350,7 @@ export default function PlacesAutocomplete({
 
       {/* Predictions dropdown */}
       {isOpen && predictions.length > 0 && (
-        <div className="absolute z-[100] w-full mt-1 bg-white dark:bg-navy-800 border border-gray-200 dark:border-navy-700 rounded-lg shadow-xl max-h-72 overflow-y-auto">
+        <div className="absolute z-[100] left-0 right-0 sm:right-auto sm:min-w-[400px] sm:max-w-[500px] mt-1 bg-white dark:bg-navy-800 border border-gray-200 dark:border-navy-700 rounded-lg shadow-xl max-h-80 overflow-y-auto">
           {predictions.map((prediction) => {
             const category = getCategoryFromTypes(prediction.types || [], locale);
             const CategoryIcon = category?.icon || MapPinIcon;
@@ -367,21 +367,21 @@ export default function PlacesAutocomplete({
                 className="w-full px-4 py-3 text-left hover:bg-gray-50 dark:hover:bg-navy-700 transition-colors border-b border-gray-100 dark:border-navy-700 last:border-b-0"
               >
                 <div className="flex items-start gap-3">
-                  <div className={`p-1.5 rounded-lg ${category?.color || 'bg-gray-400'} bg-opacity-20 mt-0.5`}>
+                  <div className={`p-1.5 rounded-lg ${category?.color || 'bg-gray-400'} bg-opacity-20 mt-0.5 flex-shrink-0`}>
                     <CategoryIcon className={`w-4 h-4 ${category?.color ? category.color.replace('bg-', 'text-') : 'text-gray-500'}`} />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2">
-                      <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                    <div className="flex items-start gap-2 flex-wrap sm:flex-nowrap">
+                      <p className="text-sm font-medium text-gray-900 dark:text-white break-words sm:truncate flex-1 min-w-0">
                         {prediction.structured_formatting.main_text}
                       </p>
                       {category && (
-                        <span className={`px-1.5 py-0.5 text-[10px] font-semibold rounded ${category.color} text-white flex-shrink-0`}>
+                        <span className={`px-1.5 py-0.5 text-[10px] font-semibold rounded ${category.color} text-white flex-shrink-0 whitespace-nowrap`}>
                           {category.label}
                         </span>
                       )}
                     </div>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 truncate mt-0.5">
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 break-words sm:line-clamp-2">
                       {prediction.structured_formatting.secondary_text}
                     </p>
                   </div>
@@ -394,7 +394,7 @@ export default function PlacesAutocomplete({
 
       {/* No results message */}
       {isOpen && noResults && predictions.length === 0 && searchedQuery.length >= 3 && (
-        <div className="absolute z-[100] w-full mt-1 bg-white dark:bg-navy-800 border border-gray-200 dark:border-navy-700 rounded-lg shadow-xl p-4">
+        <div className="absolute z-[100] left-0 right-0 sm:right-auto sm:min-w-[400px] mt-1 bg-white dark:bg-navy-800 border border-gray-200 dark:border-navy-700 rounded-lg shadow-xl p-4">
           <div className="flex items-start gap-3">
             <div className="p-2 rounded-full bg-amber-100 dark:bg-amber-900/30">
               <MapPinIcon className="w-5 h-5 text-amber-600 dark:text-amber-400" />

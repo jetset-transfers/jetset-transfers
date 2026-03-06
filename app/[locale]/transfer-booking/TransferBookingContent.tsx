@@ -176,7 +176,6 @@ export default function TransferBookingContent({ locale, searchParams }: Transfe
       destZoneId: searchParams.dest_zone_id || '',
       date: searchParams.date || '',
       time: searchParams.time || '',
-      passengers: parseInt(searchParams.passengers || '2'),
       duration: searchParams.duration ? parseInt(searchParams.duration) : null,
       distance: searchParams.distance ? parseFloat(searchParams.distance) : null,
       vehiclePricing,
@@ -184,23 +183,37 @@ export default function TransferBookingContent({ locale, searchParams }: Transfe
     };
   }, [searchParams]);
 
+  // Country codes for phone dropdown
+  const countryCodes = [
+    { code: '+1', country: 'US', flag: '🇺🇸', label: 'USA (+1)' },
+    { code: '+52', country: 'MX', flag: '🇲🇽', label: 'México (+52)' },
+    { code: '+1', country: 'CA', flag: '🇨🇦', label: 'Canadá (+1)' },
+    { code: '+44', country: 'GB', flag: '🇬🇧', label: 'UK (+44)' },
+    { code: '+34', country: 'ES', flag: '🇪🇸', label: 'España (+34)' },
+    { code: '+33', country: 'FR', flag: '🇫🇷', label: 'Francia (+33)' },
+    { code: '+49', country: 'DE', flag: '🇩🇪', label: 'Alemania (+49)' },
+    { code: '+55', country: 'BR', flag: '🇧🇷', label: 'Brasil (+55)' },
+    { code: '+54', country: 'AR', flag: '🇦🇷', label: 'Argentina (+54)' },
+    { code: '+57', country: 'CO', flag: '🇨🇴', label: 'Colombia (+57)' },
+  ];
+
   // State
   const [currentStep, setCurrentStep] = useState<BookingStep>('vehicle');
   const [selectedVehicle, setSelectedVehicle] = useState<VehiclePricing | null>(null);
+  const [numPassengers, setNumPassengers] = useState(1);
   const [isProcessing, setIsProcessing] = useState(false);
   const [passengerData, setPassengerData] = useState({
     fullName: '',
     email: '',
+    countryCode: '+1',
     phone: '',
     flightNumber: '',
     specialRequests: '',
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  // Filter vehicles that can accommodate the passengers
-  const availableVehicles = useMemo(() => {
-    return transferData.vehiclePricing.filter(v => v.max_passengers >= transferData.passengers);
-  }, [transferData.vehiclePricing, transferData.passengers]);
+  // All available vehicles (no filtering by passengers - user selects after choosing vehicle)
+  const availableVehicles = transferData.vehiclePricing;
 
   // Format date for display
   const formatDate = (dateStr: string) => {
@@ -277,7 +290,7 @@ export default function TransferBookingContent({ locale, searchParams }: Transfe
           // Trip details
           date: transferData.date,
           time: transferData.time,
-          passengers: transferData.passengers,
+          passengers: numPassengers,
           // Vehicle
           vehicleName: selectedVehicle.vehicle_name,
           priceUsd: selectedVehicle.price_usd,
@@ -285,7 +298,7 @@ export default function TransferBookingContent({ locale, searchParams }: Transfe
           // Customer
           customerName: passengerData.fullName,
           customerEmail: passengerData.email,
-          customerPhone: passengerData.phone,
+          customerPhone: `${passengerData.countryCode} ${passengerData.phone}`,
           flightNumber: passengerData.flightNumber,
           specialRequests: passengerData.specialRequests,
           // Locale
@@ -495,6 +508,35 @@ export default function TransferBookingContent({ locale, searchParams }: Transfe
                   })}
                 </div>
 
+                {/* Passengers selector - shown after selecting a vehicle */}
+                {selectedVehicle && (
+                  <div className="mt-6 pt-6 border-t border-gray-200 dark:border-navy-700">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      <UserGroupIcon className="w-4 h-4 inline mr-1" />
+                      {t.passengers}
+                    </label>
+                    <div className="flex items-center gap-3">
+                      <select
+                        value={numPassengers}
+                        onChange={(e) => setNumPassengers(parseInt(e.target.value))}
+                        className="flex-1 px-4 py-2.5 bg-white dark:bg-navy-800 border border-gray-300 dark:border-navy-700 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500"
+                      >
+                        {Array.from({ length: selectedVehicle.max_passengers }, (_, i) => i + 1).map(num => (
+                          <option key={num} value={num}>
+                            {num} {num === 1
+                              ? (locale === 'es' ? 'pasajero' : 'passenger')
+                              : (locale === 'es' ? 'pasajeros' : 'passengers')
+                            }
+                          </option>
+                        ))}
+                      </select>
+                      <span className="text-sm text-gray-500 dark:text-gray-400">
+                        {locale === 'es' ? 'Máx.' : 'Max.'} {selectedVehicle.max_passengers}
+                      </span>
+                    </div>
+                  </div>
+                )}
+
                 <div className="mt-6 pt-6 border-t border-gray-200 dark:border-navy-700">
                   <button
                     onClick={handleContinueToDetails}
@@ -552,14 +594,28 @@ export default function TransferBookingContent({ locale, searchParams }: Transfe
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   {t.phone} *
                 </label>
-                <input
-                  type="tel"
-                  value={passengerData.phone}
-                  onChange={(e) => setPassengerData({ ...passengerData, phone: e.target.value })}
-                  className={`w-full px-4 py-2.5 bg-white dark:bg-navy-800 border rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 ${
-                    errors.phone ? 'border-red-500' : 'border-gray-300 dark:border-navy-700'
-                  }`}
-                />
+                <div className="flex gap-2">
+                  <select
+                    value={passengerData.countryCode}
+                    onChange={(e) => setPassengerData({ ...passengerData, countryCode: e.target.value })}
+                    className="w-28 sm:w-32 px-2 py-2.5 rounded-lg border border-gray-300 dark:border-navy-700 bg-white dark:bg-navy-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent text-sm"
+                  >
+                    {countryCodes.map((country) => (
+                      <option key={`${country.country}-${country.code}`} value={country.code}>
+                        {country.flag} {country.code}
+                      </option>
+                    ))}
+                  </select>
+                  <input
+                    type="tel"
+                    value={passengerData.phone}
+                    onChange={(e) => setPassengerData({ ...passengerData, phone: e.target.value })}
+                    placeholder="555 123 4567"
+                    className={`flex-1 px-4 py-2.5 bg-white dark:bg-navy-800 border rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 ${
+                      errors.phone ? 'border-red-500' : 'border-gray-300 dark:border-navy-700'
+                    }`}
+                  />
+                </div>
                 {errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phone}</p>}
               </div>
 
@@ -635,7 +691,7 @@ export default function TransferBookingContent({ locale, searchParams }: Transfe
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600 dark:text-gray-400">{t.passengers}</span>
-                  <span className="text-gray-900 dark:text-white">{transferData.passengers}</span>
+                  <span className="text-gray-900 dark:text-white">{numPassengers}</span>
                 </div>
                 <div className="border-t border-gray-200 dark:border-navy-700 pt-2 mt-2">
                   <div className="flex justify-between text-lg font-bold">

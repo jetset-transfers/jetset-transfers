@@ -10,7 +10,6 @@ import {
   PaperAirplaneIcon,
   ArrowsRightLeftIcon,
   TruckIcon,
-  UserGroupIcon,
 } from '@heroicons/react/24/outline';
 import PlacesAutocomplete from '@/components/maps/PlacesAutocomplete';
 import { useGoogleMaps } from '@/components/maps/GoogleMapsProvider';
@@ -81,10 +80,12 @@ export default function QuickBookingSearch({ locale, destinations }: QuickBookin
   const [formData, setFormData] = useState({
     pickup_date: '',
     pickup_time: '',
-    destination: '',
     return_date: '',
     return_time: '',
   });
+
+  // State for private/roundtrip destination (using PlacesAutocomplete)
+  const [selectedDestination, setSelectedDestination] = useState<PlaceResult | null>(null);
 
   // State for oneway transfer
   const [onewayData, setOnewayData] = useState({
@@ -92,7 +93,6 @@ export default function QuickBookingSearch({ locale, destinations }: QuickBookin
     destination: null as PlaceResult | null,
     date: '',
     time: '',
-    passengers: '2',
   });
 
   // State for zones and pricing
@@ -162,17 +162,51 @@ export default function QuickBookingSearch({ locale, destinations }: QuickBookin
 
   const t = labels[locale as keyof typeof labels] || labels.es;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // Get Airport Zone (Zone 1) from zones data
+  const getAirportZone = () => {
+    return zones.find(z => z.zone_number === 1);
+  };
+
+  // Airport coordinates (Cancun International Airport)
+  const AIRPORT_COORDS = { lat: 21.0365, lng: -86.8771 };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (serviceType === 'oneway') return;
-    if (!formData.destination || !formData.pickup_date) return;
+    if (!selectedDestination || !formData.pickup_date) return;
 
-    // Build URL params for booking page
+    setIsCheckingRoute(true);
+
+    // Get airport zone (Zone 1)
+    const airportZone = getAirportZone();
+
+    if (!airportZone) {
+      console.error('Airport zone not found');
+      setIsCheckingRoute(false);
+      return;
+    }
+
+    // Detect zones for airport to destination
+    const detection = detectZonesForTransfer(
+      AIRPORT_COORDS,
+      { lat: selectedDestination.lat, lng: selectedDestination.lng },
+      zones,
+      zonePricings
+    );
+
+    // Build base params
     const params = new URLSearchParams({
-      destination: formData.destination,
-      date: formData.pickup_date,
       type: serviceType,
+      origin_name: locale === 'es' ? 'Aeropuerto de Cancún' : 'Cancun Airport',
+      origin_address: 'Carretera Cancún-Chetumal Km 22, 77565 Cancún, Q.R.',
+      origin_lat: AIRPORT_COORDS.lat.toString(),
+      origin_lng: AIRPORT_COORDS.lng.toString(),
+      dest_name: selectedDestination.name,
+      dest_address: selectedDestination.address,
+      dest_lat: selectedDestination.lat.toString(),
+      dest_lng: selectedDestination.lng.toString(),
+      date: formData.pickup_date,
     });
 
     if (formData.pickup_time) {
@@ -189,7 +223,38 @@ export default function QuickBookingSearch({ locale, destinations }: QuickBookin
       }
     }
 
-    router.push(`/${locale}/booking?${params.toString()}`);
+    // If we have a valid route with pricing, go to booking page
+    if (detection.hasValidRoute && detection.pricing && detection.originZone && detection.destinationZone) {
+      params.set('origin_zone_id', detection.originZone.id);
+      params.set('dest_zone_id', detection.destinationZone.id);
+      params.set('pricing_id', detection.pricing.id);
+
+      // Add zone names for display
+      params.set('origin_zone_name', locale === 'es' ? detection.originZone.name_es : detection.originZone.name_en);
+      params.set('dest_zone_name', locale === 'es' ? detection.destinationZone.name_es : detection.destinationZone.name_en);
+
+      // Add pricing info
+      if (detection.pricing.duration_minutes) {
+        params.set('duration', detection.pricing.duration_minutes.toString());
+      }
+      if (detection.pricing.distance_km) {
+        params.set('distance', detection.pricing.distance_km.toString());
+      }
+
+      // Encode vehicle pricing as JSON
+      params.set('vehicle_pricing', JSON.stringify(detection.pricing.vehicle_pricing));
+
+      setIsCheckingRoute(false);
+      router.push(`/${locale}/transfer-booking?${params.toString()}`);
+    } else {
+      // No valid route - go to contact page for manual quote
+      if (detection.error) {
+        params.set('error', detection.error);
+      }
+
+      setIsCheckingRoute(false);
+      router.push(`/${locale}/contact?${params.toString()}`);
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -221,7 +286,6 @@ export default function QuickBookingSearch({ locale, destinations }: QuickBookin
       dest_address: onewayData.destination.address,
       dest_lat: onewayData.destination.lat.toString(),
       dest_lng: onewayData.destination.lng.toString(),
-      passengers: onewayData.passengers,
     });
 
     if (onewayData.date) {
@@ -332,26 +396,21 @@ export default function QuickBookingSearch({ locale, destinations }: QuickBookin
                     <label className="block text-[10px] font-semibold text-gray-400 dark:text-gray-500 mb-1 uppercase tracking-wider">
                       {t.destination}
                     </label>
-                    <div className="relative">
-                      <MapPinIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                      <select
-                        name="destination"
-                        value={formData.destination}
-                        onChange={handleChange}
-                        required
-                        className="w-full pl-9 pr-8 py-2.5 bg-white dark:bg-navy-800 border border-gray-200 dark:border-navy-700 rounded-lg text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent appearance-none cursor-pointer"
-                      >
-                        <option value="">{t.selectDestination}</option>
-                        {destinations.map(dest => (
-                          <option key={dest.id} value={dest.slug}>
-                            {locale === 'es' ? dest.name_es : dest.name_en}
-                          </option>
-                        ))}
-                      </select>
-                      <svg className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                      </svg>
-                    </div>
+                    {mapsLoaded ? (
+                      <PlacesAutocomplete
+                        placeholder={t.searchDestination}
+                        value={selectedDestination}
+                        onChange={setSelectedDestination}
+                        locale={locale as 'es' | 'en'}
+                      />
+                    ) : (
+                      <div className="flex items-center gap-2 px-3 py-2.5 bg-gray-100 dark:bg-navy-800 rounded-lg">
+                        <MapPinIcon className="w-4 h-4 text-gray-400 animate-pulse" />
+                        <span className="text-sm text-gray-400">
+                          {locale === 'es' ? 'Cargando...' : 'Loading...'}
+                        </span>
+                      </div>
+                    )}
                   </div>
 
                   {/* Date */}
@@ -402,10 +461,15 @@ export default function QuickBookingSearch({ locale, destinations }: QuickBookin
                     <div className="w-full sm:w-auto flex items-end">
                       <button
                         type="submit"
-                        className="w-full sm:w-auto px-6 py-2.5 bg-brand-500 hover:bg-brand-600 text-white font-semibold rounded-lg transition-colors flex items-center justify-center gap-2"
+                        disabled={!selectedDestination || isCheckingRoute}
+                        className="w-full sm:w-auto px-6 py-2.5 bg-brand-500 hover:bg-brand-600 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition-colors flex items-center justify-center gap-2"
                       >
-                        <MagnifyingGlassIcon className="w-4 h-4" />
-                        <span>{t.search}</span>
+                        {isCheckingRoute ? (
+                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        ) : (
+                          <MagnifyingGlassIcon className="w-4 h-4" />
+                        )}
+                        <span>{t.quote}</span>
                       </button>
                     </div>
                   )}
@@ -467,10 +531,15 @@ export default function QuickBookingSearch({ locale, destinations }: QuickBookin
                     <div className="w-full sm:w-auto flex items-end">
                       <button
                         type="submit"
-                        className="w-full sm:w-auto px-6 py-2.5 bg-brand-500 hover:bg-brand-600 text-white font-semibold rounded-lg transition-colors flex items-center justify-center gap-2"
+                        disabled={!selectedDestination || isCheckingRoute}
+                        className="w-full sm:w-auto px-6 py-2.5 bg-brand-500 hover:bg-brand-600 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition-colors flex items-center justify-center gap-2"
                       >
-                        <MagnifyingGlassIcon className="w-4 h-4" />
-                        <span>{t.search}</span>
+                        {isCheckingRoute ? (
+                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        ) : (
+                          <MagnifyingGlassIcon className="w-4 h-4" />
+                        )}
+                        <span>{t.quote}</span>
                       </button>
                     </div>
                   </div>
@@ -558,28 +627,6 @@ export default function QuickBookingSearch({ locale, destinations }: QuickBookin
                         <option value="">{t.selectTime}</option>
                         {TIME_OPTIONS.map(time => (
                           <option key={time} value={time}>{time}</option>
-                        ))}
-                      </select>
-                      <svg className="absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                      </svg>
-                    </div>
-                  </div>
-
-                  {/* Passengers */}
-                  <div className="flex-1 sm:flex-none sm:w-28">
-                    <label className="block text-[10px] font-semibold text-gray-400 dark:text-gray-500 mb-1 uppercase tracking-wider">
-                      {t.passengers}
-                    </label>
-                    <div className="relative">
-                      <UserGroupIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                      <select
-                        value={onewayData.passengers}
-                        onChange={(e) => setOnewayData(prev => ({ ...prev, passengers: e.target.value }))}
-                        className="w-full pl-9 pr-6 py-2.5 bg-white dark:bg-navy-800 border border-gray-200 dark:border-navy-700 rounded-lg text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent appearance-none cursor-pointer"
-                      >
-                        {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14].map(num => (
-                          <option key={num} value={num}>{num}</option>
                         ))}
                       </select>
                       <svg className="absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
