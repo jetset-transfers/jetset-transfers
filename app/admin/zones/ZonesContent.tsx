@@ -12,6 +12,7 @@ import {
   CheckIcon,
   XMarkIcon,
 } from '@heroicons/react/24/outline';
+import ZoneMapEditor from '@/components/maps/ZoneMapEditor';
 
 interface ZonesContentProps {
   user: User;
@@ -61,6 +62,7 @@ export default function ZonesContent({ user }: ZonesContentProps) {
   const [editingZone, setEditingZone] = useState<TransferZone | null>(null);
   const [isCreating, setIsCreating] = useState(false);
   const [formData, setFormData] = useState<Omit<TransferZone, 'id'>>(DEFAULT_ZONE);
+  const [selectedZoneId, setSelectedZoneId] = useState<string | null>(null);
 
   // Load zones
   useEffect(() => {
@@ -317,14 +319,28 @@ export default function ZonesContent({ user }: ZonesContentProps) {
             </div>
           </div>
 
-          {/* Map Editor Placeholder */}
-          <div className="mt-4 p-4 bg-navy-900/50 rounded-lg border border-dashed border-navy-700">
-            <div className="flex items-center gap-2 text-gray-400">
-              <MapPinIcon className="w-5 h-5" />
-              <span className="text-sm">
-                Editor de mapa para definir límites de zona (requiere API key de Google Maps)
-              </span>
-            </div>
+          {/* Map Editor */}
+          <div className="mt-4">
+            <label className="block text-sm font-medium text-gray-300 mb-2">
+              <div className="flex items-center gap-2">
+                <MapPinIcon className="w-4 h-4" />
+                Delimitar zona en el mapa
+              </div>
+            </label>
+            <ZoneMapEditor
+              zones={[]}
+              height="400px"
+              onZoneCreate={(coordinates) => {
+                const boundaries = coordinates.map(c => [c.lat, c.lng]);
+                setFormData({ ...formData, boundaries });
+              }}
+              editable={true}
+            />
+            {formData.boundaries.length > 0 && (
+              <p className="text-xs text-green-400 mt-2">
+                ✓ Zona delimitada con {formData.boundaries.length} puntos
+              </p>
+            )}
           </div>
 
           {/* Actions */}
@@ -348,6 +364,37 @@ export default function ZonesContent({ user }: ZonesContentProps) {
               Guardar
             </button>
           </div>
+        </div>
+      )}
+
+      {/* Zones Map View */}
+      {zones.length > 0 && !isCreating && !editingZone && (
+        <div className="bg-navy-800 rounded-xl border border-navy-700 p-4">
+          <h2 className="text-lg font-semibold text-white mb-3">Mapa de Zonas</h2>
+          <ZoneMapEditor
+            zones={zones.map(z => ({
+              id: z.id,
+              name: z.name_es,
+              coordinates: (z.boundaries || []).map(b => ({ lat: b[0], lng: b[1] })),
+              color: z.color,
+            }))}
+            selectedZoneId={selectedZoneId}
+            onZoneSelect={(zone) => setSelectedZoneId(zone?.id || null)}
+            onZoneDelete={async (zoneId) => {
+              const zone = zones.find(z => z.id === zoneId);
+              if (zone) await handleDelete(zone);
+            }}
+            onZoneUpdate={async (zoneId, coordinates) => {
+              const boundaries = coordinates.map(c => [c.lat, c.lng]);
+              const { error } = await supabase
+                .from('transfer_zones')
+                .update({ boundaries })
+                .eq('id', zoneId);
+              if (!error) await loadZones();
+            }}
+            height="400px"
+            editable={true}
+          />
         </div>
       )}
 

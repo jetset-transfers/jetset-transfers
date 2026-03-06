@@ -12,6 +12,7 @@ import AnalyticsProvider from '@/components/analytics/AnalyticsProvider';
 import ScrollTracker from '@/components/analytics/ScrollTracker';
 import { CurrencyProvider } from '@/contexts/CurrencyContext';
 import { LoadingProvider } from '@/contexts/LoadingContext';
+import GoogleMapsProvider from '@/components/maps/GoogleMapsProvider';
 import { createClient } from '@/lib/supabase/server';
 import '../globals.css';
 
@@ -96,6 +97,8 @@ export default async function LocaleLayout({
         {/* Preconnect to critical third-party origins */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://maps.googleapis.com" />
+        <link rel="dns-prefetch" href="https://maps.gstatic.com" />
         <link rel="dns-prefetch" href="https://static.tacdn.com" />
         {gaId && (
           <>
@@ -127,13 +130,15 @@ export default async function LocaleLayout({
         <NextIntlClientProvider messages={messages}>
           <CurrencyProvider>
             <LoadingProvider>
-              <AnalyticsProvider>
-                <ScrollTracker />
-                <Header hasVehicles={hasVehicles} />
-                <main>{children}</main>
-                <FooterWrapper />
-                <LazyCookieBanner />
-              </AnalyticsProvider>
+              <GoogleMapsProvider>
+                <AnalyticsProvider>
+                  <ScrollTracker />
+                  <Header hasVehicles={hasVehicles} />
+                  <main>{children}</main>
+                  <FooterWrapper />
+                  <LazyCookieBanner />
+                </AnalyticsProvider>
+              </GoogleMapsProvider>
             </LoadingProvider>
           </CurrencyProvider>
         </NextIntlClientProvider>

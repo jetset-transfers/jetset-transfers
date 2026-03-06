@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   CalendarDaysIcon,
@@ -10,7 +10,12 @@ import {
   PaperAirplaneIcon,
   ArrowsRightLeftIcon,
   TruckIcon,
+  UserGroupIcon,
 } from '@heroicons/react/24/outline';
+import PlacesAutocomplete from '@/components/maps/PlacesAutocomplete';
+import { useGoogleMaps } from '@/components/maps/GoogleMapsProvider';
+import { createClient } from '@/lib/supabase/client';
+import { detectZonesForTransfer, type ZoneDetectionResult } from '@/lib/zones/detectZone';
 
 interface Destination {
   id: string;
@@ -24,6 +29,34 @@ interface VehiclePricing {
   vehicle_name: string;
   max_passengers: number;
   price_usd: number;
+}
+
+interface PlaceResult {
+  placeId: string;
+  name: string;
+  address: string;
+  lat: number;
+  lng: number;
+}
+
+interface TransferZone {
+  id: string;
+  zone_number: number;
+  name_es: string;
+  name_en: string;
+  color: string;
+  is_active: boolean;
+  boundaries: number[][];
+}
+
+interface ZonePricing {
+  id: string;
+  origin_zone_id: string;
+  destination_zone_id: string;
+  vehicle_pricing: VehiclePricing[];
+  duration_minutes: number | null;
+  distance_km: number | null;
+  is_active: boolean;
 }
 
 interface QuickBookingSearchProps {
@@ -42,6 +75,8 @@ const TIME_OPTIONS = [
 
 export default function QuickBookingSearch({ locale, destinations }: QuickBookingSearchProps) {
   const router = useRouter();
+  const supabase = createClient();
+  const { isLoaded: mapsLoaded } = useGoogleMaps();
   const [serviceType, setServiceType] = useState<ServiceType>('private');
   const [formData, setFormData] = useState({
     pickup_date: '',
@@ -50,6 +85,35 @@ export default function QuickBookingSearch({ locale, destinations }: QuickBookin
     return_date: '',
     return_time: '',
   });
+
+  // State for oneway transfer
+  const [onewayData, setOnewayData] = useState({
+    origin: null as PlaceResult | null,
+    destination: null as PlaceResult | null,
+    date: '',
+    time: '',
+    passengers: '2',
+  });
+
+  // State for zones and pricing
+  const [zones, setZones] = useState<TransferZone[]>([]);
+  const [zonePricings, setZonePricings] = useState<ZonePricing[]>([]);
+  const [isCheckingRoute, setIsCheckingRoute] = useState(false);
+
+  // Load zones and pricings on mount
+  useEffect(() => {
+    const loadZonesAndPricings = async () => {
+      const [zonesResult, pricingsResult] = await Promise.all([
+        supabase.from('transfer_zones').select('*').eq('is_active', true),
+        supabase.from('zone_pricing').select('*').eq('is_active', true),
+      ]);
+
+      if (zonesResult.data) setZones(zonesResult.data);
+      if (pricingsResult.data) setZonePricings(pricingsResult.data);
+    };
+
+    loadZonesAndPricings();
+  }, []);
 
   const labels = {
     es: {
@@ -68,6 +132,10 @@ export default function QuickBookingSearch({ locale, destinations }: QuickBookin
       oneWayDescription: 'Traslados entre hoteles y zonas turísticas',
       returnDate: 'Regreso',
       returnTime: 'Hora regreso',
+      searchOrigin: 'Buscar hotel o ubicación de origen',
+      searchDestination: 'Buscar hotel o ubicación de destino',
+      passengers: 'Pasajeros',
+      quote: 'Cotizar',
     },
     en: {
       privateTransfer: 'Private Transfer',
@@ -85,6 +153,10 @@ export default function QuickBookingSearch({ locale, destinations }: QuickBookin
       oneWayDescription: 'Transfers between hotels and tourist areas',
       returnDate: 'Return',
       returnTime: 'Return time',
+      searchOrigin: 'Search origin hotel or location',
+      searchDestination: 'Search destination hotel or location',
+      passengers: 'Passengers',
+      quote: 'Get Quote',
     },
   };
 
@@ -125,6 +197,74 @@ export default function QuickBookingSearch({ locale, destinations }: QuickBookin
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
+  const handleOnewaySubmit = async () => {
+    if (!onewayData.origin || !onewayData.destination) return;
+
+    setIsCheckingRoute(true);
+
+    // Detect zones for origin and destination
+    const detection = detectZonesForTransfer(
+      { lat: onewayData.origin.lat, lng: onewayData.origin.lng },
+      { lat: onewayData.destination.lat, lng: onewayData.destination.lng },
+      zones,
+      zonePricings
+    );
+
+    // Build base params
+    const params = new URLSearchParams({
+      type: 'oneway',
+      origin_name: onewayData.origin.name,
+      origin_address: onewayData.origin.address,
+      origin_lat: onewayData.origin.lat.toString(),
+      origin_lng: onewayData.origin.lng.toString(),
+      dest_name: onewayData.destination.name,
+      dest_address: onewayData.destination.address,
+      dest_lat: onewayData.destination.lat.toString(),
+      dest_lng: onewayData.destination.lng.toString(),
+      passengers: onewayData.passengers,
+    });
+
+    if (onewayData.date) {
+      params.set('date', onewayData.date);
+    }
+    if (onewayData.time) {
+      params.set('time', onewayData.time);
+    }
+
+    // If we have a valid route with pricing, go to booking page
+    if (detection.hasValidRoute && detection.pricing && detection.originZone && detection.destinationZone) {
+      params.set('origin_zone_id', detection.originZone.id);
+      params.set('dest_zone_id', detection.destinationZone.id);
+      params.set('pricing_id', detection.pricing.id);
+
+      // Add zone names for display
+      params.set('origin_zone_name', locale === 'es' ? detection.originZone.name_es : detection.originZone.name_en);
+      params.set('dest_zone_name', locale === 'es' ? detection.destinationZone.name_es : detection.destinationZone.name_en);
+
+      // Add pricing info
+      if (detection.pricing.duration_minutes) {
+        params.set('duration', detection.pricing.duration_minutes.toString());
+      }
+      if (detection.pricing.distance_km) {
+        params.set('distance', detection.pricing.distance_km.toString());
+      }
+
+      // Encode vehicle pricing as JSON
+      params.set('vehicle_pricing', JSON.stringify(detection.pricing.vehicle_pricing));
+
+      setIsCheckingRoute(false);
+      router.push(`/${locale}/transfer-booking?${params.toString()}`);
+    } else {
+      // No valid route - go to contact page for manual quote
+      if (detection.error) {
+        params.set('error', detection.error);
+      }
+
+      setIsCheckingRoute(false);
+      router.push(`/${locale}/contact?${params.toString()}`);
+    }
+  };
+
   const today = new Date().toISOString().split('T')[0];
 
   const tabs = [
@@ -136,7 +276,7 @@ export default function QuickBookingSearch({ locale, destinations }: QuickBookin
   return (
     <section id="booking" className="relative z-20 bg-gray-50 dark:bg-navy-900/50 pb-8 pt-4">
       <div className="relative -mt-16 sm:-mt-20 max-w-4xl mx-auto px-4 sm:px-6">
-        <div className="bg-white dark:bg-navy-900 rounded-xl shadow-xl border border-gray-200 dark:border-navy-800 overflow-hidden">
+        <div className="bg-white dark:bg-navy-900 rounded-xl shadow-xl border border-gray-200 dark:border-navy-800">
           {/* Tabs */}
           <div className="flex border-b border-gray-200 dark:border-navy-800">
             {tabs.map((tab) => {
@@ -338,17 +478,133 @@ export default function QuickBookingSearch({ locale, destinations }: QuickBookin
               </div>
             )}
 
-            {/* One Way - Coming Soon */}
+            {/* One Way Transfer */}
             {serviceType === 'oneway' && (
-              <div className="text-center py-6">
-                <TruckIcon className="w-10 h-10 text-amber-500 mx-auto mb-3" />
-                <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-                  {t.oneWayDescription}
-                </p>
-                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 rounded-full text-xs font-medium">
-                  <ClockIcon className="w-3.5 h-3.5" />
-                  {t.comingSoon}
-                </span>
+              <div className="space-y-3">
+                {/* First row: Origin, Destination */}
+                <div className="flex flex-col sm:flex-row gap-3">
+                  {/* Origin */}
+                  <div className="flex-1 min-w-0">
+                    <label className="block text-[10px] font-semibold text-gray-400 dark:text-gray-500 mb-1 uppercase tracking-wider">
+                      {t.origin}
+                    </label>
+                    {mapsLoaded ? (
+                      <PlacesAutocomplete
+                        placeholder={t.searchOrigin}
+                        value={onewayData.origin}
+                        onChange={(place) => setOnewayData(prev => ({ ...prev, origin: place }))}
+                        locale={locale as 'es' | 'en'}
+                      />
+                    ) : (
+                      <div className="flex items-center gap-2 px-3 py-2.5 bg-gray-100 dark:bg-navy-800 rounded-lg">
+                        <MapPinIcon className="w-4 h-4 text-gray-400 animate-pulse" />
+                        <span className="text-sm text-gray-400">Cargando...</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Destination */}
+                  <div className="flex-1 min-w-0">
+                    <label className="block text-[10px] font-semibold text-gray-400 dark:text-gray-500 mb-1 uppercase tracking-wider">
+                      {t.destination}
+                    </label>
+                    {mapsLoaded ? (
+                      <PlacesAutocomplete
+                        placeholder={t.searchDestination}
+                        value={onewayData.destination}
+                        onChange={(place) => setOnewayData(prev => ({ ...prev, destination: place }))}
+                        locale={locale as 'es' | 'en'}
+                      />
+                    ) : (
+                      <div className="flex items-center gap-2 px-3 py-2.5 bg-gray-100 dark:bg-navy-800 rounded-lg">
+                        <MapPinIcon className="w-4 h-4 text-gray-400 animate-pulse" />
+                        <span className="text-sm text-gray-400">Cargando...</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Second row: Date, Time, Passengers, Button */}
+                <div className="flex flex-col sm:flex-row gap-3">
+                  {/* Date */}
+                  <div className="flex-1 sm:flex-none sm:w-36">
+                    <label className="block text-[10px] font-semibold text-gray-400 dark:text-gray-500 mb-1 uppercase tracking-wider">
+                      {t.pickupDate}
+                    </label>
+                    <div className="relative">
+                      <CalendarDaysIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                      <input
+                        type="date"
+                        value={onewayData.date}
+                        onChange={(e) => setOnewayData(prev => ({ ...prev, date: e.target.value }))}
+                        min={today}
+                        className="w-full pl-9 pr-2 py-2.5 bg-white dark:bg-navy-800 border border-gray-200 dark:border-navy-700 rounded-lg text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Time */}
+                  <div className="flex-1 sm:flex-none sm:w-28">
+                    <label className="block text-[10px] font-semibold text-gray-400 dark:text-gray-500 mb-1 uppercase tracking-wider">
+                      {t.pickupTime}
+                    </label>
+                    <div className="relative">
+                      <ClockIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                      <select
+                        value={onewayData.time}
+                        onChange={(e) => setOnewayData(prev => ({ ...prev, time: e.target.value }))}
+                        className="w-full pl-9 pr-6 py-2.5 bg-white dark:bg-navy-800 border border-gray-200 dark:border-navy-700 rounded-lg text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent appearance-none cursor-pointer"
+                      >
+                        <option value="">{t.selectTime}</option>
+                        {TIME_OPTIONS.map(time => (
+                          <option key={time} value={time}>{time}</option>
+                        ))}
+                      </select>
+                      <svg className="absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </div>
+                  </div>
+
+                  {/* Passengers */}
+                  <div className="flex-1 sm:flex-none sm:w-28">
+                    <label className="block text-[10px] font-semibold text-gray-400 dark:text-gray-500 mb-1 uppercase tracking-wider">
+                      {t.passengers}
+                    </label>
+                    <div className="relative">
+                      <UserGroupIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                      <select
+                        value={onewayData.passengers}
+                        onChange={(e) => setOnewayData(prev => ({ ...prev, passengers: e.target.value }))}
+                        className="w-full pl-9 pr-6 py-2.5 bg-white dark:bg-navy-800 border border-gray-200 dark:border-navy-700 rounded-lg text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent appearance-none cursor-pointer"
+                      >
+                        {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14].map(num => (
+                          <option key={num} value={num}>{num}</option>
+                        ))}
+                      </select>
+                      <svg className="absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </div>
+                  </div>
+
+                  {/* Quote Button */}
+                  <div className="flex-1 sm:flex-none sm:w-auto flex items-end">
+                    <button
+                      type="button"
+                      onClick={handleOnewaySubmit}
+                      disabled={!onewayData.origin || !onewayData.destination || isCheckingRoute}
+                      className="w-full sm:w-auto px-6 py-2.5 bg-brand-500 hover:bg-brand-600 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition-colors flex items-center justify-center gap-2"
+                    >
+                      {isCheckingRoute ? (
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      ) : (
+                        <MagnifyingGlassIcon className="w-4 h-4" />
+                      )}
+                      <span>{t.quote}</span>
+                    </button>
+                  </div>
+                </div>
               </div>
             )}
           </form>
