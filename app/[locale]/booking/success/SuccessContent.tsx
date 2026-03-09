@@ -239,20 +239,20 @@ export default function SuccessContent({
             </div>
 
             {/* Date & Time */}
-            <div className="grid grid-cols-2 gap-4">
-              <div className="flex items-center gap-4">
-                <div className="w-10 h-10 rounded-lg bg-gray-100 dark:bg-navy-800 flex items-center justify-center">
-                  <CalendarIcon className="w-5 h-5 text-gray-600 dark:text-gray-400" />
-                </div>
-                <div>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">
-                    {t.date}
-                  </p>
-                  <p className="font-medium text-gray-900 dark:text-white">
-                    {formatDate(booking.pickup_date)}
-                  </p>
-                </div>
+            <div className="flex items-center gap-4">
+              <div className="w-10 h-10 rounded-lg bg-gray-100 dark:bg-navy-800 flex items-center justify-center">
+                <CalendarIcon className="w-5 h-5 text-gray-600 dark:text-gray-400" />
               </div>
+              <div>
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  {t.date}
+                </p>
+                <p className="font-medium text-gray-900 dark:text-white">
+                  {formatDate(booking.pickup_date)}
+                </p>
+              </div>
+            </div>
+            {booking.pickup_time && (
               <div className="flex items-center gap-4">
                 <div className="w-10 h-10 rounded-lg bg-gray-100 dark:bg-navy-800 flex items-center justify-center">
                   <ClockIcon className="w-5 h-5 text-gray-600 dark:text-gray-400" />
@@ -266,7 +266,7 @@ export default function SuccessContent({
                   </p>
                 </div>
               </div>
-            </div>
+            )}
 
             {/* Return info if round trip */}
             {booking.return_date && (

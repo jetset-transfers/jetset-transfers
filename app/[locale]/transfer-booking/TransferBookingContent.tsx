@@ -464,7 +464,7 @@ export default function TransferBookingContent({ locale, searchParams }: Transfe
                                 <p>
                                   {t.maxPassengers}: {vehicle.max_passengers}
                                 </p>
-                                {vehicle.max_passengers_no_luggage && vehicle.max_passengers_no_luggage > vehicle.max_passengers && (
+                                {!transferData.withLuggage && vehicle.max_passengers_no_luggage && vehicle.max_passengers_no_luggage > vehicle.max_passengers && (
                                   <p className="text-xs text-red-500 dark:text-red-400">
                                     {vehicle.max_passengers_no_luggage} ({t.maxPassengersNoLuggage})
                                   </p>
