@@ -20,6 +20,7 @@ import {
 interface VehiclePricing {
   vehicle_name: string;
   max_passengers: number;
+  max_passengers_no_luggage?: number;
   price_usd: number;
 }
 
@@ -50,6 +51,7 @@ const labels = {
     // Vehicle selection
     selectVehicle: 'Selecciona tu vehículo',
     maxPassengers: 'Máx. pasajeros',
+    maxPassengersNoLuggage: 'sin equipaje',
     perTrip: 'por viaje',
     select: 'Seleccionar',
     selected: 'Seleccionado',
@@ -97,6 +99,7 @@ const labels = {
     // Vehicle selection
     selectVehicle: 'Select your vehicle',
     maxPassengers: 'Max. passengers',
+    maxPassengersNoLuggage: 'no luggage',
     perTrip: 'per trip',
     select: 'Select',
     selected: 'Selected',
@@ -127,29 +130,6 @@ const labels = {
   },
 };
 
-// Vehicle icons and descriptions
-const VEHICLE_INFO: Record<string, { description_es: string; description_en: string; features: string[] }> = {
-  Sedan: {
-    description_es: 'Vehículo cómodo para parejas o viajeros solos',
-    description_en: 'Comfortable vehicle for couples or solo travelers',
-    features: ['A/C', 'Wi-Fi', 'Agua'],
-  },
-  SUV: {
-    description_es: 'Espacio extra para familias pequeñas',
-    description_en: 'Extra space for small families',
-    features: ['A/C', 'Wi-Fi', 'Agua', 'USB'],
-  },
-  Van: {
-    description_es: 'Ideal para grupos medianos',
-    description_en: 'Ideal for medium groups',
-    features: ['A/C', 'Wi-Fi', 'Agua', 'USB', 'TV'],
-  },
-  Sprinter: {
-    description_es: 'Perfecto para grupos grandes',
-    description_en: 'Perfect for large groups',
-    features: ['A/C', 'Wi-Fi', 'Agua', 'USB', 'TV', 'Más espacio'],
-  },
-};
 
 export default function TransferBookingContent({ locale, searchParams }: TransferBookingContentProps) {
   const router = useRouter();
@@ -180,6 +160,7 @@ export default function TransferBookingContent({ locale, searchParams }: Transfe
       distance: searchParams.distance ? parseFloat(searchParams.distance) : null,
       vehiclePricing,
       pricingId: searchParams.pricing_id || '',
+      withLuggage: searchParams.with_luggage !== 'false', // Default to true unless explicitly false
     };
   }, [searchParams]);
 
@@ -455,11 +436,6 @@ export default function TransferBookingContent({ locale, searchParams }: Transfe
                 <div className="space-y-3">
                   {availableVehicles.map((vehicle) => {
                     const isSelected = selectedVehicle?.vehicle_name === vehicle.vehicle_name;
-                    const vehicleInfo = VEHICLE_INFO[vehicle.vehicle_name] || {
-                      description_es: '',
-                      description_en: '',
-                      features: [],
-                    };
 
                     return (
                       <button
@@ -484,15 +460,15 @@ export default function TransferBookingContent({ locale, searchParams }: Transfe
                               <h3 className="font-semibold text-gray-900 dark:text-white">
                                 {vehicle.vehicle_name}
                               </h3>
-                              <p className="text-sm text-gray-500 dark:text-gray-400">
-                                {t.maxPassengers}: {vehicle.max_passengers}
-                              </p>
-                              <div className="flex gap-1 mt-1">
-                                {vehicleInfo.features.slice(0, 4).map((f) => (
-                                  <span key={f} className="text-xs px-1.5 py-0.5 bg-gray-100 dark:bg-navy-800 text-gray-500 rounded">
-                                    {f}
-                                  </span>
-                                ))}
+                              <div className="text-sm text-gray-500 dark:text-gray-400">
+                                <p>
+                                  {t.maxPassengers}: {vehicle.max_passengers}
+                                </p>
+                                {vehicle.max_passengers_no_luggage && vehicle.max_passengers_no_luggage > vehicle.max_passengers && (
+                                  <p className="text-xs text-red-500 dark:text-red-400">
+                                    {vehicle.max_passengers_no_luggage} ({t.maxPassengersNoLuggage})
+                                  </p>
+                                )}
                               </div>
                             </div>
                           </div>
@@ -509,33 +485,45 @@ export default function TransferBookingContent({ locale, searchParams }: Transfe
                 </div>
 
                 {/* Passengers selector - shown after selecting a vehicle */}
-                {selectedVehicle && (
-                  <div className="mt-6 pt-6 border-t border-gray-200 dark:border-navy-700">
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      <UserGroupIcon className="w-4 h-4 inline mr-1" />
-                      {t.passengers}
-                    </label>
-                    <div className="flex items-center gap-3">
-                      <select
-                        value={numPassengers}
-                        onChange={(e) => setNumPassengers(parseInt(e.target.value))}
-                        className="flex-1 px-4 py-2.5 bg-white dark:bg-navy-800 border border-gray-300 dark:border-navy-700 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500"
-                      >
-                        {Array.from({ length: selectedVehicle.max_passengers }, (_, i) => i + 1).map(num => (
-                          <option key={num} value={num}>
-                            {num} {num === 1
-                              ? (locale === 'es' ? 'pasajero' : 'passenger')
-                              : (locale === 'es' ? 'pasajeros' : 'passengers')
-                            }
-                          </option>
-                        ))}
-                      </select>
-                      <span className="text-sm text-gray-500 dark:text-gray-400">
-                        {locale === 'es' ? 'Máx.' : 'Max.'} {selectedVehicle.max_passengers}
-                      </span>
+                {selectedVehicle && (() => {
+                  // Calculate max capacity based on luggage
+                  const maxCapacity = !transferData.withLuggage && selectedVehicle.max_passengers_no_luggage
+                    ? selectedVehicle.max_passengers_no_luggage
+                    : selectedVehicle.max_passengers;
+
+                  return (
+                    <div className="mt-6 pt-6 border-t border-gray-200 dark:border-navy-700">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        <UserGroupIcon className="w-4 h-4 inline mr-1" />
+                        {t.passengers}
+                      </label>
+                      <div className="flex items-center gap-3">
+                        <select
+                          value={numPassengers}
+                          onChange={(e) => setNumPassengers(parseInt(e.target.value))}
+                          className="flex-1 px-4 py-2.5 bg-white dark:bg-navy-800 border border-gray-300 dark:border-navy-700 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500"
+                        >
+                          {Array.from({ length: maxCapacity }, (_, i) => i + 1).map(num => (
+                            <option key={num} value={num}>
+                              {num} {num === 1
+                                ? (locale === 'es' ? 'pasajero' : 'passenger')
+                                : (locale === 'es' ? 'pasajeros' : 'passengers')
+                              }
+                            </option>
+                          ))}
+                        </select>
+                        <span className="text-sm text-gray-500 dark:text-gray-400">
+                          {locale === 'es' ? 'Máx.' : 'Max.'} {maxCapacity}
+                          {!transferData.withLuggage && selectedVehicle.max_passengers_no_luggage && (
+                            <span className="text-xs text-red-500 dark:text-red-400 block">
+                              ({t.maxPassengersNoLuggage})
+                            </span>
+                          )}
+                        </span>
+                      </div>
                     </div>
-                  </div>
-                )}
+                  );
+                })()}
 
                 <div className="mt-6 pt-6 border-t border-gray-200 dark:border-navy-700">
                   <button

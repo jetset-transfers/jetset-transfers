@@ -8,6 +8,7 @@ import {
   PhoneIcon,
   EnvelopeIcon,
   ClockIcon,
+  InformationCircleIcon,
 } from '@heroicons/react/24/outline';
 
 interface Phone {
@@ -17,12 +18,17 @@ interface Phone {
 
 interface ContactPageProps {
   params: Promise<{ locale: string }>;
+  searchParams: Promise<{ [key: string]: string | undefined }>;
 }
 
-export default async function ContactPage({ params }: ContactPageProps) {
+export default async function ContactPage({ params, searchParams }: ContactPageProps) {
   const { locale } = await params;
+  const resolvedSearchParams = await searchParams;
   const t = await getTranslations('contact');
   const supabase = await createClient();
+
+  // Check if user was redirected due to no pricing available
+  const noPricingReason = resolvedSearchParams.reason === 'no_pricing';
 
   // Fetch contact info from database
   const { data: dbContactInfo } = await supabase
@@ -82,6 +88,36 @@ export default async function ContactPage({ params }: ContactPageProps) {
             {t('subtitle')}
           </p>
         </div>
+
+        {/* No Pricing Available Message */}
+        {noPricingReason && (
+          <div className="mb-8">
+            <div className="card p-6 bg-gradient-to-r from-brand-50 to-blue-50 dark:from-brand-900/20 dark:to-blue-900/20 border-brand-200 dark:border-brand-800">
+              <div className="flex items-start gap-4">
+                <div className="flex-shrink-0">
+                  <InformationCircleIcon className="w-6 h-6 text-brand-600 dark:text-brand-400" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                    {locale === 'es'
+                      ? 'Cotización Personalizada Requerida'
+                      : 'Custom Quote Required'}
+                  </h3>
+                  <p className="text-gray-700 dark:text-gray-300 mb-3">
+                    {locale === 'es'
+                      ? 'En este momento no contamos con tarifas establecidas para la ruta específica que has seleccionado. Sin embargo, estaremos encantados de prepararte una cotización personalizada que se ajuste perfectamente a tus necesidades.'
+                      : 'At this time, we do not have established rates for the specific route you have selected. However, we would be delighted to prepare a personalized quote that perfectly fits your needs.'}
+                  </p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    {locale === 'es'
+                      ? 'Por favor, completa el formulario de contacto a continuación con los detalles de tu viaje y nos pondremos en contacto contigo a la brevedad con una oferta exclusiva. También puedes contactarnos directamente por WhatsApp para una atención más rápida.'
+                      : 'Please complete the contact form below with your travel details and we will get back to you shortly with an exclusive offer. You can also contact us directly via WhatsApp for faster service.'}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         <div className="grid lg:grid-cols-2 gap-12">
           {/* Contact Form */}

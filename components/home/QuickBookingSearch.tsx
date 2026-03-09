@@ -95,6 +95,9 @@ export default function QuickBookingSearch({ locale, destinations }: QuickBookin
     time: '',
   });
 
+  // State for luggage option (Transfer One Way only)
+  const [withLuggage, setWithLuggage] = useState(true);
+
   // State for zones and pricing
   const [zones, setZones] = useState<TransferZone[]>([]);
   const [zonePricings, setZonePricings] = useState<ZonePricing[]>([]);
@@ -136,6 +139,9 @@ export default function QuickBookingSearch({ locale, destinations }: QuickBookin
       searchDestination: 'Buscar hotel o ubicación de destino',
       passengers: 'Pasajeros',
       quote: 'Cotizar',
+      withLuggage: 'Con equipaje',
+      noLuggage: 'Sin equipaje',
+      luggageQuestion: '¿Viajas con equipaje?',
     },
     en: {
       privateTransfer: 'Private Transfer',
@@ -157,6 +163,9 @@ export default function QuickBookingSearch({ locale, destinations }: QuickBookin
       searchDestination: 'Search destination hotel or location',
       passengers: 'Passengers',
       quote: 'Get Quote',
+      withLuggage: 'With luggage',
+      noLuggage: 'No luggage',
+      luggageQuestion: 'Traveling with luggage?',
     },
   };
 
@@ -248,6 +257,7 @@ export default function QuickBookingSearch({ locale, destinations }: QuickBookin
       router.push(`/${locale}/transfer-booking?${params.toString()}`);
     } else {
       // No valid route - go to contact page for manual quote
+      params.set('reason', 'no_pricing');
       if (detection.error) {
         params.set('error', detection.error);
       }
@@ -316,10 +326,14 @@ export default function QuickBookingSearch({ locale, destinations }: QuickBookin
       // Encode vehicle pricing as JSON
       params.set('vehicle_pricing', JSON.stringify(detection.pricing.vehicle_pricing));
 
+      // Add luggage preference
+      params.set('with_luggage', withLuggage.toString());
+
       setIsCheckingRoute(false);
       router.push(`/${locale}/transfer-booking?${params.toString()}`);
     } else {
       // No valid route - go to contact page for manual quote
+      params.set('reason', 'no_pricing');
       if (detection.error) {
         params.set('error', detection.error);
       }
@@ -550,6 +564,35 @@ export default function QuickBookingSearch({ locale, destinations }: QuickBookin
             {/* One Way Transfer */}
             {serviceType === 'oneway' && (
               <div className="space-y-3">
+                {/* Luggage Toggle */}
+                <div className="flex items-center justify-center gap-2 pb-2 border-b border-gray-200 dark:border-navy-700">
+                  <span className="text-xs text-gray-500 dark:text-gray-400">{t.luggageQuestion}</span>
+                  <div className="flex items-center gap-1 bg-gray-100 dark:bg-navy-800 rounded-lg p-1">
+                    <button
+                      type="button"
+                      onClick={() => setWithLuggage(true)}
+                      className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
+                        withLuggage
+                          ? 'bg-white dark:bg-navy-700 text-brand-600 dark:text-brand-400 shadow-sm'
+                          : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                      }`}
+                    >
+                      ✓ {t.withLuggage}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setWithLuggage(false)}
+                      className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
+                        !withLuggage
+                          ? 'bg-white dark:bg-navy-700 text-brand-600 dark:text-brand-400 shadow-sm'
+                          : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                      }`}
+                    >
+                      ✗ {t.noLuggage}
+                    </button>
+                  </div>
+                </div>
+
                 {/* First row: Origin, Destination */}
                 <div className="flex flex-col sm:flex-row gap-3">
                   {/* Origin */}

@@ -29,6 +29,7 @@ interface TransferZone {
 interface VehiclePricing {
   vehicle_name: string;
   max_passengers: number;
+  max_passengers_no_luggage?: number;
   price_usd: number;
 }
 
@@ -44,16 +45,17 @@ interface ZonePricing {
   destination_zone?: TransferZone;
 }
 
-const DEFAULT_VEHICLES: VehiclePricing[] = [
-  { vehicle_name: 'Sedan', max_passengers: 3, price_usd: 0 },
-  { vehicle_name: 'SUV', max_passengers: 5, price_usd: 0 },
-  { vehicle_name: 'Van', max_passengers: 10, price_usd: 0 },
-  { vehicle_name: 'Sprinter', max_passengers: 14, price_usd: 0 },
-];
+interface Vehicle {
+  id: string;
+  name: string;
+  max_passengers: number;
+  capacity_no_luggage: number | null;
+}
 
 export default function ZonePricingContent({ user }: ZonePricingContentProps) {
   const supabase = createClient();
   const [zones, setZones] = useState<TransferZone[]>([]);
+  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [pricings, setPricings] = useState<ZonePricing[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -64,7 +66,7 @@ export default function ZonePricingContent({ user }: ZonePricingContentProps) {
   const [formData, setFormData] = useState({
     origin_zone_id: '',
     destination_zone_id: '',
-    vehicle_pricing: DEFAULT_VEHICLES,
+    vehicle_pricing: [] as VehiclePricing[],
     duration_minutes: '',
     distance_km: '',
     is_active: true,
@@ -76,6 +78,13 @@ export default function ZonePricingContent({ user }: ZonePricingContentProps) {
 
   const loadData = async () => {
     setLoading(true);
+
+    // Load vehicles
+    const { data: vehiclesData } = await supabase
+      .from('vehicles')
+      .select('id, name, max_passengers, capacity_no_luggage')
+      .eq('is_active', true)
+      .order('display_order');
 
     // Load zones
     const { data: zonesData } = await supabase
@@ -94,16 +103,27 @@ export default function ZonePricingContent({ user }: ZonePricingContentProps) {
       `)
       .order('origin_zone_id');
 
+    setVehicles(vehiclesData || []);
     setZones(zonesData || []);
     setPricings(pricingsData || []);
     setLoading(false);
+  };
+
+  // Helper function to convert vehicles to VehiclePricing format
+  const getDefaultVehiclePricing = (): VehiclePricing[] => {
+    return vehicles.map(vehicle => ({
+      vehicle_name: vehicle.name,
+      max_passengers: vehicle.max_passengers,
+      ...(vehicle.capacity_no_luggage && { max_passengers_no_luggage: vehicle.capacity_no_luggage }),
+      price_usd: 0,
+    }));
   };
 
   const handleCreate = () => {
     setFormData({
       origin_zone_id: '',
       destination_zone_id: '',
-      vehicle_pricing: DEFAULT_VEHICLES,
+      vehicle_pricing: getDefaultVehiclePricing(),
       duration_minutes: '',
       distance_km: '',
       is_active: true,
@@ -113,10 +133,22 @@ export default function ZonePricingContent({ user }: ZonePricingContentProps) {
   };
 
   const handleEdit = (pricing: ZonePricing) => {
+    // Merge existing pricing with current vehicle data to ensure we have latest vehicle info
+    const defaultPricing = getDefaultVehiclePricing();
+    const mergedPricing = defaultPricing.map(defaultVehicle => {
+      const existingVehicle = pricing.vehicle_pricing?.find(
+        v => v.vehicle_name === defaultVehicle.vehicle_name
+      );
+      return {
+        ...defaultVehicle,
+        price_usd: existingVehicle?.price_usd || 0,
+      };
+    });
+
     setFormData({
       origin_zone_id: pricing.origin_zone_id,
       destination_zone_id: pricing.destination_zone_id,
-      vehicle_pricing: pricing.vehicle_pricing || DEFAULT_VEHICLES,
+      vehicle_pricing: mergedPricing,
       duration_minutes: pricing.duration_minutes?.toString() || '',
       distance_km: pricing.distance_km?.toString() || '',
       is_active: pricing.is_active,
@@ -130,9 +162,15 @@ export default function ZonePricingContent({ user }: ZonePricingContentProps) {
     setEditingPricing(null);
   };
 
-  const handleVehiclePriceChange = (index: number, field: keyof VehiclePricing, value: string | number) => {
+  const handleVehiclePriceChange = (index: number, field: keyof VehiclePricing, value: string | number | undefined) => {
     const updated = [...formData.vehicle_pricing];
-    updated[index] = { ...updated[index], [field]: value };
+    // Remove field if value is undefined
+    if (value === undefined) {
+      const { [field]: _, ...rest } = updated[index];
+      updated[index] = rest as VehiclePricing;
+    } else {
+      updated[index] = { ...updated[index], [field]: value };
+    }
     setFormData({ ...formData, vehicle_pricing: updated });
   };
 
@@ -336,7 +374,13 @@ export default function ZonePricingContent({ user }: ZonePricingContentProps) {
                   </div>
                   <div className="text-xs text-gray-500 mb-2">
                     Máx. {vehicle.max_passengers} pasajeros
+                    {vehicle.max_passengers_no_luggage && (
+                      <span className="block text-[10px] text-gray-600">
+                        Sin equipaje: {vehicle.max_passengers_no_luggage}
+                      </span>
+                    )}
                   </div>
+                  {/* Price */}
                   <div className="relative">
                     <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
                     <input
