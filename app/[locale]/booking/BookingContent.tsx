@@ -204,6 +204,8 @@ export default function BookingContent({ locale, searchParams }: BookingContentP
     flightNumber: '',
     numPassengers: 1,
     specialRequests: '',
+    travelDate: travelDate || '', // Pre-fill from URL or empty
+    travelTime: travelTime || '', // Pre-fill from URL or empty
   });
   const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({});
 
@@ -270,6 +272,10 @@ export default function BookingContent({ locale, searchParams }: BookingContentP
     } else if (!/^[\d\s-()]{7,}$/.test(formData.phone)) {
       errors.phone = t.invalidPhone;
     }
+    // Validate travel date (required)
+    if (!formData.travelDate.trim()) {
+      errors.travelDate = t.requiredField;
+    }
 
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
@@ -311,8 +317,8 @@ export default function BookingContent({ locale, searchParams }: BookingContentP
           destinationId: destination.id,
           destinationName,
           serviceType,
-          travelDate,
-          travelTime,
+          travelDate: formData.travelDate,
+          travelTime: formData.travelTime || undefined,
           returnDate: returnDate || undefined,
           returnTime: returnTime || undefined,
           vehicleName: selectedVehicle.vehicle_name,
@@ -678,6 +684,43 @@ export default function BookingContent({ locale, searchParams }: BookingContentP
                     </select>
                   </div>
 
+                  {/* Travel Date */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      {t.date} *
+                    </label>
+                    <input
+                      type="date"
+                      value={formData.travelDate}
+                      onChange={(e) => setFormData({ ...formData, travelDate: e.target.value })}
+                      min={new Date().toISOString().split('T')[0]}
+                      className={`w-full px-4 py-3 rounded-lg border ${
+                        formErrors.travelDate
+                          ? 'border-red-500'
+                          : 'border-gray-300 dark:border-navy-600'
+                      } bg-white dark:bg-navy-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent`}
+                    />
+                    {formErrors.travelDate && (
+                      <p className="text-red-500 text-sm mt-1">{formErrors.travelDate}</p>
+                    )}
+                  </div>
+
+                  {/* Travel Time */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      {t.time}
+                    </label>
+                    <input
+                      type="time"
+                      value={formData.travelTime}
+                      onChange={(e) => setFormData({ ...formData, travelTime: e.target.value })}
+                      className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-navy-600 bg-white dark:bg-navy-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                    />
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                      {locale === 'es' ? 'Opcional' : 'Optional'}
+                    </p>
+                  </div>
+
                   {/* Special Requests */}
                   <div className="sm:col-span-2">
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -826,7 +869,7 @@ export default function BookingContent({ locale, searchParams }: BookingContentP
                   </div>
 
                   {/* Date */}
-                  {travelDate && (
+                  {formData.travelDate && (
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 rounded-lg bg-gray-100 dark:bg-navy-800 flex items-center justify-center">
                         <CalendarIcon className="w-4 h-4 text-gray-600 dark:text-gray-400" />
@@ -834,14 +877,14 @@ export default function BookingContent({ locale, searchParams }: BookingContentP
                       <div>
                         <p className="text-xs text-gray-500 dark:text-gray-400">{t.date}</p>
                         <p className="text-sm font-medium text-gray-900 dark:text-white">
-                          {formatDate(travelDate)}
+                          {formatDate(formData.travelDate)}
                         </p>
                       </div>
                     </div>
                   )}
 
                   {/* Time */}
-                  {travelTime && (
+                  {formData.travelTime && (
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 rounded-lg bg-gray-100 dark:bg-navy-800 flex items-center justify-center">
                         <ClockIcon className="w-4 h-4 text-gray-600 dark:text-gray-400" />
@@ -849,7 +892,7 @@ export default function BookingContent({ locale, searchParams }: BookingContentP
                       <div>
                         <p className="text-xs text-gray-500 dark:text-gray-400">{t.time}</p>
                         <p className="text-sm font-medium text-gray-900 dark:text-white">
-                          {travelTime}
+                          {formData.travelTime}
                         </p>
                       </div>
                     </div>
