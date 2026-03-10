@@ -63,8 +63,15 @@ export async function POST(request: NextRequest) {
             .single();
 
           if (booking) {
-            // Send confirmation emails (async, don't wait)
-            sendConfirmationEmails(booking).catch(console.error);
+            // Send confirmation emails - MUST await in serverless environment
+            // Otherwise the function may terminate before emails are sent
+            try {
+              await sendConfirmationEmails(booking);
+              console.log('Confirmation emails sent successfully');
+            } catch (emailError) {
+              console.error('Failed to send confirmation emails:', emailError);
+              // Don't fail the webhook - booking is already confirmed
+            }
           }
         }
       }
@@ -124,8 +131,13 @@ async function sendConfirmationEmails(booking: any) {
   }
 
   try {
+    console.log('Sending confirmation emails for booking:', booking.booking_number);
+    console.log('Base URL:', baseUrl);
+    console.log('Origin address extracted:', originAddress);
+    console.log('Destination address extracted:', destinationAddress);
+
     // Send notification using existing API
-    await fetch(`${baseUrl}/api/send-notification`, {
+    const response = await fetch(`${baseUrl}/api/send-notification`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -153,6 +165,13 @@ async function sendConfirmationEmails(booking: any) {
         },
       }),
     });
+
+    const responseData = await response.json();
+    console.log('Send notification response:', response.status, responseData);
+
+    if (!response.ok) {
+      console.error('Failed to send confirmation emails:', responseData);
+    }
   } catch (error) {
     console.error('Error sending confirmation emails:', error);
   }
