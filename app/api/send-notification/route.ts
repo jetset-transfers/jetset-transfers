@@ -53,6 +53,9 @@ interface BookingConfirmationData {
     price_usd: number;
     service_type: string;
     special_requests?: string;
+    // Full addresses for zone transfers
+    origin_address?: string;
+    destination_address?: string;
   };
 }
 
@@ -176,10 +179,12 @@ function generateBookingConfirmationHTML(data: BookingConfirmationData['booking'
                   <td style="padding: 8px 0; color: #64748b; font-size: 14px;">Date:</td>
                   <td style="padding: 8px 0; color: #1e293b; font-size: 14px;">${formatDateEN(data.travel_date)}</td>
                 </tr>
+                ${data.travel_time ? `
                 <tr>
                   <td style="padding: 8px 0; color: #64748b; font-size: 14px;">Time:</td>
                   <td style="padding: 8px 0; color: #1e293b; font-size: 14px;">${data.travel_time}</td>
                 </tr>
+                ` : ''}
                 ${data.flight_number ? `
                 <tr>
                   <td style="padding: 8px 0; color: #64748b; font-size: 14px;">Flight:</td>
@@ -209,7 +214,7 @@ function generateBookingConfirmationHTML(data: BookingConfirmationData['booking'
                 </tr>
                 ` : ''}
                 ` : ''}
-                ${data.special_requests ? `
+                ${data.special_requests && !data.special_requests.includes('Transfer Details:') && !data.special_requests.includes('ORIGEN:') ? `
                 <tr>
                   <td style="padding: 8px 0; color: #64748b; font-size: 14px;">Special Requests:</td>
                   <td style="padding: 8px 0; color: #1e293b; font-size: 14px;">${data.special_requests}</td>
@@ -360,17 +365,31 @@ function generateBookingNotificationHTML(data: BookingConfirmationData['booking'
                   <td style="padding: 8px 0; color: #1e293b; font-size: 14px; font-weight: 500;">${serviceTypeLabel}</td>
                 </tr>
                 <tr>
-                  <td style="padding: 8px 0; color: #64748b; font-size: 14px;">Destino:</td>
+                  <td style="padding: 8px 0; color: #64748b; font-size: 14px;">Ruta:</td>
                   <td style="padding: 8px 0; color: #1e293b; font-size: 14px; font-weight: 500;">${data.destination}</td>
                 </tr>
+                ${data.origin_address ? `
+                <tr>
+                  <td style="padding: 8px 0; color: #64748b; font-size: 14px;">📍 Origen:</td>
+                  <td style="padding: 8px 0; color: #1e293b; font-size: 13px;">${data.origin_address}</td>
+                </tr>
+                ` : ''}
+                ${data.destination_address ? `
+                <tr>
+                  <td style="padding: 8px 0; color: #64748b; font-size: 14px;">📍 Destino:</td>
+                  <td style="padding: 8px 0; color: #1e293b; font-size: 13px;">${data.destination_address}</td>
+                </tr>
+                ` : ''}
                 <tr>
                   <td style="padding: 8px 0; color: #64748b; font-size: 14px;">Fecha:</td>
                   <td style="padding: 8px 0; color: #1e293b; font-size: 14px;">${formatDate(data.travel_date)}</td>
                 </tr>
+                ${data.travel_time ? `
                 <tr>
                   <td style="padding: 8px 0; color: #64748b; font-size: 14px;">Hora:</td>
                   <td style="padding: 8px 0; color: #1e293b; font-size: 14px; font-weight: 500;">${data.travel_time}</td>
                 </tr>
+                ` : ''}
                 ${data.flight_number ? `
                 <tr>
                   <td style="padding: 8px 0; color: #64748b; font-size: 14px;">Vuelo:</td>
@@ -391,7 +410,7 @@ function generateBookingNotificationHTML(data: BookingConfirmationData['booking'
                   <td style="padding: 8px 0; color: #1e293b; font-size: 14px;">${formatDate(data.return_date)}${data.return_time ? ` a las ${data.return_time}` : ''}</td>
                 </tr>
                 ` : ''}
-                ${data.special_requests ? `
+                ${data.special_requests && !data.special_requests.includes('Transfer Details:') && !data.special_requests.includes('ORIGEN:') ? `
                 <tr>
                   <td style="padding: 8px 0; color: #64748b; font-size: 14px;">Notas:</td>
                   <td style="padding: 8px 0; color: #1e293b; font-size: 14px;">${data.special_requests}</td>

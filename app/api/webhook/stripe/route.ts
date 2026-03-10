@@ -106,6 +106,23 @@ export async function POST(request: NextRequest) {
 async function sendConfirmationEmails(booking: any) {
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
 
+  // Extract addresses from special_requests if present
+  let originAddress = '';
+  let destinationAddress = '';
+  let cleanSpecialRequests = booking.special_requests || '';
+
+  if (cleanSpecialRequests.includes('---')) {
+    const parts = cleanSpecialRequests.split('---');
+    cleanSpecialRequests = parts[0].trim(); // User notes only
+
+    const addressPart = parts[1] || '';
+    const originMatch = addressPart.match(/ORIGEN:\s*(.+?)(?=\nDESTINO:|$)/s);
+    const destMatch = addressPart.match(/DESTINO:\s*(.+?)$/s);
+
+    if (originMatch) originAddress = originMatch[1].trim();
+    if (destMatch) destinationAddress = destMatch[1].trim();
+  }
+
   try {
     // Send notification using existing API
     await fetch(`${baseUrl}/api/send-notification`, {
@@ -121,14 +138,18 @@ async function sendConfirmationEmails(booking: any) {
           destination: booking.pickup_location,
           vehicle_name: booking.vehicle_name,
           travel_date: booking.pickup_date,
-          travel_time: booking.pickup_time,
+          // Don't show time if it's the default "00:00" value
+          travel_time: booking.pickup_time && !booking.pickup_time.startsWith('00:00') ? booking.pickup_time : null,
           return_date: booking.return_date,
           return_time: booking.return_time,
           num_passengers: booking.num_passengers,
           flight_number: booking.pickup_flight_number,
           price_usd: booking.price_usd,
           service_type: booking.service_type,
-          special_requests: booking.special_requests,
+          special_requests: cleanSpecialRequests || null,
+          // Full addresses for admin email
+          origin_address: originAddress || null,
+          destination_address: destinationAddress || null,
         },
       }),
     });

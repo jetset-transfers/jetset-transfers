@@ -61,28 +61,13 @@ export async function POST(request: NextRequest) {
     // Create Supabase client
     const supabase = await createClient();
 
-    // Build special requests with transfer details
-    const transferDetails = {
-      type: 'zone_transfer',
-      originName: body.originName,
-      originAddress: body.originAddress,
-      destName: body.destName,
-      destAddress: body.destAddress,
-      originZoneId: body.originZoneId,
-      destZoneId: body.destZoneId,
-      originLat: body.originLat,
-      originLng: body.originLng,
-      destLat: body.destLat,
-      destLng: body.destLng,
-      pricingId: body.pricingId,
-    };
-
-    // Combine user's special requests with transfer details
-    const specialRequestsData = body.specialRequests
-      ? `${body.specialRequests}\n\n---\nTransfer Details: ${JSON.stringify(transferDetails)}`
-      : `Transfer Details: ${JSON.stringify(transferDetails)}`;
-
     // Create a pending booking in the database using existing columns
+    // Store full addresses in special_requests in a clean format (not JSON)
+    const addressInfo = `\n\n---\nORIGEN: ${body.originAddress}\nDESTINO: ${body.destAddress}`;
+    const specialRequestsData = body.specialRequests
+      ? `${body.specialRequests}${addressInfo}`
+      : addressInfo.trim();
+
     const { data: booking, error: bookingError } = await supabase
       .from('bookings')
       .insert({
@@ -93,8 +78,8 @@ export async function POST(request: NextRequest) {
         destination_id: null, // Not a predefined destination
         // Store route as "Origin → Destination"
         pickup_location: `${body.originName} → ${body.destName}`,
-        pickup_date: body.date || null,
-        pickup_time: body.time || '12:00',
+        pickup_date: body.date || new Date().toISOString().split('T')[0],
+        pickup_time: body.time || '00:00',
         num_passengers: body.passengers,
         pickup_flight_number: body.flightNumber || null,
         vehicle_name: body.vehicleName,
