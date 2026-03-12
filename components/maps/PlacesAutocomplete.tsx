@@ -34,23 +34,23 @@ interface PlacesAutocompleteProps {
   locale?: 'es' | 'en';
 }
 
-// Riviera Maya bounds (Cancun to Tulum) - Extended to cover service area
-const RIVIERA_MAYA_BOUNDS = {
-  north: 21.25,  // North of Cancun (includes Hotel Zone)
-  south: 20.15,  // South of Tulum (includes Tulum ruins)
+// Yucatan Peninsula bounds (Yucatan, Campeche, Quintana Roo states)
+const YUCATAN_PENINSULA_BOUNDS = {
+  north: 21.65,  // Northern Yucatan (Rio Lagartos, Progreso, Celestun)
+  south: 17.85,  // Southern QR/Campeche (Chetumal, Bacalar, Calakmul)
   east: -86.70,  // Caribbean coast
-  west: -87.55,  // Inland (includes cenotes and inland destinations)
+  west: -90.50,  // Western Campeche (includes Campeche city)
 };
 
 // Messages for no results
 const NO_RESULTS_MESSAGES = {
   es: {
     noResults: 'No hay resultados en nuestra zona de servicio',
-    serviceArea: 'Solo ofrecemos traslados en Cancún y la Riviera Maya',
+    serviceArea: 'Ofrecemos traslados en toda la Península de Yucatán',
   },
   en: {
     noResults: 'No results in our service area',
-    serviceArea: 'We only offer transfers in Cancun and the Riviera Maya',
+    serviceArea: 'We offer transfers throughout the Yucatan Peninsula',
   },
 };
 
@@ -169,8 +169,8 @@ export default function PlacesAutocomplete({
     setSearchedQuery(input);
 
     const bounds = new google.maps.LatLngBounds(
-      new google.maps.LatLng(RIVIERA_MAYA_BOUNDS.south, RIVIERA_MAYA_BOUNDS.west),
-      new google.maps.LatLng(RIVIERA_MAYA_BOUNDS.north, RIVIERA_MAYA_BOUNDS.east)
+      new google.maps.LatLng(YUCATAN_PENINSULA_BOUNDS.south, YUCATAN_PENINSULA_BOUNDS.west),
+      new google.maps.LatLng(YUCATAN_PENINSULA_BOUNDS.north, YUCATAN_PENINSULA_BOUNDS.east)
     );
 
     const request: google.maps.places.AutocompletionRequest = {

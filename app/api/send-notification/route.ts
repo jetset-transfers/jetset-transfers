@@ -371,13 +371,21 @@ function generateBookingNotificationHTML(data: BookingConfirmationData['booking'
                 ${data.origin_address ? `
                 <tr>
                   <td style="padding: 8px 0; color: #64748b; font-size: 14px;">📍 Origen:</td>
-                  <td style="padding: 8px 0; color: #1e293b; font-size: 13px;">${data.origin_address}</td>
+                  <td style="padding: 8px 0; color: #1e293b; font-size: 13px;">
+                    <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(data.origin_address)}" style="color: #e63946; text-decoration: none;" target="_blank">
+                      ${data.origin_address} 🗺️
+                    </a>
+                  </td>
                 </tr>
                 ` : ''}
                 ${data.destination_address ? `
                 <tr>
                   <td style="padding: 8px 0; color: #64748b; font-size: 14px;">📍 Destino:</td>
-                  <td style="padding: 8px 0; color: #1e293b; font-size: 13px;">${data.destination_address}</td>
+                  <td style="padding: 8px 0; color: #1e293b; font-size: 13px;">
+                    <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(data.destination_address)}" style="color: #e63946; text-decoration: none;" target="_blank">
+                      ${data.destination_address} 🗺️
+                    </a>
+                  </td>
                 </tr>
                 ` : ''}
                 <tr>
