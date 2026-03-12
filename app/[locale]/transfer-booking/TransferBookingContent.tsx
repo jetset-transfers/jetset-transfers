@@ -16,6 +16,7 @@ import {
   CreditCardIcon,
   ShieldCheckIcon,
 } from '@heroicons/react/24/outline';
+import CountryCodeSelect from '@/components/ui/CountryCodeSelect';
 
 interface VehiclePricing {
   vehicle_name: string;
@@ -163,20 +164,6 @@ export default function TransferBookingContent({ locale, searchParams }: Transfe
       withLuggage: searchParams.with_luggage !== 'false', // Default to true unless explicitly false
     };
   }, [searchParams]);
-
-  // Country codes for phone dropdown
-  const countryCodes = [
-    { code: '+1', country: 'US', flag: '🇺🇸', label: 'USA (+1)' },
-    { code: '+52', country: 'MX', flag: '🇲🇽', label: 'México (+52)' },
-    { code: '+1', country: 'CA', flag: '🇨🇦', label: 'Canadá (+1)' },
-    { code: '+44', country: 'GB', flag: '🇬🇧', label: 'UK (+44)' },
-    { code: '+34', country: 'ES', flag: '🇪🇸', label: 'España (+34)' },
-    { code: '+33', country: 'FR', flag: '🇫🇷', label: 'Francia (+33)' },
-    { code: '+49', country: 'DE', flag: '🇩🇪', label: 'Alemania (+49)' },
-    { code: '+55', country: 'BR', flag: '🇧🇷', label: 'Brasil (+55)' },
-    { code: '+54', country: 'AR', flag: '🇦🇷', label: 'Argentina (+54)' },
-    { code: '+57', country: 'CO', flag: '🇨🇴', label: 'Colombia (+57)' },
-  ];
 
   // State
   const [currentStep, setCurrentStep] = useState<BookingStep>('vehicle');
@@ -583,17 +570,11 @@ export default function TransferBookingContent({ locale, searchParams }: Transfe
                   {t.phone} *
                 </label>
                 <div className="flex gap-2">
-                  <select
+                  <CountryCodeSelect
                     value={passengerData.countryCode}
-                    onChange={(e) => setPassengerData({ ...passengerData, countryCode: e.target.value })}
-                    className="w-28 sm:w-32 px-2 py-2.5 rounded-lg border border-gray-300 dark:border-navy-700 bg-white dark:bg-navy-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent text-sm"
-                  >
-                    {countryCodes.map((country) => (
-                      <option key={`${country.country}-${country.code}`} value={country.code}>
-                        {country.flag} {country.code}
-                      </option>
-                    ))}
-                  </select>
+                    onChange={(value) => setPassengerData({ ...passengerData, countryCode: value })}
+                    className="w-32 sm:w-36"
+                  />
                   <input
                     type="tel"
                     value={passengerData.phone}

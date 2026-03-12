@@ -60,7 +60,7 @@ export default function ServicesSection({ locale, destinations, zones }: Service
         {/* Section Header */}
         <div className="text-center mb-14 md:mb-20">
           <span className="inline-block px-4 py-1.5 rounded-full text-sm font-medium bg-brand-100 text-brand-700 dark:bg-brand-900/50 dark:text-brand-300 mb-4">
-            {locale === 'es' ? 'Destinos Populares' : 'Popular Destinations'}
+            {locale === 'es' ? 'Áreas Populares' : 'Popular Areas'}
           </span>
           <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-5">
             {t('title')}
@@ -146,7 +146,7 @@ export default function ServicesSection({ locale, destinations, zones }: Service
                 ))
               ) : (
                 <div className="text-center py-12 text-muted rounded-2xl border border-dashed border-navy-200 dark:border-navy-700">
-                  {locale === 'es' ? 'Próximamente destinos disponibles' : 'Destinations coming soon'}
+                  {locale === 'es' ? 'Próximamente áreas disponibles' : 'Areas coming soon'}
                 </div>
               )}
             </div>
@@ -157,7 +157,7 @@ export default function ServicesSection({ locale, destinations, zones }: Service
               className="group flex items-center justify-center gap-2 w-full mt-6 py-4 text-sm font-semibold text-navy-700 dark:text-navy-200 bg-navy-100 dark:bg-navy-800 hover:bg-navy-600 hover:text-white dark:hover:bg-navy-600 rounded-xl transition-all duration-300"
             >
               {hasMoreDestinations
-                ? (locale === 'es' ? `Ver los ${destinations.length} destinos` : `View all ${destinations.length} destinations`)
+                ? (locale === 'es' ? `Ver las ${destinations.length} áreas` : `View all ${destinations.length} areas`)
                 : t('private.viewAll')
               }
               <ArrowRightIcon className="w-4 h-4 transition-transform group-hover:translate-x-1" />

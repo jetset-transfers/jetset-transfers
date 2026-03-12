@@ -101,7 +101,7 @@ export default function HeroCards({ locale, featuredTour, featuredDestination, h
 
   // Use featured destination
   const featured = featuredDestination || featuredTour;
-  const featuredType = locale === 'es' ? 'destinos' : 'destinations';
+  const featuredType = 'destinations';
   const featuredName = featured
     ? (locale === 'es' ? featured.name_es : featured.name_en)
     : null;

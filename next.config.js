@@ -95,6 +95,11 @@ const nextConfig = {
         hostname: 'static.tacdn.com',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'flagcdn.com',
+        pathname: '/**',
+      },
     ],
     // Image formats for optimization
     formats: ['image/avif', 'image/webp'],

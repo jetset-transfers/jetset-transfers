@@ -118,6 +118,19 @@ export default function QuickBookingSearch({ locale, destinations }: QuickBookin
     loadZonesAndPricings();
   }, []);
 
+  // Handle hash scroll on page load (for #booking anchor from other pages)
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.location.hash === '#booking') {
+      // Small delay to ensure the page is fully rendered
+      setTimeout(() => {
+        const bookingSection = document.getElementById('booking');
+        if (bookingSection) {
+          bookingSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 100);
+    }
+  }, []);
+
   const labels = {
     es: {
       privateTransfer: 'Traslado Privado',
@@ -352,7 +365,7 @@ export default function QuickBookingSearch({ locale, destinations }: QuickBookin
   ];
 
   return (
-    <section id="booking" className="relative z-20 bg-gray-50 dark:bg-navy-900/50 pb-8 pt-4">
+    <section id="booking" className="relative z-20 bg-gray-50 dark:bg-navy-900/50 pb-8 pt-4 scroll-mt-20">
       <div className="relative -mt-16 sm:-mt-20 max-w-4xl mx-auto px-4 sm:px-6">
         <div className="bg-white dark:bg-navy-900 rounded-xl shadow-xl border border-gray-200 dark:border-navy-800">
           {/* Tabs */}

@@ -43,7 +43,7 @@ export default function DestinationsSection({ locale, destinations }: Destinatio
         {/* Section Header */}
         <div className="text-center mb-14 md:mb-20">
           <span className="inline-block px-4 py-1.5 rounded-full text-sm font-medium bg-brand-100 text-brand-700 dark:bg-brand-900/50 dark:text-brand-300 mb-4">
-            {locale === 'es' ? 'Destinos Populares' : 'Popular Destinations'}
+            {locale === 'es' ? 'Áreas Populares' : 'Popular Areas'}
           </span>
           <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-5">
             {t('title')}
@@ -130,7 +130,7 @@ export default function DestinationsSection({ locale, destinations }: Destinatio
             ))
           ) : (
             <div className="col-span-full text-center py-20 text-muted rounded-2xl border border-dashed border-gray-200 dark:border-navy-700">
-              {locale === 'es' ? 'Próximamente destinos disponibles' : 'Destinations coming soon'}
+              {locale === 'es' ? 'Próximamente áreas disponibles' : 'Areas coming soon'}
             </div>
           )}
         </div>
@@ -143,7 +143,7 @@ export default function DestinationsSection({ locale, destinations }: Destinatio
               className="inline-flex items-center justify-center gap-2 px-8 py-4 text-base font-semibold text-white bg-brand-600 hover:bg-brand-700 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 group"
             >
               {hasMoreDestinations
-                ? (locale === 'es' ? `Ver los ${destinations.length} destinos` : `View all ${destinations.length} destinations`)
+                ? (locale === 'es' ? `Ver las ${destinations.length} áreas` : `View all ${destinations.length} areas`)
                 : t('private.viewAll')
               }
               <ArrowRightIcon className="w-5 h-5 transition-transform group-hover:translate-x-1" />

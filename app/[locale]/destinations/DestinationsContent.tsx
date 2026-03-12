@@ -58,42 +58,44 @@ interface DestinationsContentProps {
 
 const translations = {
   es: {
-    title: 'Destinos',
+    title: 'Áreas',
     subtitle: 'Traslados seguros y puntuales a toda la Riviera Maya',
-    description: 'Ofrecemos traslados privados desde el Aeropuerto de Cancún a los hoteles y destinos más populares de la región. Viaja cómodo, seguro y sin preocupaciones.',
+    description: 'Ofrecemos traslados privados desde el Aeropuerto de Cancún a los hoteles y áreas más populares de la región. Viaja cómodo, seguro y sin preocupaciones.',
     backToHome: 'Volver al inicio',
     passengersFrom: 'Hasta',
     passengersLabel: 'pasajeros',
     bookNow: 'Reservar ahora',
-    noDestinations: 'No hay destinos disponibles',
-    customTitle: '¿No encuentras tu destino?',
-    customDesc: 'Ofrecemos traslados personalizados a cualquier hotel o destino en la Riviera Maya. Contáctanos para una cotización.',
+    noDestinations: 'No hay áreas disponibles',
+    customTitle: '¿No encuentras tu área?',
+    customDesc: 'Ofrecemos traslados personalizados a cualquier hotel o área en la Riviera Maya. Contáctanos para una cotización.',
     requestQuote: 'Solicitar cotización',
     travelTime: 'Tiempo de traslado',
     filterByZone: 'Filtrar por zona',
     allZones: 'Todas las zonas',
     showingResults: 'Mostrando',
     of: 'de',
-    destinations: 'destinos',
+    destinations: 'áreas',
+    getQuoteNow: 'Cotizar ahora',
   },
   en: {
-    title: 'Destinations',
+    title: 'Areas',
     subtitle: 'Safe and punctual transfers to all Riviera Maya',
-    description: 'We offer private transfers from Cancun Airport to the most popular hotels and destinations in the region. Travel comfortably, safely, and worry-free.',
+    description: 'We offer private transfers from Cancun Airport to the most popular hotels and areas in the region. Travel comfortably, safely, and worry-free.',
     backToHome: 'Back to home',
     passengersFrom: 'Up to',
     passengersLabel: 'passengers',
     bookNow: 'Book now',
-    noDestinations: 'No destinations available',
-    customTitle: "Can't find your destination?",
-    customDesc: 'We offer custom transfers to any hotel or destination in the Riviera Maya. Contact us for a quote.',
+    noDestinations: 'No areas available',
+    customTitle: "Can't find your area?",
+    customDesc: 'We offer custom transfers to any hotel or area in the Riviera Maya. Contact us for a quote.',
     requestQuote: 'Request a quote',
     travelTime: 'Travel time',
     filterByZone: 'Filter by zone',
     allZones: 'All zones',
     showingResults: 'Showing',
     of: 'of',
-    destinations: 'destinations',
+    destinations: 'areas',
+    getQuoteNow: 'Book now',
   },
 };
 
@@ -202,7 +204,7 @@ export default function DestinationsContent({ locale, destinations, zones }: Des
         <section className="py-16 md:py-20">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">
-              {locale === 'es' ? 'Nuestros Destinos' : 'Our Destinations'}
+              {locale === 'es' ? 'Nuestras Áreas' : 'Our Areas'}
             </h2>
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
               {filteredDestinations.map((dest, index) => (
@@ -307,6 +309,17 @@ export default function DestinationsContent({ locale, destinations, zones }: Des
             </Link>
           </div>
         </LazySection>
+
+        {/* Floating CTA Button */}
+        <div className="fixed top-24 right-6 z-40">
+          <Link
+            href={`/${locale}#booking`}
+            className="flex items-center gap-2 px-6 py-3 bg-brand-500 hover:bg-brand-600 text-white font-semibold rounded-full shadow-lg hover:shadow-xl transition-all duration-300 animate-pulse hover:animate-none"
+          >
+            <TruckIcon className="w-5 h-5" />
+            {t.getQuoteNow}
+          </Link>
+        </div>
     </main>
   );
 }

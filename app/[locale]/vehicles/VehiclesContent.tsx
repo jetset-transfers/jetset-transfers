@@ -51,6 +51,7 @@ const translations = {
     upTo: 'Hasta',
     from: 'Desde',
     noLuggage: 'sin equipaje',
+    getQuoteNow: 'Cotizar ahora',
   },
   en: {
     title: 'Our Fleet',
@@ -67,6 +68,7 @@ const translations = {
     upTo: 'Up to',
     from: 'From',
     noLuggage: 'no luggage',
+    getQuoteNow: 'Book now',
   },
 };
 
@@ -248,6 +250,17 @@ export default function VehiclesContent({ locale, vehicles }: VehiclesContentPro
           </Link>
         </div>
       </LazySection>
+
+      {/* Floating CTA Button */}
+      <div className="fixed top-24 right-6 z-40">
+        <Link
+          href={`/${locale}#booking`}
+          className="flex items-center gap-2 px-6 py-3 bg-brand-500 hover:bg-brand-600 text-white font-semibold rounded-full shadow-lg hover:shadow-xl transition-all duration-300 animate-pulse hover:animate-none"
+        >
+          <TruckIcon className="w-5 h-5" />
+          {t.getQuoteNow}
+        </Link>
+      </div>
     </main>
   );
 }

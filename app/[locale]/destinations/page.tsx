@@ -11,8 +11,8 @@ export async function generateMetadata({ params }: DestinationsPageProps): Promi
   const { locale } = await params;
 
   const titles = {
-    es: 'Destinos de Traslado | Hoteles y Zonas en Riviera Maya | Jetset Transfers',
-    en: 'Transfer Destinations | Hotels & Zones in Riviera Maya | Jetset Transfers',
+    es: 'Áreas de Traslado | Hoteles y Zonas en Riviera Maya | Jetset Transfers',
+    en: 'Transfer Areas | Hotels & Zones in Riviera Maya | Jetset Transfers',
   };
 
   const descriptions = {

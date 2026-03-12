@@ -107,7 +107,7 @@ const DEFAULT_BENEFITS: Benefit[] = [
 
 const translations = {
   es: {
-    backToDestinations: 'Ver todos los destinos',
+    backToDestinations: 'Ver todas las áreas',
     travelTime: 'Tiempo de traslado',
     from: 'Desde',
     perVehicle: 'por vehículo',
@@ -115,8 +115,8 @@ const translations = {
     callUs: 'Llamar ahora',
     servicesIncluded: 'Servicios incluidos',
     whyChoose: '¿Por qué elegir traslado a',
-    otherDestinations: 'Otros destinos populares',
-    viewDestination: 'Ver destino',
+    otherDestinations: 'Otras áreas populares',
+    viewDestination: 'Ver área',
     ctaTitle: '¿Listo para tu viaje?',
     ctaDesc: 'Contacta con nosotros para reservar tu traslado y llegar a tu destino sin preocupaciones.',
     contactNow: 'Contactar ahora',
@@ -126,9 +126,11 @@ const translations = {
     moreInfoAbout: 'Más información sobre',
     howItWorksTitle: 'Reserva tu transporte privado a',
     step: 'Paso',
+    aboutThisArea: 'Sobre esta área',
+    getQuoteNow: 'Cotizar ahora',
   },
   en: {
-    backToDestinations: 'View all destinations',
+    backToDestinations: 'View all areas',
     travelTime: 'Travel time',
     from: 'From',
     perVehicle: 'per vehicle',
@@ -136,8 +138,8 @@ const translations = {
     callUs: 'Call us',
     servicesIncluded: 'Services included',
     whyChoose: 'Why choose transfer to',
-    otherDestinations: 'Other popular destinations',
-    viewDestination: 'View destination',
+    otherDestinations: 'Other popular areas',
+    viewDestination: 'View area',
     ctaTitle: 'Ready for your trip?',
     ctaDesc: 'Contact us to book your transfer and arrive at your destination worry-free.',
     contactNow: 'Contact us now',
@@ -147,6 +149,8 @@ const translations = {
     moreInfoAbout: 'More info about',
     howItWorksTitle: 'Book your private transport to',
     step: 'Step',
+    aboutThisArea: 'About this area',
+    getQuoteNow: 'Book now',
   },
 };
 
@@ -405,7 +409,7 @@ export default function DestinationDetailContent({
                   <div className={hasGallery ? '' : 'max-w-3xl'}>
                     {!description.trim().startsWith('#') && (
                       <h2 className="text-2xl md:text-3xl font-bold mb-6">
-                        {locale === 'es' ? 'Sobre este destino' : 'About this destination'}
+                        {t.aboutThisArea}
                       </h2>
                     )}
                     <div className="prose prose-lg dark:prose-invert prose-brand max-w-none">
@@ -626,6 +630,17 @@ export default function DestinationDetailContent({
             </Link>
           </div>
         </LazySection>
+
+        {/* Floating CTA Button */}
+        <div className="fixed top-24 right-6 z-40">
+          <Link
+            href={`/${locale}#booking`}
+            className="flex items-center gap-2 px-6 py-3 bg-brand-500 hover:bg-brand-600 text-white font-semibold rounded-full shadow-lg hover:shadow-xl transition-all duration-300 animate-pulse hover:animate-none"
+          >
+            <TruckIcon className="w-5 h-5" />
+            {t.getQuoteNow}
+          </Link>
+        </div>
       </main>
 
       {/* Lightbox Modal */}

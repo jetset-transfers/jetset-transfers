@@ -18,6 +18,7 @@ import {
   ExclamationTriangleIcon,
 } from '@heroicons/react/24/outline';
 import { useCurrency } from '@/contexts/CurrencyContext';
+import CountryCodeSelect from '@/components/ui/CountryCodeSelect';
 
 interface BookingContentProps {
   locale: string;
@@ -171,29 +172,6 @@ export default function BookingContent({ locale, searchParams }: BookingContentP
   const [selectedVehicle, setSelectedVehicle] = useState<VehiclePricing | null>(null);
   const [processing, setProcessing] = useState(false);
   const [paymentError, setPaymentError] = useState<string | null>(null);
-
-  // Country codes for phone dropdown
-  const countryCodes = [
-    { code: '+1', country: 'US', flag: '🇺🇸', label: 'USA (+1)' },
-    { code: '+52', country: 'MX', flag: '🇲🇽', label: 'México (+52)' },
-    { code: '+1', country: 'CA', flag: '🇨🇦', label: 'Canadá (+1)' },
-    { code: '+44', country: 'GB', flag: '🇬🇧', label: 'UK (+44)' },
-    { code: '+34', country: 'ES', flag: '🇪🇸', label: 'España (+34)' },
-    { code: '+33', country: 'FR', flag: '🇫🇷', label: 'Francia (+33)' },
-    { code: '+49', country: 'DE', flag: '🇩🇪', label: 'Alemania (+49)' },
-    { code: '+39', country: 'IT', flag: '🇮🇹', label: 'Italia (+39)' },
-    { code: '+55', country: 'BR', flag: '🇧🇷', label: 'Brasil (+55)' },
-    { code: '+54', country: 'AR', flag: '🇦🇷', label: 'Argentina (+54)' },
-    { code: '+57', country: 'CO', flag: '🇨🇴', label: 'Colombia (+57)' },
-    { code: '+56', country: 'CL', flag: '🇨🇱', label: 'Chile (+56)' },
-    { code: '+51', country: 'PE', flag: '🇵🇪', label: 'Perú (+51)' },
-    { code: '+58', country: 'VE', flag: '🇻🇪', label: 'Venezuela (+58)' },
-    { code: '+507', country: 'PA', flag: '🇵🇦', label: 'Panamá (+507)' },
-    { code: '+506', country: 'CR', flag: '🇨🇷', label: 'Costa Rica (+506)' },
-    { code: '+31', country: 'NL', flag: '🇳🇱', label: 'Países Bajos (+31)' },
-    { code: '+41', country: 'CH', flag: '🇨🇭', label: 'Suiza (+41)' },
-    { code: '+61', country: 'AU', flag: '🇦🇺', label: 'Australia (+61)' },
-  ];
 
   // Form state
   const [formData, setFormData] = useState({
@@ -619,17 +597,11 @@ export default function BookingContent({ locale, searchParams }: BookingContentP
                       {t.phone} *
                     </label>
                     <div className="flex gap-2">
-                      <select
+                      <CountryCodeSelect
                         value={formData.countryCode}
-                        onChange={(e) => setFormData({ ...formData, countryCode: e.target.value })}
-                        className="w-32 sm:w-40 px-2 py-3 rounded-lg border border-gray-300 dark:border-navy-600 bg-white dark:bg-navy-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent text-sm"
-                      >
-                        {countryCodes.map((country) => (
-                          <option key={`${country.country}-${country.code}`} value={country.code}>
-                            {country.flag} {country.code}
-                          </option>
-                        ))}
-                      </select>
+                        onChange={(value) => setFormData({ ...formData, countryCode: value })}
+                        className="w-32 sm:w-36"
+                      />
                       <input
                         type="tel"
                         value={formData.phone}

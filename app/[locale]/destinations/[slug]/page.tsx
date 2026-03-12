@@ -185,7 +185,7 @@ export default async function DestinationDetailPage({ params }: DestinationDetai
     '@type': 'BreadcrumbList',
     itemListElement: [
       { '@type': 'ListItem', position: 1, name: 'Home', item: `https://www.jetsettransfers.com/${locale}` },
-      { '@type': 'ListItem', position: 2, name: locale === 'es' ? 'Destinos' : 'Destinations', item: `https://www.jetsettransfers.com/${locale}/destinations` },
+      { '@type': 'ListItem', position: 2, name: locale === 'es' ? 'Áreas' : 'Areas', item: `https://www.jetsettransfers.com/${locale}/destinations` },
       { '@type': 'ListItem', position: 3, name: name, item: `https://www.jetsettransfers.com/${locale}/destinations/${slug}` },
     ],
   };
