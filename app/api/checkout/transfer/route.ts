@@ -21,6 +21,7 @@ interface TransferCheckoutRequestBody {
   date?: string;
   time?: string;
   passengers: number;
+  serviceType?: 'private' | 'roundtrip' | 'oneway';
 
   // Vehicle
   vehicleName: string;
@@ -68,13 +69,16 @@ export async function POST(request: NextRequest) {
       ? `${body.specialRequests}${addressInfo}`
       : addressInfo.trim();
 
+    // Determine service type for database
+    const serviceType = body.serviceType === 'roundtrip' ? 'roundtrip' : 'transfer';
+
     const { data: booking, error: bookingError } = await supabase
       .from('bookings')
       .insert({
         customer_name: body.customerName,
         customer_email: body.customerEmail,
         customer_phone: body.customerPhone,
-        service_type: 'transfer',
+        service_type: serviceType,
         destination_id: null, // Not a predefined destination
         // Store route as "Origin → Destination"
         pickup_location: `${body.originName} → ${body.destName}`,
@@ -103,11 +107,16 @@ export async function POST(request: NextRequest) {
     // Get base URL for success/cancel redirects
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
 
-    // Build product description
+    // Build product description based on service type
+    const isRoundTrip = body.serviceType === 'roundtrip';
+    const serviceLabel = isRoundTrip
+      ? (body.locale === 'es' ? 'Viaje Redondo' : 'Round Trip')
+      : (body.locale === 'es' ? 'Transfer Privado' : 'Private Transfer');
+
     const description =
       body.locale === 'es'
-        ? `Transfer: ${body.originName} → ${body.destName} - ${body.vehicleName}`
-        : `Transfer: ${body.originName} → ${body.destName} - ${body.vehicleName}`;
+        ? `${serviceLabel}: ${body.originName} → ${body.destName} - ${body.vehicleName}`
+        : `${serviceLabel}: ${body.originName} → ${body.destName} - ${body.vehicleName}`;
 
     // Create Stripe Checkout Session
     const session = await stripe.checkout.sessions.create({
@@ -117,10 +126,7 @@ export async function POST(request: NextRequest) {
           price_data: {
             currency: 'usd',
             product_data: {
-              name:
-                body.locale === 'es'
-                  ? `Transfer Privado`
-                  : `Private Transfer`,
+              name: serviceLabel,
               description: description,
               images: ['https://www.jetsettransfers.com/images/og/og-image.jpg'],
             },

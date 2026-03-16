@@ -172,6 +172,7 @@ export default function BookingContent({ locale, searchParams }: BookingContentP
   const [selectedVehicle, setSelectedVehicle] = useState<VehiclePricing | null>(null);
   const [processing, setProcessing] = useState(false);
   const [paymentError, setPaymentError] = useState<string | null>(null);
+  const [roundTripDiscount, setRoundTripDiscount] = useState(10); // Default 10%
 
   // Form state
   const [formData, setFormData] = useState({
@@ -187,9 +188,24 @@ export default function BookingContent({ locale, searchParams }: BookingContentP
   });
   const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({});
 
-  // Load destination data
+  // Load destination data and settings
   useEffect(() => {
-    const loadDestination = async () => {
+    const loadData = async () => {
+      // Fetch round trip discount setting
+      const { data: settingsData } = await supabase
+        .from('site_settings')
+        .select('value')
+        .eq('key', 'roundtrip_discount')
+        .single();
+
+      if (settingsData?.value) {
+        const discount = parseFloat(settingsData.value);
+        if (!isNaN(discount) && discount >= 0 && discount <= 50) {
+          setRoundTripDiscount(discount);
+        }
+      }
+
+      // Fetch destination
       if (!destinationSlug) {
         setLoading(false);
         return;
@@ -220,15 +236,16 @@ export default function BookingContent({ locale, searchParams }: BookingContentP
       setLoading(false);
     };
 
-    loadDestination();
+    loadData();
   }, [destinationSlug, preSelectedVehicle]);
 
-  // Calculate price
+  // Calculate price with dynamic round trip discount
   const calculatePrice = () => {
     if (!selectedVehicle) return 0;
     let price = selectedVehicle.price_usd;
     if (serviceType === 'roundtrip') {
-      price = price * 2 * 0.9; // 10% discount for round trip
+      // Apply configurable discount: (price × 2) - discount%
+      price = price * 2 * (1 - roundTripDiscount / 100);
     }
     return price;
   };
@@ -947,10 +964,10 @@ export default function BookingContent({ locale, searchParams }: BookingContentP
                     )}
 
                     {/* Discount */}
-                    {serviceType === 'roundtrip' && (
+                    {serviceType === 'roundtrip' && roundTripDiscount > 0 && (
                       <div className="flex justify-between text-sm text-green-600 dark:text-green-400">
-                        <span>Descuento 10%</span>
-                        <span>-{formatPrice(selectedVehicle.price_usd * 2 * 0.1)}</span>
+                        <span>{locale === 'es' ? `Descuento ${roundTripDiscount}%` : `${roundTripDiscount}% Discount`}</span>
+                        <span>-{formatPrice(selectedVehicle.price_usd * 2 * roundTripDiscount / 100)}</span>
                       </div>
                     )}
 

@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { createClient } from '@/lib/supabase/client';
 import {
   MapPinIcon,
   CalendarDaysIcon,
@@ -85,9 +86,12 @@ const labels = {
     tripDetails: 'Detalles del viaje',
     serviceType: 'Tipo de servicio',
     privateTransfer: 'Transfer Privado',
+    roundTrip: 'Viaje Redondo',
     travelTime: 'Tiempo de traslado',
     distanceLabel: 'Distancia',
     bookingSummary: 'Resumen de reserva',
+    discount: 'Descuento',
+    basePrice: 'Precio base (×2)',
   },
   en: {
     title: 'Book Transfer',
@@ -140,16 +144,25 @@ const labels = {
     tripDetails: 'Trip details',
     serviceType: 'Service type',
     privateTransfer: 'Private Transfer',
+    roundTrip: 'Round Trip',
     travelTime: 'Travel time',
     distanceLabel: 'Distance',
     bookingSummary: 'Booking summary',
+    discount: 'Discount',
+    basePrice: 'Base price (×2)',
   },
 };
 
 
+type ServiceType = 'private' | 'roundtrip' | 'oneway';
+
 export default function TransferBookingContent({ locale, searchParams }: TransferBookingContentProps) {
   const router = useRouter();
+  const supabase = createClient();
   const t = labels[locale as keyof typeof labels] || labels.es;
+
+  // Get service type from URL
+  const serviceType = (searchParams.type as ServiceType) || 'private';
 
   // Parse search params
   const transferData = useMemo(() => {
@@ -185,6 +198,7 @@ export default function TransferBookingContent({ locale, searchParams }: Transfe
   const [selectedVehicle, setSelectedVehicle] = useState<VehiclePricing | null>(null);
   const [numPassengers, setNumPassengers] = useState(1);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [roundTripDiscount, setRoundTripDiscount] = useState(10); // Default 10%
   const [passengerData, setPassengerData] = useState({
     fullName: '',
     email: '',
@@ -194,6 +208,36 @@ export default function TransferBookingContent({ locale, searchParams }: Transfe
     specialRequests: '',
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  // Fetch round trip discount setting
+  useEffect(() => {
+    const fetchDiscount = async () => {
+      const { data } = await supabase
+        .from('site_settings')
+        .select('value')
+        .eq('key', 'roundtrip_discount')
+        .single();
+
+      if (data?.value) {
+        const discount = parseFloat(data.value);
+        if (!isNaN(discount) && discount >= 0 && discount <= 50) {
+          setRoundTripDiscount(discount);
+        }
+      }
+    };
+    fetchDiscount();
+  }, [supabase]);
+
+  // Calculate price with round trip discount
+  const calculatePrice = () => {
+    if (!selectedVehicle) return 0;
+    let price = selectedVehicle.price_usd;
+    if (serviceType === 'roundtrip') {
+      // Apply configurable discount: (price × 2) - discount%
+      price = price * 2 * (1 - roundTripDiscount / 100);
+    }
+    return Math.round(price * 100) / 100; // Round to 2 decimals
+  };
 
   // All available vehicles (no filtering by passengers - user selects after choosing vehicle)
   const availableVehicles = transferData.vehiclePricing;
@@ -276,7 +320,8 @@ export default function TransferBookingContent({ locale, searchParams }: Transfe
           passengers: numPassengers,
           // Vehicle
           vehicleName: selectedVehicle.vehicle_name,
-          priceUsd: selectedVehicle.price_usd,
+          priceUsd: calculatePrice(),
+          serviceType,
           pricingId: transferData.pricingId,
           // Customer
           customerName: passengerData.fullName,
@@ -681,10 +726,25 @@ export default function TransferBookingContent({ locale, searchParams }: Transfe
                   <span className="text-gray-600 dark:text-gray-400">{t.passengers}</span>
                   <span className="text-gray-900 dark:text-white">{numPassengers}</span>
                 </div>
+                {/* Round trip pricing breakdown */}
+                {serviceType === 'roundtrip' && (
+                  <>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600 dark:text-gray-400">{t.basePrice}</span>
+                      <span className="text-gray-900 dark:text-white">${selectedVehicle.price_usd * 2}</span>
+                    </div>
+                    {roundTripDiscount > 0 && (
+                      <div className="flex justify-between text-green-600 dark:text-green-400">
+                        <span>{t.discount} ({roundTripDiscount}%)</span>
+                        <span>-${(selectedVehicle.price_usd * 2 * roundTripDiscount / 100).toFixed(2)}</span>
+                      </div>
+                    )}
+                  </>
+                )}
                 <div className="border-t border-gray-200 dark:border-navy-700 pt-2 mt-2">
                   <div className="flex justify-between text-lg font-bold">
                     <span className="text-gray-900 dark:text-white">{t.total}</span>
-                    <span className="text-brand-500">${selectedVehicle.price_usd} USD</span>
+                    <span className="text-brand-500">${calculatePrice()} USD</span>
                   </div>
                 </div>
               </div>
@@ -712,7 +772,7 @@ export default function TransferBookingContent({ locale, searchParams }: Transfe
               ) : (
                 <>
                   <CreditCardIcon className="w-5 h-5" />
-                  {t.payNow} - ${selectedVehicle.price_usd} USD
+                  {t.payNow} - ${calculatePrice()} USD
                 </>
               )}
             </button>
@@ -749,7 +809,7 @@ export default function TransferBookingContent({ locale, searchParams }: Transfe
                     <div>
                       <p className="text-xs text-gray-500 dark:text-gray-400">{t.serviceType}</p>
                       <p className="text-sm font-medium text-gray-900 dark:text-white">
-                        {t.privateTransfer}
+                        {serviceType === 'roundtrip' ? t.roundTrip : t.privateTransfer}
                       </p>
                     </div>
                   </div>
@@ -823,10 +883,25 @@ export default function TransferBookingContent({ locale, searchParams }: Transfe
                       <span className="text-gray-500 dark:text-gray-400">{selectedVehicle.vehicle_name}</span>
                       <span className="text-gray-900 dark:text-white">${selectedVehicle.price_usd}</span>
                     </div>
+                    {/* Round trip pricing breakdown */}
+                    {serviceType === 'roundtrip' && (
+                      <>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-500 dark:text-gray-400">{t.basePrice}</span>
+                          <span className="text-gray-900 dark:text-white">${selectedVehicle.price_usd * 2}</span>
+                        </div>
+                        {roundTripDiscount > 0 && (
+                          <div className="flex justify-between text-sm text-green-500">
+                            <span>{t.discount} ({roundTripDiscount}%)</span>
+                            <span>-${(selectedVehicle.price_usd * 2 * roundTripDiscount / 100).toFixed(2)}</span>
+                          </div>
+                        )}
+                      </>
+                    )}
                     <div className="border-t border-gray-200 dark:border-navy-700 pt-2 mt-2">
                       <div className="flex justify-between font-semibold">
                         <span className="text-gray-900 dark:text-white">{t.total}</span>
-                        <span className="text-brand-500">${selectedVehicle.price_usd} USD</span>
+                        <span className="text-brand-500">${calculatePrice()} USD</span>
                       </div>
                     </div>
                   </div>
