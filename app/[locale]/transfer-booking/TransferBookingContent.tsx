@@ -17,6 +17,7 @@ import {
   ShieldCheckIcon,
 } from '@heroicons/react/24/outline';
 import CountryCodeSelect from '@/components/ui/CountryCodeSelect';
+import RouteMap from '@/components/maps/RouteMap';
 
 interface VehiclePricing {
   vehicle_name: string;
@@ -80,6 +81,13 @@ const labels = {
     // Common
     back: 'Volver',
     required: 'Requerido',
+    // Sidebar
+    tripDetails: 'Detalles del viaje',
+    serviceType: 'Tipo de servicio',
+    privateTransfer: 'Transfer Privado',
+    travelTime: 'Tiempo de traslado',
+    distanceLabel: 'Distancia',
+    bookingSummary: 'Resumen de reserva',
   },
   en: {
     title: 'Book Transfer',
@@ -128,6 +136,13 @@ const labels = {
     // Common
     back: 'Back',
     required: 'Required',
+    // Sidebar
+    tripDetails: 'Trip details',
+    serviceType: 'Service type',
+    privateTransfer: 'Private Transfer',
+    travelTime: 'Travel time',
+    distanceLabel: 'Distance',
+    bookingSummary: 'Booking summary',
   },
 };
 
@@ -302,7 +317,7 @@ export default function TransferBookingContent({ locale, searchParams }: Transfe
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-navy-950 pt-24 pb-12">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6">
         {/* Header */}
         <div className="mb-6">
           <button
@@ -376,31 +391,35 @@ export default function TransferBookingContent({ locale, searchParams }: Transfe
           </div>
         </div>
 
-        {/* Route Summary (always visible) */}
-        <div className="bg-white dark:bg-navy-900 rounded-xl shadow-lg border border-gray-200 dark:border-navy-800 p-4 mb-6">
-          <div className="flex flex-wrap items-center gap-4 text-sm">
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-green-500" />
-              <span className="text-gray-600 dark:text-gray-400">{transferData.originName}</span>
+        {/* Grid Layout - Main content + Sidebar */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Main content - left column */}
+          <div className="lg:col-span-2 order-2 lg:order-1">
+            {/* Route Summary (always visible) */}
+            <div className="bg-white dark:bg-navy-900 rounded-xl shadow-lg border border-gray-200 dark:border-navy-800 p-4 mb-6">
+              <div className="flex flex-wrap items-center gap-4 text-sm">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-green-500" />
+                  <span className="text-gray-600 dark:text-gray-400">{transferData.originName}</span>
+                </div>
+                <ArrowRightIcon className="w-4 h-4 text-gray-400" />
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-brand-500" />
+                  <span className="text-gray-600 dark:text-gray-400">{transferData.destName}</span>
+                </div>
+                {transferData.date && (
+                  <>
+                    <span className="text-gray-300 dark:text-navy-600">|</span>
+                    <span className="text-gray-600 dark:text-gray-400">{formatDate(transferData.date)}</span>
+                  </>
+                )}
+                {transferData.time && (
+                  <span className="text-gray-600 dark:text-gray-400">{transferData.time}</span>
+                )}
+              </div>
             </div>
-            <ArrowRightIcon className="w-4 h-4 text-gray-400" />
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-brand-500" />
-              <span className="text-gray-600 dark:text-gray-400">{transferData.destName}</span>
-            </div>
-            {transferData.date && (
-              <>
-                <span className="text-gray-300 dark:text-navy-600">|</span>
-                <span className="text-gray-600 dark:text-gray-400">{formatDate(transferData.date)}</span>
-              </>
-            )}
-            {transferData.time && (
-              <span className="text-gray-600 dark:text-gray-400">{transferData.time}</span>
-            )}
-          </div>
-        </div>
 
-        {/* Step Content */}
+            {/* Step Content */}
         {currentStep === 'vehicle' && (
           <div className="bg-white dark:bg-navy-900 rounded-xl shadow-lg border border-gray-200 dark:border-navy-800 p-6">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
@@ -699,6 +718,123 @@ export default function TransferBookingContent({ locale, searchParams }: Transfe
             </button>
           </div>
         )}
+          </div>
+
+          {/* Sidebar - right column */}
+          <div className="lg:col-span-1 order-1 lg:order-2">
+            <div className="sticky top-24 space-y-6">
+              {/* Trip Details Card with Map */}
+              <div className="bg-white dark:bg-navy-900 rounded-xl p-5 border border-gray-200 dark:border-navy-700">
+                <h3 className="font-semibold text-gray-900 dark:text-white mb-4">
+                  {t.tripDetails}
+                </h3>
+
+                {/* Route Map */}
+                <RouteMap
+                  originLat={transferData.originLat}
+                  originLng={transferData.originLng}
+                  originName={transferData.originName}
+                  destLat={transferData.destLat}
+                  destLng={transferData.destLng}
+                  destName={transferData.destName}
+                  className="h-40 mb-4"
+                />
+
+                <div className="space-y-3">
+                  {/* Service type */}
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-brand-500/20 flex items-center justify-center text-brand-500">
+                      <TruckIcon className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">{t.serviceType}</p>
+                      <p className="text-sm font-medium text-gray-900 dark:text-white">
+                        {t.privateTransfer}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Origin */}
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-green-500/20 flex items-center justify-center">
+                      <div className="w-3 h-3 rounded-full bg-green-500" />
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">{t.origin}</p>
+                      <p className="text-sm font-medium text-gray-900 dark:text-white">
+                        {transferData.originName}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Destination */}
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-brand-500/20 flex items-center justify-center">
+                      <div className="w-3 h-3 rounded-full bg-brand-500" />
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">{t.destination}</p>
+                      <p className="text-sm font-medium text-gray-900 dark:text-white">
+                        {transferData.destName}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Duration */}
+                  {transferData.duration && (
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-lg bg-gray-100 dark:bg-navy-800 flex items-center justify-center text-gray-500">
+                        <ClockIcon className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">{t.travelTime}</p>
+                        <p className="text-sm font-medium text-gray-900 dark:text-white">
+                          {transferData.duration} {t.minutes}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Distance */}
+                  {transferData.distance && (
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-lg bg-gray-100 dark:bg-navy-800 flex items-center justify-center text-gray-500">
+                        <MapPinIcon className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">{t.distanceLabel}</p>
+                        <p className="text-sm font-medium text-gray-900 dark:text-white">
+                          {transferData.distance.toFixed(1)} km
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Booking Summary Card (shown when vehicle selected) */}
+              {selectedVehicle && (
+                <div className="bg-white dark:bg-navy-900 rounded-xl p-5 border border-gray-200 dark:border-navy-700">
+                  <h3 className="font-semibold text-gray-900 dark:text-white mb-4">
+                    {t.bookingSummary}
+                  </h3>
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-500 dark:text-gray-400">{selectedVehicle.vehicle_name}</span>
+                      <span className="text-gray-900 dark:text-white">${selectedVehicle.price_usd}</span>
+                    </div>
+                    <div className="border-t border-gray-200 dark:border-navy-700 pt-2 mt-2">
+                      <div className="flex justify-between font-semibold">
+                        <span className="text-gray-900 dark:text-white">{t.total}</span>
+                        <span className="text-brand-500">${selectedVehicle.price_usd} USD</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
