@@ -92,6 +92,9 @@ const labels = {
     bookingSummary: 'Resumen de reserva',
     discount: 'Descuento',
     basePrice: 'Precio base (×2)',
+    returnDate: 'Fecha de regreso',
+    returnTime: 'Hora de regreso',
+    oneWayPrice: 'Precio por tramo',
   },
   en: {
     title: 'Book Transfer',
@@ -150,6 +153,9 @@ const labels = {
     bookingSummary: 'Booking summary',
     discount: 'Discount',
     basePrice: 'Base price (×2)',
+    returnDate: 'Return date',
+    returnTime: 'Return time',
+    oneWayPrice: 'One-way price',
   },
 };
 
@@ -190,6 +196,8 @@ export default function TransferBookingContent({ locale, searchParams }: Transfe
       vehiclePricing,
       pricingId: searchParams.pricing_id || '',
       withLuggage: searchParams.with_luggage !== 'false', // Default to true unless explicitly false
+      returnDate: searchParams.return_date || '',
+      returnTime: searchParams.return_time || '',
     };
   }, [searchParams]);
 
@@ -317,6 +325,8 @@ export default function TransferBookingContent({ locale, searchParams }: Transfe
           // Trip details
           date: transferData.date,
           time: transferData.time,
+          returnDate: transferData.returnDate || undefined,
+          returnTime: transferData.returnTime || undefined,
           passengers: numPassengers,
           // Vehicle
           vehicleName: selectedVehicle.vehicle_name,
@@ -524,10 +534,21 @@ export default function TransferBookingContent({ locale, searchParams }: Transfe
                             </div>
                           </div>
                           <div className="text-right">
-                            <p className="text-xl font-bold text-gray-900 dark:text-white">
-                              ${vehicle.price_usd}
-                            </p>
-                            <p className="text-xs text-gray-500">USD</p>
+                            {serviceType === 'roundtrip' ? (
+                              <>
+                                <p className="text-xl font-bold text-gray-900 dark:text-white">
+                                  ${vehicle.price_usd * 2}
+                                </p>
+                                <p className="text-xs text-gray-500">USD ({t.roundTrip})</p>
+                              </>
+                            ) : (
+                              <>
+                                <p className="text-xl font-bold text-gray-900 dark:text-white">
+                                  ${vehicle.price_usd}
+                                </p>
+                                <p className="text-xs text-gray-500">USD</p>
+                              </>
+                            )}
                           </div>
                         </div>
                       </button>
@@ -718,6 +739,15 @@ export default function TransferBookingContent({ locale, searchParams }: Transfe
                     <span className="text-gray-900 dark:text-white">{formatDate(transferData.date)}</span>
                   </div>
                 )}
+                {serviceType === 'roundtrip' && transferData.returnDate && (
+                  <div className="flex justify-between">
+                    <span className="text-gray-600 dark:text-gray-400">{t.returnDate}</span>
+                    <span className="text-gray-900 dark:text-white">
+                      {formatDate(transferData.returnDate)}
+                      {transferData.returnTime && ` - ${transferData.returnTime}`}
+                    </span>
+                  </div>
+                )}
                 <div className="flex justify-between">
                   <span className="text-gray-600 dark:text-gray-400">{t.vehicle}</span>
                   <span className="text-gray-900 dark:text-white">{selectedVehicle.vehicle_name}</span>
@@ -840,6 +870,22 @@ export default function TransferBookingContent({ locale, searchParams }: Transfe
                     </div>
                   </div>
 
+                  {/* Return date for round trips */}
+                  {serviceType === 'roundtrip' && transferData.returnDate && (
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-lg bg-orange-500/20 flex items-center justify-center text-orange-500">
+                        <CalendarDaysIcon className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">{t.returnDate}</p>
+                        <p className="text-sm font-medium text-gray-900 dark:text-white">
+                          {formatDate(transferData.returnDate)}
+                          {transferData.returnTime && ` - ${transferData.returnTime}`}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
                   {/* Duration */}
                   {transferData.duration && (
                     <div className="flex items-center gap-3">
@@ -891,7 +937,7 @@ export default function TransferBookingContent({ locale, searchParams }: Transfe
                           <span className="text-gray-900 dark:text-white">${selectedVehicle.price_usd * 2}</span>
                         </div>
                         {roundTripDiscount > 0 && (
-                          <div className="flex justify-between text-sm text-green-500">
+                          <div className="flex justify-between text-sm text-green-600 dark:text-green-400">
                             <span>{t.discount} ({roundTripDiscount}%)</span>
                             <span>-${(selectedVehicle.price_usd * 2 * roundTripDiscount / 100).toFixed(2)}</span>
                           </div>

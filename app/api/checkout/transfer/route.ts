@@ -20,6 +20,8 @@ interface TransferCheckoutRequestBody {
   // Trip details
   date?: string;
   time?: string;
+  returnDate?: string;
+  returnTime?: string;
   passengers: number;
   serviceType?: 'private' | 'roundtrip' | 'oneway';
 
@@ -84,6 +86,8 @@ export async function POST(request: NextRequest) {
         pickup_location: `${body.originName} → ${body.destName}`,
         pickup_date: body.date || new Date().toISOString().split('T')[0],
         pickup_time: body.time || '00:00',
+        return_date: body.returnDate || null,
+        return_time: body.returnTime || null,
         num_passengers: body.passengers,
         pickup_flight_number: body.flightNumber || null,
         vehicle_name: body.vehicleName,
