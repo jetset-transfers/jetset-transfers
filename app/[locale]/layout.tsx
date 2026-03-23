@@ -40,11 +40,7 @@ export const metadata: Metadata = {
   other: {
     'msapplication-TileColor': '#102a43',
   },
-  alternates: {
-    types: {
-      'application/rss+xml': '/feed.xml',
-    },
-  },
+  alternates: {},
 };
 
 // Viewport configuration

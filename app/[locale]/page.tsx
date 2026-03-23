@@ -2,9 +2,10 @@ import dynamic from 'next/dynamic';
 import HeroSection from '@/components/home/HeroSection';
 import QuickBookingSearch from '@/components/home/QuickBookingSearch';
 import QuickBenefitsSection from '@/components/home/QuickBenefitsSection';
-import { LocalBusinessSchema, ServiceSchema, OrganizationSchema } from '@/components/seo/SchemaMarkup';
+import { LocalBusinessSchema, ServiceSchema, OrganizationSchema, WebSiteSchema, ReviewSchema } from '@/components/seo/SchemaMarkup';
 import { createClient } from '@/lib/supabase/server';
 import { getYearsOfExperienceFormatted } from '@/lib/constants';
+import { getContactInfo } from '@/lib/seo';
 
 // Skeleton loader component for consistent loading states
 function SectionSkeleton({ height, bg }: { height: string; bg: string }) {
@@ -153,6 +154,9 @@ export default async function HomePage({ params }: HomePageProps) {
 
   const whyChooseImage = whyChooseImages?.[0] || null;
 
+  // Fetch contact info for schemas
+  const contactInfo = await getContactInfo(supabase);
+
   // Transform carousel images to include price and link_url from metadata
   const transformedCarouselImages = (carouselImages || []).map((img: any) => ({
     id: img.id,
@@ -178,13 +182,16 @@ export default async function HomePage({ params }: HomePageProps) {
   return (
     <>
       {/* SEO Schema Markup */}
+      <WebSiteSchema locale={locale} />
       <LocalBusinessSchema
         locale={locale}
+        contactInfo={contactInfo}
         heroImageUrl={heroImage?.url}
         fleetImageUrl={fleetImage?.url}
       />
-      <ServiceSchema locale={locale} />
-      <OrganizationSchema locale={locale} />
+      <ServiceSchema locale={locale} contactInfo={contactInfo} />
+      <OrganizationSchema locale={locale} contactInfo={contactInfo} />
+      <ReviewSchema locale={locale} />
 
       {/* Page Content */}
       <HeroSection

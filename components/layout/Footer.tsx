@@ -155,11 +155,38 @@ export default function Footer({ contactInfo }: FooterProps) {
               </li>
               <li>
                 <Link
+                  href={`/${locale}/pricing`}
+                  className="text-sm text-gray-400 hover:text-white transition-colors"
+                  onClick={() => trackNavigation('Pricing', 'footer')}
+                >
+                  {locale === 'es' ? 'Precios' : 'Pricing'}
+                </Link>
+              </li>
+              <li>
+                <Link
                   href={`/${locale}/contact`}
                   className="text-sm text-gray-400 hover:text-white transition-colors"
                   onClick={() => trackNavigation(t('nav.contact'), 'footer')}
                 >
                   {t('nav.contact')}
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href={`/${locale}/faq`}
+                  className="text-sm text-gray-400 hover:text-white transition-colors"
+                  onClick={() => trackNavigation('FAQ', 'footer')}
+                >
+                  {locale === 'es' ? 'Preguntas Frecuentes' : 'FAQ'}
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href={`/${locale}/about`}
+                  className="text-sm text-gray-400 hover:text-white transition-colors"
+                  onClick={() => trackNavigation('About', 'footer')}
+                >
+                  {locale === 'es' ? 'Sobre Nosotros' : 'About Us'}
                 </Link>
               </li>
             </ul>

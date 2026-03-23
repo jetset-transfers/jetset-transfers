@@ -1,6 +1,8 @@
 import { Metadata } from 'next';
 import { createClient } from '@/lib/supabase/server';
 import { getZones } from '@/lib/constants/zones';
+import { BreadcrumbSchema, ItemListSchema } from '@/components/seo/SchemaMarkup';
+import { SITE_URL } from '@/lib/seo';
 import DestinationsContent from './DestinationsContent';
 
 interface DestinationsPageProps {
@@ -76,5 +78,28 @@ export default async function DestinationsPage({ params }: DestinationsPageProps
   // Fetch zones from database with fallback to defaults
   const zones = await getZones(supabase);
 
-  return <DestinationsContent locale={locale} destinations={destinations || []} zones={zones} />;
+  const destList = destinations || [];
+
+  // Build ItemList schema for SEO
+  const itemListItems = destList.map((dest, index) => ({
+    name: locale === 'es' ? dest.name_es : dest.name_en,
+    url: `/${locale}/destinations/${dest.slug}`,
+    image: dest.image_url || undefined,
+    description: locale === 'es' ? dest.description_es : dest.description_en,
+    position: index + 1,
+  }));
+
+  return (
+    <>
+      <BreadcrumbSchema items={[
+        { name: locale === 'es' ? 'Inicio' : 'Home', url: `/${locale}` },
+        { name: locale === 'es' ? 'Areas de Traslado' : 'Transfer Areas', url: `/${locale}/destinations` },
+      ]} />
+      <ItemListSchema
+        items={itemListItems}
+        name={locale === 'es' ? 'Areas de Traslado en Cancun y Riviera Maya' : 'Transfer Areas in Cancun and Riviera Maya'}
+      />
+      <DestinationsContent locale={locale} destinations={destList} zones={zones} />
+    </>
+  );
 }

@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import { createClient } from '@/lib/supabase/server';
+import { BreadcrumbSchema, VehicleProductSchema } from '@/components/seo/SchemaMarkup';
 import VehiclesContent from './VehiclesContent';
 
 interface VehiclesPageProps {
@@ -72,5 +73,16 @@ export default async function VehiclesPage({ params }: VehiclesPageProps) {
     .eq('is_active', true)
     .order('display_order', { ascending: true });
 
-  return <VehiclesContent locale={locale} vehicles={vehicles || []} />;
+  const vehicleList = vehicles || [];
+
+  return (
+    <>
+      <BreadcrumbSchema items={[
+        { name: locale === 'es' ? 'Inicio' : 'Home', url: `/${locale}` },
+        { name: locale === 'es' ? 'Vehiculos' : 'Vehicles', url: `/${locale}/vehicles` },
+      ]} />
+      <VehicleProductSchema vehicles={vehicleList} locale={locale} />
+      <VehiclesContent locale={locale} vehicles={vehicleList} />
+    </>
+  );
 }

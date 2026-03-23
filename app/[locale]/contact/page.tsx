@@ -2,6 +2,8 @@ import { getTranslations } from 'next-intl/server';
 import { createClient } from '@/lib/supabase/server';
 import ContactForm from '@/components/contact/ContactForm';
 import { EmailLink, PhoneLinks, WhatsAppButton } from '@/components/contact/ContactInfoLinks';
+import { BreadcrumbSchema, ContactPageSchema } from '@/components/seo/SchemaMarkup';
+import { getContactInfo } from '@/lib/seo';
 import LazyMap from '@/components/ui/LazyMap';
 import {
   MapPinIcon,
@@ -76,7 +78,16 @@ export default async function ContactPage({ params, searchParams }: ContactPageP
   const googleMapsEmbed = dbContactInfo?.google_maps_embed ||
     'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3721.2847392889904!2d-86.87699268507456!3d21.036544985994!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8f4c2b05aef653db%3A0xce32b73c625fcd8a!2sAeropuerto%20Internacional%20de%20Canc%C3%BAn!5e0!3m2!1ses-419!2smx!4v1640000000000!5m2!1ses-419!2smx';
 
+  // Get contact info for schema
+  const seoContactInfo = await getContactInfo(supabase);
+
   return (
+    <>
+    <BreadcrumbSchema items={[
+      { name: locale === 'es' ? 'Inicio' : 'Home', url: `/${locale}` },
+      { name: locale === 'es' ? 'Contacto' : 'Contact', url: `/${locale}/contact` },
+    ]} />
+    <ContactPageSchema locale={locale} contactInfo={seoContactInfo} />
     <main className="min-h-screen pt-28 md:pt-32 pb-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
@@ -187,6 +198,7 @@ export default async function ContactPage({ params, searchParams }: ContactPageP
         </div>
       </div>
     </main>
+    </>
   );
 }
 

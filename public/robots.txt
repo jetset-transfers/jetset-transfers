@@ -11,6 +11,24 @@ Disallow: /admin
 Disallow: /admin/
 Disallow: /_next/
 Disallow: /api/
+Disallow: /*/booking/success
+Disallow: /*/booking/cancel
+
+# Allow AI crawlers for ChatGPT and Bing AI
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: Applebot
+Allow: /
 
 # Sitemap location
 Sitemap: https://www.jetsetcancun.com/sitemap.xml
