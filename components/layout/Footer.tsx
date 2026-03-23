@@ -78,7 +78,7 @@ export default function Footer({ contactInfo }: FooterProps) {
     ? contactInfo.phones
     : [{ display: contactInfo?.phone || '+52 998 740 7149', link: contactInfo?.phone_link || '+529987407149' }];
 
-  const email = contactInfo?.email || 'info@jetsettransfers.com';
+  const email = contactInfo?.email || 'info@jetsetcancun.com';
 
   return (
     <footer className="bg-navy-900 border-t border-navy-800">

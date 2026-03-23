@@ -328,7 +328,7 @@ export default function ContentPageContent({ user, content: initialContent }: Co
               <div className="w-2 h-2 rounded-full bg-yellow-400" />
               <div className="w-2 h-2 rounded-full bg-green-400" />
               <div className="ml-2 flex-1 h-3 bg-navy-700 rounded text-[8px] text-navy-500 flex items-center justify-center">
-                jetsettransfers.com
+                jetsetcancun.com
               </div>
             </div>
 

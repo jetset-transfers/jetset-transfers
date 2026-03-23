@@ -107,7 +107,7 @@ export async function POST(request: NextRequest) {
                   ? `Transfer a ${body.destinationName}`
                   : `Transfer to ${body.destinationName}`,
               description: description,
-              images: ['https://www.jetsettransfers.com/images/og/og-image.jpg'],
+              images: ['https://www.jetsetcancun.com/images/og/og-image.jpg'],
             },
             unit_amount: Math.round(body.priceUsd * 100), // Stripe uses cents
           },

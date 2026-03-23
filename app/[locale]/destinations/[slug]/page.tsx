@@ -38,8 +38,8 @@ export async function generateMetadata({ params }: DestinationDetailPageProps): 
 
   // Get image URL - ensure it's absolute
   const imageUrl = destination.image_url
-    ? (destination.image_url.startsWith('http') ? destination.image_url : `https://www.jetsettransfers.com${destination.image_url}`)
-    : 'https://www.jetsettransfers.com/images/og/og-image.jpg';
+    ? (destination.image_url.startsWith('http') ? destination.image_url : `https://www.jetsetcancun.com${destination.image_url}`)
+    : 'https://www.jetsetcancun.com/images/og/og-image.jpg';
 
   return {
     title: metaTitle,
@@ -50,7 +50,7 @@ export async function generateMetadata({ params }: DestinationDetailPageProps): 
     openGraph: {
       title: metaTitle,
       description: metaDescription,
-      url: `https://www.jetsettransfers.com/${locale}/destinations/${slug}`,
+      url: `https://www.jetsetcancun.com/${locale}/destinations/${slug}`,
       siteName: 'Jetset Transfers',
       images: [
         {
@@ -70,11 +70,11 @@ export async function generateMetadata({ params }: DestinationDetailPageProps): 
       images: [imageUrl],
     },
     alternates: {
-      canonical: `https://www.jetsettransfers.com/${locale}/destinations/${slug}`,
+      canonical: `https://www.jetsetcancun.com/${locale}/destinations/${slug}`,
       languages: {
-        'es': `https://www.jetsettransfers.com/es/destinations/${slug}`,
-        'en': `https://www.jetsettransfers.com/en/destinations/${slug}`,
-        'x-default': `https://www.jetsettransfers.com/en/destinations/${slug}`,
+        'es': `https://www.jetsetcancun.com/es/destinations/${slug}`,
+        'en': `https://www.jetsetcancun.com/en/destinations/${slug}`,
+        'x-default': `https://www.jetsetcancun.com/en/destinations/${slug}`,
       },
     },
   };
@@ -134,8 +134,8 @@ export default async function DestinationDetailPage({ params }: DestinationDetai
   const name = locale === 'es' ? destination.name_es : destination.name_en;
   const description = locale === 'es' ? destination.description_es : destination.description_en;
   const imageUrl = destination.image_url
-    ? (destination.image_url.startsWith('http') ? destination.image_url : `https://www.jetsettransfers.com${destination.image_url}`)
-    : 'https://www.jetsettransfers.com/images/og/og-image.jpg';
+    ? (destination.image_url.startsWith('http') ? destination.image_url : `https://www.jetsetcancun.com${destination.image_url}`)
+    : 'https://www.jetsetcancun.com/images/og/og-image.jpg';
 
   // Build schemas for rendering
   const vehiclePricing = destination.vehicle_pricing || [];
@@ -165,7 +165,7 @@ export default async function DestinationDetailPage({ params }: DestinationDetai
         priceCurrency: 'USD',
         availability: 'https://schema.org/InStock',
         priceValidUntil: new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split('T')[0],
-        url: `https://www.jetsettransfers.com/${locale}/destinations/${slug}`,
+        url: `https://www.jetsetcancun.com/${locale}/destinations/${slug}`,
       })),
     } : vehiclePricing.length === 1 ? {
       '@type': 'Offer',
@@ -173,10 +173,10 @@ export default async function DestinationDetailPage({ params }: DestinationDetai
       priceCurrency: 'USD',
       availability: 'https://schema.org/InStock',
       priceValidUntil: new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split('T')[0],
-      url: `https://www.jetsettransfers.com/${locale}/destinations/${slug}`,
+      url: `https://www.jetsetcancun.com/${locale}/destinations/${slug}`,
     } : { '@type': 'Offer', priceCurrency: 'USD', availability: 'https://schema.org/InStock' },
     aggregateRating: { '@type': 'AggregateRating', ratingValue: '4.9', reviewCount: '150' },
-    url: `https://www.jetsettransfers.com/${locale}/destinations/${slug}`,
+    url: `https://www.jetsetcancun.com/${locale}/destinations/${slug}`,
     category: locale === 'es' ? 'Traslados Privados' : 'Private Transfers',
   };
 
@@ -184,9 +184,9 @@ export default async function DestinationDetailPage({ params }: DestinationDetai
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
     itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Home', item: `https://www.jetsettransfers.com/${locale}` },
-      { '@type': 'ListItem', position: 2, name: locale === 'es' ? 'Áreas' : 'Areas', item: `https://www.jetsettransfers.com/${locale}/destinations` },
-      { '@type': 'ListItem', position: 3, name: name, item: `https://www.jetsettransfers.com/${locale}/destinations/${slug}` },
+      { '@type': 'ListItem', position: 1, name: 'Home', item: `https://www.jetsetcancun.com/${locale}` },
+      { '@type': 'ListItem', position: 2, name: locale === 'es' ? 'Áreas' : 'Areas', item: `https://www.jetsetcancun.com/${locale}/destinations` },
+      { '@type': 'ListItem', position: 3, name: name, item: `https://www.jetsetcancun.com/${locale}/destinations/${slug}` },
     ],
   };
 

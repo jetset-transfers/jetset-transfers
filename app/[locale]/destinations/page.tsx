@@ -32,11 +32,11 @@ export async function generateMetadata({ params }: DestinationsPageProps): Promi
     openGraph: {
       title,
       description,
-      url: `https://www.jetsettransfers.com/${locale}/destinations`,
+      url: `https://www.jetsetcancun.com/${locale}/destinations`,
       siteName: 'Jetset Transfers',
       images: [
         {
-          url: 'https://www.jetsettransfers.com/images/og/og-image.jpg',
+          url: 'https://www.jetsetcancun.com/images/og/og-image.jpg',
           width: 1200,
           height: 630,
           alt: locale === 'es' ? 'Traslados en Cancún - Jetset Transfers' : 'Cancun Transfers - Jetset Transfers',
@@ -49,14 +49,14 @@ export async function generateMetadata({ params }: DestinationsPageProps): Promi
       card: 'summary_large_image',
       title,
       description,
-      images: ['https://www.jetsettransfers.com/images/og/og-image.jpg'],
+      images: ['https://www.jetsetcancun.com/images/og/og-image.jpg'],
     },
     alternates: {
-      canonical: `https://www.jetsettransfers.com/${locale}/destinations`,
+      canonical: `https://www.jetsetcancun.com/${locale}/destinations`,
       languages: {
-        'es': 'https://www.jetsettransfers.com/es/destinations',
-        'en': 'https://www.jetsettransfers.com/en/destinations',
-        'x-default': 'https://www.jetsettransfers.com/en/destinations',
+        'es': 'https://www.jetsetcancun.com/es/destinations',
+        'en': 'https://www.jetsetcancun.com/en/destinations',
+        'x-default': 'https://www.jetsetcancun.com/en/destinations',
       },
     },
   };

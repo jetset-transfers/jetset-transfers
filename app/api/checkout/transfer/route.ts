@@ -132,7 +132,7 @@ export async function POST(request: NextRequest) {
             product_data: {
               name: serviceLabel,
               description: description,
-              images: ['https://www.jetsettransfers.com/images/og/og-image.jpg'],
+              images: ['https://www.jetsetcancun.com/images/og/og-image.jpg'],
             },
             unit_amount: Math.round(body.priceUsd * 100), // Stripe uses cents
           },

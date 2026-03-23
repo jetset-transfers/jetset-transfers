@@ -31,11 +31,11 @@ export async function generateMetadata({ params }: VehiclesPageProps): Promise<M
     openGraph: {
       title,
       description,
-      url: `https://www.jetsettransfers.com/${locale}/vehicles`,
+      url: `https://www.jetsetcancun.com/${locale}/vehicles`,
       siteName: 'Jetset Transfers',
       images: [
         {
-          url: 'https://www.jetsettransfers.com/images/og/og-image.jpg',
+          url: 'https://www.jetsetcancun.com/images/og/og-image.jpg',
           width: 1200,
           height: 630,
           alt: locale === 'es' ? 'Vehículos Jetset Transfers' : 'Jetset Transfers Vehicles',
@@ -48,14 +48,14 @@ export async function generateMetadata({ params }: VehiclesPageProps): Promise<M
       card: 'summary_large_image',
       title,
       description,
-      images: ['https://www.jetsettransfers.com/images/og/og-image.jpg'],
+      images: ['https://www.jetsetcancun.com/images/og/og-image.jpg'],
     },
     alternates: {
-      canonical: `https://www.jetsettransfers.com/${locale}/vehicles`,
+      canonical: `https://www.jetsetcancun.com/${locale}/vehicles`,
       languages: {
-        'es': 'https://www.jetsettransfers.com/es/vehicles',
-        'en': 'https://www.jetsettransfers.com/en/vehicles',
-        'x-default': 'https://www.jetsettransfers.com/en/vehicles',
+        'es': 'https://www.jetsetcancun.com/es/vehicles',
+        'en': 'https://www.jetsetcancun.com/en/vehicles',
+        'x-default': 'https://www.jetsetcancun.com/en/vehicles',
       },
     },
   };

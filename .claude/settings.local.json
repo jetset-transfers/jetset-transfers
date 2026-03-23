@@ -13,7 +13,17 @@
       "Bash(npm install:*)",
       "Bash(npm run dev:*)",
       "Bash(npx tsc:*)",
-      "Bash(npx supabase:*)"
+      "Bash(npx supabase:*)",
+      "WebSearch",
+      "Bash(claude mcp:*)",
+      "Bash(npm uninstall:*)",
+      "Bash(npx -y --package=@stripe/mcp@latest stripe-mcp --help)",
+      "Bash(npm view:*)",
+      "mcp__stripe__retrieve_balance",
+      "mcp__stripe__list_customers",
+      "mcp__stripe__list_products",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
     ]
   }
 }

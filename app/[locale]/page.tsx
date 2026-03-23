@@ -228,8 +228,8 @@ export async function generateMetadata({ params }: HomePageProps) {
 
   // Get OG image URL - use hero image if available, fallback to static
   const ogImageUrl = heroImage?.url
-    ? (heroImage.url.startsWith('http') ? heroImage.url : `https://www.jetsettransfers.com${heroImage.url}`)
-    : 'https://www.jetsettransfers.com/images/og/og-image.jpg';
+    ? (heroImage.url.startsWith('http') ? heroImage.url : `https://www.jetsetcancun.com${heroImage.url}`)
+    : 'https://www.jetsetcancun.com/images/og/og-image.jpg';
 
   const ogImageAlt = heroImage
     ? (locale === 'es' ? heroImage.alt_es : heroImage.alt_en) || 'Jetset Transfers'
@@ -255,7 +255,7 @@ export async function generateMetadata({ params }: HomePageProps) {
     openGraph: {
       title: titles[locale as keyof typeof titles] || titles.es,
       description: descriptions[locale as keyof typeof descriptions] || descriptions.es,
-      url: `https://www.jetsettransfers.com/${locale}`,
+      url: `https://www.jetsetcancun.com/${locale}`,
       siteName: 'Jetset Transfers',
       images: [
         {
@@ -275,11 +275,11 @@ export async function generateMetadata({ params }: HomePageProps) {
       images: [ogImageUrl],
     },
     alternates: {
-      canonical: `https://www.jetsettransfers.com/${locale}`,
+      canonical: `https://www.jetsetcancun.com/${locale}`,
       languages: {
-        'es': 'https://www.jetsettransfers.com/es',
-        'en': 'https://www.jetsettransfers.com/en',
-        'x-default': 'https://www.jetsettransfers.com/en',
+        'es': 'https://www.jetsetcancun.com/es',
+        'en': 'https://www.jetsetcancun.com/en',
+        'x-default': 'https://www.jetsetcancun.com/en',
       },
     },
   };

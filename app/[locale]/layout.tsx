@@ -28,7 +28,7 @@ const locales = ['es', 'en'];
 
 // Global metadata base URL for all pages
 export const metadata: Metadata = {
-  metadataBase: new URL('https://www.jetsettransfers.com'),
+  metadataBase: new URL('https://www.jetsetcancun.com'),
   icons: {
     icon: '/images/logo/logo-jetset.webp',
     shortcut: '/images/logo/logo-jetset.webp',

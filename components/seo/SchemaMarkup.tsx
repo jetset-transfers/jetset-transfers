@@ -15,26 +15,26 @@ export function LocalBusinessSchema({ locale, heroImageUrl, fleetImageUrl }: Loc
   // Ensure URLs are absolute
   const getAbsoluteUrl = (url: string) => {
     if (url.startsWith('http')) return url;
-    return `https://jetsettransfers.com${url}`;
+    return `https://jetsetcancun.com${url}`;
   };
 
   const schema = {
     '@context': 'https://schema.org',
     '@type': 'LocalBusiness',
-    '@id': 'https://jetsettransfers.com',
+    '@id': 'https://jetsetcancun.com',
     name: 'Jetset Transfers',
     alternateName: locale === 'es' ? 'Jetset Transfers Cancún' : 'Jetset Transfers Cancun',
     description: locale === 'es'
       ? `Transporte privado seguro y puntual desde el Aeropuerto de Cancún a hoteles y destinos turísticos en la Riviera Maya. ${getYearsOfExperienceFormatted()} años de experiencia.`
       : `Safe and punctual private transportation from Cancun Airport to hotels and tourist destinations in the Riviera Maya. ${getYearsOfExperienceFormatted()} years of experience.`,
-    url: 'https://jetsettransfers.com',
+    url: 'https://jetsetcancun.com',
     telephone: '+52-998-123-4567',
-    email: 'info@jetsettransfers.com',
+    email: 'info@jetsetcancun.com',
     logo: {
       '@type': 'ImageObject',
-      '@id': 'https://jetsettransfers.com/#logo',
-      url: 'https://jetsettransfers.com/images/logo/logo-jetset.webp',
-      contentUrl: 'https://jetsettransfers.com/images/logo/logo-jetset.webp',
+      '@id': 'https://jetsetcancun.com/#logo',
+      url: 'https://jetsetcancun.com/images/logo/logo-jetset.webp',
+      contentUrl: 'https://jetsetcancun.com/images/logo/logo-jetset.webp',
       caption: locale === 'es'
         ? 'Jetset Transfers - Transporte privado en Cancún y Riviera Maya'
         : 'Jetset Transfers - Private transportation in Cancún and Riviera Maya',
@@ -58,7 +58,7 @@ export function LocalBusinessSchema({ locale, heroImageUrl, fleetImageUrl }: Loc
     image: [
       {
         '@type': 'ImageObject',
-        url: 'https://jetsettransfers.com/images/logo/logo-jetset.webp',
+        url: 'https://jetsetcancun.com/images/logo/logo-jetset.webp',
         caption: locale === 'es' ? 'Logo de Jetset Transfers' : 'Jetset Transfers Logo',
         width: 150,
         height: 40,
@@ -200,7 +200,7 @@ export function TransferSchema({ transfer, locale }: TransferSchemaProps) {
     '@type': 'Product',
     name: transfer.name,
     description: transfer.description,
-    image: `https://jetsettransfers.com${transfer.image}`,
+    image: `https://jetsetcancun.com${transfer.image}`,
     offers: {
       '@type': 'Offer',
       price: transfer.price.replace('$', '').replace(',', ''),
@@ -210,7 +210,7 @@ export function TransferSchema({ transfer, locale }: TransferSchemaProps) {
     provider: {
       '@type': 'LocalBusiness',
       name: 'Jetset Transfers',
-      url: 'https://jetsettransfers.com',
+      url: 'https://jetsetcancun.com',
     },
   };
 
@@ -231,15 +231,15 @@ export function OrganizationSchema({ locale }: OrganizationSchemaProps) {
   const schema = {
     '@context': 'https://schema.org',
     '@type': 'Organization',
-    '@id': 'https://jetsettransfers.com/#organization',
+    '@id': 'https://jetsetcancun.com/#organization',
     name: 'Jetset Transfers',
     alternateName: ['Jetset Transfers Cancún', 'Jetset Transfers Mexico', 'Transporte Privado Cancún'],
-    url: 'https://jetsettransfers.com',
+    url: 'https://jetsetcancun.com',
     logo: {
       '@type': 'ImageObject',
-      '@id': 'https://jetsettransfers.com/#logo',
-      url: 'https://jetsettransfers.com/images/logo/logo-jetset.webp',
-      contentUrl: 'https://jetsettransfers.com/images/logo/logo-jetset.webp',
+      '@id': 'https://jetsetcancun.com/#logo',
+      url: 'https://jetsetcancun.com/images/logo/logo-jetset.webp',
+      contentUrl: 'https://jetsetcancun.com/images/logo/logo-jetset.webp',
       caption: locale === 'es'
         ? 'Jetset Transfers - Empresa de transporte privado en Cancún, México'
         : 'Jetset Transfers - Private transportation company in Cancún, Mexico',
@@ -249,7 +249,7 @@ export function OrganizationSchema({ locale }: OrganizationSchemaProps) {
     },
     image: {
       '@type': 'ImageObject',
-      url: 'https://jetsettransfers.com/images/logo/logo-jetset.webp',
+      url: 'https://jetsetcancun.com/images/logo/logo-jetset.webp',
       width: 150,
       height: 40,
     },
@@ -288,7 +288,7 @@ export function OrganizationSchema({ locale }: OrganizationSchemaProps) {
       '@type': 'ContactPoint',
       telephone: '+52-998-123-4567',
       contactType: locale === 'es' ? 'Reservaciones' : 'Reservations',
-      email: 'info@jetsettransfers.com',
+      email: 'info@jetsetcancun.com',
       availableLanguage: ['Spanish', 'English'],
       areaServed: 'MX',
     },
@@ -324,7 +324,7 @@ export function BreadcrumbSchema({ items }: BreadcrumbSchemaProps) {
       '@type': 'ListItem',
       position: index + 1,
       name: item.name,
-      item: `https://jetsettransfers.com${item.url}`,
+      item: `https://jetsetcancun.com${item.url}`,
     })),
   };
 
@@ -392,9 +392,9 @@ export function DestinationProductSchema({ destination, locale }: DestinationPro
 
   // Get absolute image URL
   const getAbsoluteUrl = (url: string) => {
-    if (!url) return 'https://www.jetsettransfers.com/images/og/og-image.jpg';
+    if (!url) return 'https://www.jetsetcancun.com/images/og/og-image.jpg';
     if (url.startsWith('http')) return url;
-    return `https://www.jetsettransfers.com${url}`;
+    return `https://www.jetsetcancun.com${url}`;
   };
 
   const imageUrl = getAbsoluteUrl(destination.image_url || '');
@@ -419,7 +419,7 @@ export function DestinationProductSchema({ destination, locale }: DestinationPro
       priceCurrency: 'USD',
       availability: 'https://schema.org/InStock',
       priceValidUntil: new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split('T')[0],
-      url: `https://www.jetsettransfers.com/${locale}/destinations/${destination.slug}`,
+      url: `https://www.jetsetcancun.com/${locale}/destinations/${destination.slug}`,
       description: locale === 'es'
         ? `Hasta ${pricing.max_passengers} pasajeros - ${pricing.vehicle_name}`
         : `Up to ${pricing.max_passengers} passengers - ${pricing.vehicle_name}`,
@@ -430,7 +430,7 @@ export function DestinationProductSchema({ destination, locale }: DestinationPro
     priceCurrency: 'USD',
     availability: 'https://schema.org/InStock',
     priceValidUntil: new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split('T')[0],
-    url: `https://www.jetsettransfers.com/${locale}/destinations/${destination.slug}`,
+    url: `https://www.jetsetcancun.com/${locale}/destinations/${destination.slug}`,
   } : null;
 
   const schema = {
@@ -449,14 +449,14 @@ export function DestinationProductSchema({ destination, locale }: DestinationPro
       '@type': 'Offer',
       priceCurrency: 'USD',
       availability: 'https://schema.org/InStock',
-      url: `https://www.jetsettransfers.com/${locale}/destinations/${destination.slug}`,
+      url: `https://www.jetsetcancun.com/${locale}/destinations/${destination.slug}`,
     },
     aggregateRating: {
       '@type': 'AggregateRating',
       ratingValue: '4.6',
       reviewCount: '9',
     },
-    url: `https://www.jetsettransfers.com/${locale}/destinations/${destination.slug}`,
+    url: `https://www.jetsetcancun.com/${locale}/destinations/${destination.slug}`,
     category: locale === 'es' ? 'Traslados Privados' : 'Private Transfers',
   };
 
