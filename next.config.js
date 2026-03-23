@@ -56,6 +56,26 @@ const nextConfig = {
           },
         ],
       },
+      // Force HTML pages to always revalidate on new deploys
+      // This prevents users from seeing stale cached pages
+      {
+        source: '/:locale(es|en)/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=0, must-revalidate',
+          },
+        ],
+      },
+      {
+        source: '/:locale(es|en)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=0, must-revalidate',
+          },
+        ],
+      },
       // Cache static assets aggressively (images, fonts, etc.)
       {
         source: '/images/:path*',
