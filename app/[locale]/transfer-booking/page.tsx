@@ -1,6 +1,8 @@
 import { Metadata } from 'next';
 import { Suspense } from 'react';
+import { createClient } from '@/lib/supabase/server';
 import TransferBookingContent from './TransferBookingContent';
+import QuickBookingSearch from '@/components/home/QuickBookingSearch';
 
 interface TransferBookingPageProps {
   params: Promise<{ locale: string }>;
@@ -15,8 +17,8 @@ export async function generateMetadata({ params }: TransferBookingPageProps): Pr
       ? 'Reservar Transfer | Jetset Transfers'
       : 'Book Transfer | Jetset Transfers',
     description: locale === 'es'
-      ? 'Completa tu reserva de transfer privado. Selecciona tu vehículo y realiza el pago seguro.'
-      : 'Complete your private transfer booking. Select your vehicle and make a secure payment.',
+      ? 'Reserva tu traslado privado desde el Aeropuerto de Cancun. Selecciona destino, vehiculo y paga en linea de forma segura.'
+      : 'Book your private transfer from Cancun Airport. Select destination, vehicle and pay online securely.',
   };
 }
 
@@ -41,6 +43,60 @@ function TransferBookingLoadingSkeleton() {
 export default async function TransferBookingPage({ params, searchParams }: TransferBookingPageProps) {
   const { locale } = await params;
   const resolvedSearchParams = await searchParams;
+
+  // Check if we have the essential params to show the booking flow
+  const hasBookingData = resolvedSearchParams.vehicle_pricing && resolvedSearchParams.dest_name;
+
+  if (!hasBookingData) {
+    // No booking data — show inline search form so user can select destination
+    const supabase = await createClient();
+    const { data: destinations } = await supabase
+      .from('destinations')
+      .select('*')
+      .eq('is_active', true)
+      .order('display_order', { ascending: true });
+
+    return (
+      <main className="min-h-screen pt-24 md:pt-28 pb-16 bg-gray-50 dark:bg-navy-950">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6">
+          {/* Header */}
+          <div className="text-center mb-8">
+            <h1 className="text-2xl md:text-3xl font-bold mb-3">
+              {locale === 'es' ? 'Reservar Traslado' : 'Book Your Transfer'}
+            </h1>
+            <p className="text-muted max-w-lg mx-auto">
+              {locale === 'es'
+                ? 'Selecciona tu destino, fecha y hora para ver vehiculos disponibles y precios.'
+                : 'Select your destination, date and time to see available vehicles and prices.'}
+            </p>
+          </div>
+
+          {/* Reuse the QuickBookingSearch component */}
+          <QuickBookingSearch locale={locale} destinations={destinations || []} />
+
+          {/* Trust signals */}
+          <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4 text-center text-sm text-muted">
+            <div className="flex flex-col items-center gap-1">
+              <span className="text-brand-500 font-semibold">24/7</span>
+              <span>{locale === 'es' ? 'Servicio disponible' : 'Service available'}</span>
+            </div>
+            <div className="flex flex-col items-center gap-1">
+              <span className="text-brand-500 font-semibold">4.9★</span>
+              <span>TripAdvisor</span>
+            </div>
+            <div className="flex flex-col items-center gap-1">
+              <span className="text-brand-500 font-semibold">$0</span>
+              <span>{locale === 'es' ? 'Cargos ocultos' : 'Hidden fees'}</span>
+            </div>
+            <div className="flex flex-col items-center gap-1">
+              <span className="text-brand-500 font-semibold">✓</span>
+              <span>{locale === 'es' ? 'Pago seguro' : 'Secure payment'}</span>
+            </div>
+          </div>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <Suspense fallback={<TransferBookingLoadingSkeleton />}>
