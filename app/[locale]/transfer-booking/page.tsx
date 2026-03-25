@@ -71,8 +71,10 @@ export default async function TransferBookingPage({ params, searchParams }: Tran
             </p>
           </div>
 
-          {/* Reuse the QuickBookingSearch component */}
-          <QuickBookingSearch locale={locale} destinations={destinations || []} />
+          {/* Reuse the QuickBookingSearch component - add pt to offset its negative margin */}
+          <div className="pt-16 sm:pt-20">
+            <QuickBookingSearch locale={locale} destinations={destinations || []} />
+          </div>
 
           {/* Trust signals */}
           <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4 text-center text-sm text-muted">
