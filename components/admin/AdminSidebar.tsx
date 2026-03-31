@@ -21,6 +21,7 @@ import {
   ShieldCheckIcon,
   GlobeAltIcon,
   CurrencyDollarIcon,
+  TicketIcon,
 } from '@heroicons/react/24/outline';
 import { useState } from 'react';
 
@@ -62,6 +63,11 @@ const menuItems = [
     title: 'Precios Zonas',
     icon: CurrencyDollarIcon,
     href: '/admin/zone-pricing',
+  },
+  {
+    title: 'Reservas',
+    icon: TicketIcon,
+    href: '/admin/bookings',
   },
   {
     title: 'Imágenes',
