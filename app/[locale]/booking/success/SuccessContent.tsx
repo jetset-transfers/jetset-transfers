@@ -116,6 +116,7 @@ export default function SuccessContent({
   const [loading, setLoading] = useState(true);
   const [booking, setBooking] = useState<BookingDetails | null>(null);
   const [error, setError] = useState(false);
+  const [conversionTracked, setConversionTracked] = useState(false);
 
   useEffect(() => {
     const loadBooking = async () => {
@@ -141,6 +142,47 @@ export default function SuccessContent({
 
     loadBooking();
   }, [bookingId]);
+
+  // Fire GA4 conversion events when booking loads successfully
+  useEffect(() => {
+    if (!booking || conversionTracked) return;
+    if (typeof window === 'undefined' || !window.gtag) return;
+
+    // Temporarily grant consent for conversion tracking even if cookies not accepted
+    window.gtag('consent', 'update', {
+      'ad_storage': 'granted',
+      'ad_user_data': 'granted',
+      'analytics_storage': 'granted',
+    });
+
+    const transactionId = booking.booking_number || booking.id;
+    const value = booking.price_usd;
+    const destination = booking.pickup_location || '';
+    const vehicle = booking.vehicle_name || '';
+
+    // 1. Locale-specific event for Google Ads conversion
+    const localeEvent = locale === 'es' ? 'booking_es' : 'booking_en';
+    window.gtag('event', localeEvent, {
+      transaction_id: transactionId,
+      value: value,
+      currency: 'USD',
+    });
+
+    // 2. Standard GA4 purchase event
+    window.gtag('event', 'purchase', {
+      transaction_id: transactionId,
+      value: value,
+      currency: 'USD',
+      items: [{
+        item_name: destination,
+        item_category: vehicle,
+        price: value,
+        quantity: 1,
+      }],
+    });
+
+    setConversionTracked(true);
+  }, [booking, conversionTracked, locale]);
 
   const formatDate = (dateStr: string) => {
     if (!dateStr) return '';
