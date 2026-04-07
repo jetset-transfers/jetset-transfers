@@ -106,7 +106,12 @@ function formatDateEN(dateString?: string): string {
 }
 
 function generateBookingConfirmationHTML(data: BookingConfirmationData['booking']): string {
-  const serviceTypeLabel = data.service_type === 'roundtrip' ? 'Round Trip Transfer' : 'Private Transfer';
+  const serviceTypeLabels: Record<string, string> = {
+    roundtrip: 'Round Trip Transfer',
+    private: 'Private Transfer',
+    oneway: 'One-Way Transfer',
+  };
+  const serviceTypeLabel = serviceTypeLabels[data.service_type] || 'Private Transfer';
 
   return `
 <!DOCTYPE html>
@@ -172,7 +177,7 @@ function generateBookingConfirmationHTML(data: BookingConfirmationData['booking'
                   <td style="padding: 8px 0; color: #1e293b; font-size: 14px; font-weight: 500;">${serviceTypeLabel}</td>
                 </tr>
                 <tr>
-                  <td style="padding: 8px 0; color: #64748b; font-size: 14px;">Destination:</td>
+                  <td style="padding: 8px 0; color: #64748b; font-size: 14px;">Route:</td>
                   <td style="padding: 8px 0; color: #1e293b; font-size: 14px; font-weight: 500;">${data.destination}</td>
                 </tr>
                 <tr>
@@ -290,7 +295,12 @@ function generateBookingConfirmationHTML(data: BookingConfirmationData['booking'
 }
 
 function generateBookingNotificationHTML(data: BookingConfirmationData['booking']): string {
-  const serviceTypeLabel = data.service_type === 'roundtrip' ? 'Viaje Redondo' : 'Traslado Privado';
+  const serviceTypeLabels: Record<string, string> = {
+    roundtrip: 'Viaje Redondo',
+    private: 'Traslado Privado',
+    oneway: 'Transfer One-Way',
+  };
+  const serviceTypeLabel = serviceTypeLabels[data.service_type] || 'Traslado Privado';
 
   return `
 <!DOCTYPE html>

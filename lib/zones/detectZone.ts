@@ -84,6 +84,7 @@ export function findZoneForPoint(point: Coordinate, zones: TransferZone[]): Tran
 
 /**
  * Find pricing for a route between two zones
+ * Searches bidirectionally - if A→B doesn't exist, will also check B→A
  * @param originZoneId - Origin zone ID
  * @param destinationZoneId - Destination zone ID
  * @param pricings - Array of zone pricings
@@ -94,11 +95,24 @@ export function findPricingForRoute(
   destinationZoneId: string,
   pricings: ZonePricing[]
 ): ZonePricing | null {
-  return pricings.find(
+  // First, try to find the exact route (origin → destination)
+  const directRoute = pricings.find(
     p => p.origin_zone_id === originZoneId &&
          p.destination_zone_id === destinationZoneId &&
          p.is_active
-  ) || null;
+  );
+
+  if (directRoute) return directRoute;
+
+  // If not found, try the reverse route (destination → origin)
+  // This allows bidirectional pricing with a single configuration
+  const reverseRoute = pricings.find(
+    p => p.origin_zone_id === destinationZoneId &&
+         p.destination_zone_id === originZoneId &&
+         p.is_active
+  );
+
+  return reverseRoute || null;
 }
 
 /**

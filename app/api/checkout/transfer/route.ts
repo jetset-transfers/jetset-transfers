@@ -71,8 +71,8 @@ export async function POST(request: NextRequest) {
       ? `${body.specialRequests}${addressInfo}`
       : addressInfo.trim();
 
-    // Determine service type for database
-    const serviceType = body.serviceType === 'roundtrip' ? 'roundtrip' : 'transfer';
+    // Determine service type for database - store the actual type
+    const serviceType = body.serviceType || 'private';
 
     const { data: booking, error: bookingError } = await supabase
       .from('bookings')
@@ -112,10 +112,13 @@ export async function POST(request: NextRequest) {
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
 
     // Build product description based on service type
-    const isRoundTrip = body.serviceType === 'roundtrip';
-    const serviceLabel = isRoundTrip
-      ? (body.locale === 'es' ? 'Viaje Redondo' : 'Round Trip')
-      : (body.locale === 'es' ? 'Transfer Privado' : 'Private Transfer');
+    const serviceLabels: Record<string, { es: string; en: string }> = {
+      roundtrip: { es: 'Viaje Redondo', en: 'Round Trip' },
+      private: { es: 'Transfer Privado', en: 'Private Transfer' },
+      oneway: { es: 'Transfer One-Way', en: 'One-Way Transfer' },
+    };
+    const labelConfig = serviceLabels[body.serviceType || 'private'] || serviceLabels.private;
+    const serviceLabel = body.locale === 'es' ? labelConfig.es : labelConfig.en;
 
     const description =
       body.locale === 'es'

@@ -158,6 +158,31 @@ export default function BookingsContent({ user, bookings: initialBookings }: Boo
     }
   };
 
+  const handlePaymentStatusChange = async (id: string, newPaymentStatus: string) => {
+    setLoading(true);
+    try {
+      const { error: updateError } = await supabase
+        .from('bookings')
+        .update({ payment_status: newPaymentStatus, updated_at: new Date().toISOString() })
+        .eq('id', id);
+
+      if (updateError) throw updateError;
+
+      setBookings(bookings.map(b =>
+        b.id === id ? { ...b, payment_status: newPaymentStatus } : b
+      ));
+      if (selectedBooking?.id === id) {
+        setSelectedBooking({ ...selectedBooking, payment_status: newPaymentStatus });
+      }
+      toast.success('Estado de pago actualizado');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Error al actualizar';
+      toast.error(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return new Intl.DateTimeFormat('es-MX', {
@@ -439,6 +464,23 @@ export default function BookingsContent({ user, bookings: initialBookings }: Boo
                         Ref: {selectedBooking.payment_reference}
                       </p>
                     )}
+                    {/* Payment status change buttons */}
+                    <div className="flex flex-wrap gap-1 mt-3 pt-3 border-t border-navy-700">
+                      {Object.entries(paymentStatusConfig).map(([key, config]) => (
+                        <button
+                          key={key}
+                          onClick={() => handlePaymentStatusChange(selectedBooking.id, key)}
+                          disabled={loading || selectedBooking.payment_status === key}
+                          className={`px-2 py-1 rounded text-xs font-medium transition-colors ${
+                            selectedBooking.payment_status === key
+                              ? config.color + ' cursor-default'
+                              : 'bg-navy-700 text-navy-400 hover:bg-navy-600 hover:text-white'
+                          }`}
+                        >
+                          {config.label}
+                        </button>
+                      ))}
+                    </div>
                   </div>
 
                   <div className="p-4 bg-navy-800 rounded-lg">

@@ -89,10 +89,16 @@ export async function POST(request: NextRequest) {
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
 
     // Build product description
+    const serviceLabels: Record<string, { es: string; en: string }> = {
+      roundtrip: { es: 'Ida y Vuelta', en: 'Round Trip' },
+      private: { es: 'Privado', en: 'Private' },
+      oneway: { es: 'One-Way', en: 'One-Way' },
+    };
+    const labelConfig = serviceLabels[body.serviceType] || serviceLabels.private;
     const description =
       body.locale === 'es'
-        ? `Transfer ${body.serviceType === 'roundtrip' ? 'Ida y Vuelta' : 'Privado'} - ${body.destinationName} - ${body.vehicleName}`
-        : `${body.serviceType === 'roundtrip' ? 'Round Trip' : 'Private'} Transfer - ${body.destinationName} - ${body.vehicleName}`;
+        ? `Transfer ${labelConfig.es} - ${body.destinationName} - ${body.vehicleName}`
+        : `${labelConfig.en} Transfer - ${body.destinationName} - ${body.vehicleName}`;
 
     // Create Stripe Checkout Session
     const session = await stripe.checkout.sessions.create({

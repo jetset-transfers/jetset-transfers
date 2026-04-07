@@ -98,6 +98,14 @@ export default function QuickBookingSearch({ locale, destinations }: QuickBookin
   // State for luggage option (Transfer One Way only)
   const [withLuggage, setWithLuggage] = useState(true);
 
+  // State for transfer direction (arrival = airport to hotel, departure = hotel to airport)
+  const [transferDirection, setTransferDirection] = useState<'arrival' | 'departure'>('arrival');
+
+  // Reset selected destination when transfer direction changes
+  useEffect(() => {
+    setSelectedDestination(null);
+  }, [transferDirection]);
+
   // State for zones and pricing
   const [zones, setZones] = useState<TransferZone[]>([]);
   const [zonePricings, setZonePricings] = useState<ZonePricing[]>([]);
@@ -155,6 +163,10 @@ export default function QuickBookingSearch({ locale, destinations }: QuickBookin
       withLuggage: 'Con equipaje',
       noLuggage: 'Sin equipaje',
       luggageQuestion: '¿Viajas con equipaje?',
+      arrival: 'Llegada',
+      departure: 'Salida',
+      arrivalDesc: 'Aeropuerto → Hotel',
+      departureDesc: 'Hotel → Aeropuerto',
     },
     en: {
       privateTransfer: 'Private Transfer',
@@ -179,6 +191,10 @@ export default function QuickBookingSearch({ locale, destinations }: QuickBookin
       withLuggage: 'With luggage',
       noLuggage: 'No luggage',
       luggageQuestion: 'Traveling with luggage?',
+      arrival: 'Arrival',
+      departure: 'Departure',
+      arrivalDesc: 'Airport → Hotel',
+      departureDesc: 'Hotel → Airport',
     },
   };
 
@@ -209,25 +225,39 @@ export default function QuickBookingSearch({ locale, destinations }: QuickBookin
       return;
     }
 
-    // Detect zones for airport to destination
+    // Determine origin and destination based on transfer direction
+    const isArrival = transferDirection === 'arrival' || serviceType === 'roundtrip';
+
+    const originCoords = isArrival
+      ? AIRPORT_COORDS
+      : { lat: selectedDestination.lat, lng: selectedDestination.lng };
+    const destCoords = isArrival
+      ? { lat: selectedDestination.lat, lng: selectedDestination.lng }
+      : AIRPORT_COORDS;
+
+    // Detect zones for the transfer
     const detection = detectZonesForTransfer(
-      AIRPORT_COORDS,
-      { lat: selectedDestination.lat, lng: selectedDestination.lng },
+      originCoords,
+      destCoords,
       zones,
       zonePricings
     );
 
+    // Build origin/destination names based on direction
+    const airportName = locale === 'es' ? 'Aeropuerto de Cancún' : 'Cancun Airport';
+    const airportAddress = 'Carretera Cancún-Chetumal Km 22, 77565 Cancún, Q.R.';
+
     // Build base params
     const params = new URLSearchParams({
       type: serviceType,
-      origin_name: locale === 'es' ? 'Aeropuerto de Cancún' : 'Cancun Airport',
-      origin_address: 'Carretera Cancún-Chetumal Km 22, 77565 Cancún, Q.R.',
-      origin_lat: AIRPORT_COORDS.lat.toString(),
-      origin_lng: AIRPORT_COORDS.lng.toString(),
-      dest_name: selectedDestination.name,
-      dest_address: selectedDestination.address,
-      dest_lat: selectedDestination.lat.toString(),
-      dest_lng: selectedDestination.lng.toString(),
+      origin_name: isArrival ? airportName : selectedDestination.name,
+      origin_address: isArrival ? airportAddress : selectedDestination.address,
+      origin_lat: originCoords.lat.toString(),
+      origin_lng: originCoords.lng.toString(),
+      dest_name: isArrival ? selectedDestination.name : airportName,
+      dest_address: isArrival ? selectedDestination.address : airportAddress,
+      dest_lat: destCoords.lat.toString(),
+      dest_lng: destCoords.lng.toString(),
       date: formData.pickup_date,
     });
 
@@ -403,6 +433,41 @@ export default function QuickBookingSearch({ locale, destinations }: QuickBookin
           <form onSubmit={handleSubmit} className="p-4">
             {(serviceType === 'private' || serviceType === 'roundtrip') && (
               <div className="space-y-3">
+                {/* Transfer Direction Toggle - Only for private transfer */}
+                {serviceType === 'private' && (
+                  <div className="flex flex-col items-center gap-1">
+                    <div className="flex items-center justify-center gap-1 p-1 bg-gray-100 dark:bg-navy-800 rounded-lg">
+                      <button
+                        type="button"
+                        onClick={() => setTransferDirection('arrival')}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all ${
+                          transferDirection === 'arrival'
+                            ? 'bg-white dark:bg-navy-700 text-brand-600 dark:text-brand-400 shadow-sm'
+                            : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                        }`}
+                      >
+                        <PaperAirplaneIcon className="w-4 h-4" />
+                        <span>{t.arrival}</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setTransferDirection('departure')}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all ${
+                          transferDirection === 'departure'
+                            ? 'bg-white dark:bg-navy-700 text-brand-600 dark:text-brand-400 shadow-sm'
+                            : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                        }`}
+                      >
+                        <PaperAirplaneIcon className="w-4 h-4 rotate-90" />
+                        <span>{t.departure}</span>
+                      </button>
+                    </div>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                      {transferDirection === 'arrival' ? t.arrivalDesc : t.departureDesc}
+                    </p>
+                  </div>
+                )}
+
                 {/* First row: Origin, Destination, Date, Time */}
                 <div className="flex flex-col sm:flex-row gap-3">
                   {/* Origin */}
@@ -410,12 +475,30 @@ export default function QuickBookingSearch({ locale, destinations }: QuickBookin
                     <label className="block text-[10px] font-semibold text-gray-400 dark:text-gray-500 mb-1 uppercase tracking-wider">
                       {t.origin}
                     </label>
-                    <div className="flex items-center gap-2 px-3 py-2.5 bg-gray-100 dark:bg-navy-800 rounded-lg">
-                      <MapPinIcon className="w-4 h-4 text-brand-500 flex-shrink-0" />
-                      <span className="text-sm text-gray-600 dark:text-gray-300 truncate">
-                        {t.airportCancun}
-                      </span>
-                    </div>
+                    {transferDirection === 'arrival' ? (
+                      <div className="flex items-center gap-2 px-3 py-2.5 bg-gray-100 dark:bg-navy-800 rounded-lg">
+                        <MapPinIcon className="w-4 h-4 text-brand-500 flex-shrink-0" />
+                        <span className="text-sm text-gray-600 dark:text-gray-300 truncate">
+                          {t.airportCancun}
+                        </span>
+                      </div>
+                    ) : (
+                      mapsLoaded ? (
+                        <PlacesAutocomplete
+                          placeholder={t.searchOrigin}
+                          value={selectedDestination}
+                          onChange={setSelectedDestination}
+                          locale={locale as 'es' | 'en'}
+                        />
+                      ) : (
+                        <div className="flex items-center gap-2 px-3 py-2.5 bg-gray-100 dark:bg-navy-800 rounded-lg">
+                          <MapPinIcon className="w-4 h-4 text-gray-400 animate-pulse" />
+                          <span className="text-sm text-gray-400">
+                            {locale === 'es' ? 'Cargando...' : 'Loading...'}
+                          </span>
+                        </div>
+                      )
+                    )}
                   </div>
 
                   {/* Destination */}
@@ -423,20 +506,29 @@ export default function QuickBookingSearch({ locale, destinations }: QuickBookin
                     <label className="block text-[10px] font-semibold text-gray-400 dark:text-gray-500 mb-1 uppercase tracking-wider">
                       {t.destination}
                     </label>
-                    {mapsLoaded ? (
-                      <PlacesAutocomplete
-                        placeholder={t.searchDestination}
-                        value={selectedDestination}
-                        onChange={setSelectedDestination}
-                        locale={locale as 'es' | 'en'}
-                      />
-                    ) : (
+                    {transferDirection === 'departure' ? (
                       <div className="flex items-center gap-2 px-3 py-2.5 bg-gray-100 dark:bg-navy-800 rounded-lg">
-                        <MapPinIcon className="w-4 h-4 text-gray-400 animate-pulse" />
-                        <span className="text-sm text-gray-400">
-                          {locale === 'es' ? 'Cargando...' : 'Loading...'}
+                        <MapPinIcon className="w-4 h-4 text-brand-500 flex-shrink-0" />
+                        <span className="text-sm text-gray-600 dark:text-gray-300 truncate">
+                          {t.airportCancun}
                         </span>
                       </div>
+                    ) : (
+                      mapsLoaded ? (
+                        <PlacesAutocomplete
+                          placeholder={t.searchDestination}
+                          value={selectedDestination}
+                          onChange={setSelectedDestination}
+                          locale={locale as 'es' | 'en'}
+                        />
+                      ) : (
+                        <div className="flex items-center gap-2 px-3 py-2.5 bg-gray-100 dark:bg-navy-800 rounded-lg">
+                          <MapPinIcon className="w-4 h-4 text-gray-400 animate-pulse" />
+                          <span className="text-sm text-gray-400">
+                            {locale === 'es' ? 'Cargando...' : 'Loading...'}
+                          </span>
+                        </div>
+                      )
                     )}
                   </div>
 
