@@ -495,8 +495,12 @@ export default function BookingsContent({ user, bookings: initialBookings }: Boo
                             const data = await res.json();
                             if (data.updated) {
                               toast.success(data.message);
-                              router.refresh();
-                              // Update local state
+                              // Update both list and detail state
+                              setBookings(bookings.map(b =>
+                                b.id === selectedBooking.id
+                                  ? { ...b, payment_status: 'paid', status: 'confirmed' }
+                                  : b
+                              ));
                               setSelectedBooking({
                                 ...selectedBooking,
                                 payment_status: 'paid',
