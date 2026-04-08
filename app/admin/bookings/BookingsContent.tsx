@@ -398,7 +398,7 @@ export default function BookingsContent({ user, bookings: initialBookings }: Boo
                     <span className={`px-2 py-0.5 rounded text-xs font-medium ${status.color}`}>
                       {status.label}
                     </span>
-                    <span className="text-green-400 font-semibold text-sm">
+                    <span className="text-green-400 font-semibold text-sm" suppressHydrationWarning>
                       ${Number(booking.total_usd).toFixed(2)} USD
                     </span>
                   </div>
@@ -456,7 +456,7 @@ export default function BookingsContent({ user, bookings: initialBookings }: Boo
                         {paymentStatusConfig[selectedBooking.payment_status as keyof typeof paymentStatusConfig]?.label || selectedBooking.payment_status}
                       </span>
                     </div>
-                    <p className="text-2xl font-bold text-green-400 mt-2">
+                    <p className="text-2xl font-bold text-green-400 mt-2" suppressHydrationWarning>
                       ${Number(selectedBooking.total_usd).toFixed(2)} USD
                     </p>
                     {selectedBooking.payment_reference && (
