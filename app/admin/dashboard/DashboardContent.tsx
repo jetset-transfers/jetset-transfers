@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import { User } from '@supabase/supabase-js';
 import AdminLayout from '@/components/admin/AdminLayout';
@@ -30,8 +31,6 @@ function StripeRevenueChart() {
   const [data, setData] = useState<RevenueData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
-  const [mounted, setMounted] = useState(false);
-
   const fetchRevenue = useCallback(async () => {
     setLoading(true);
     setError(false);
@@ -46,13 +45,11 @@ function StripeRevenueChart() {
     setLoading(false);
   }, []);
 
-  useEffect(() => { setMounted(true); fetchRevenue(); }, [fetchRevenue]);
-
-  if (!mounted) return null;
+  useEffect(() => { fetchRevenue(); }, [fetchRevenue]);
 
   if (loading) {
     return (
-      <div className="bg-navy-900 rounded-xl border border-navy-800 p-6">
+      <div className="bg-navy-900 rounded-xl border border-navy-800 p-6" style={{ minHeight: '320px' }}>
         <div className="flex items-center gap-3 mb-4">
           <CurrencyDollarIcon className="w-6 h-6 text-green-400" />
           <h2 className="text-lg font-medium text-white">Ingresos Stripe</h2>
@@ -219,6 +216,24 @@ interface DashboardContentProps {
   stats: DashboardStats;
 }
 
+const DynamicStripeRevenueChart = dynamic(
+  () => Promise.resolve(StripeRevenueChart),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="bg-navy-900 rounded-xl border border-navy-800 p-6" style={{ minHeight: '320px' }}>
+        <div className="flex items-center gap-3 mb-4">
+          <CurrencyDollarIcon className="w-6 h-6 text-green-400" />
+          <h2 className="text-lg font-medium text-white">Ingresos Stripe</h2>
+        </div>
+        <div className="flex items-center justify-center h-48">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-400" />
+        </div>
+      </div>
+    ),
+  }
+);
+
 export default function DashboardContent({ user, stats }: DashboardContentProps) {
   const router = useRouter();
 
@@ -297,7 +312,7 @@ export default function DashboardContent({ user, stats }: DashboardContentProps)
 
       {/* Stripe Revenue Chart */}
       <div className="mb-8">
-        <StripeRevenueChart />
+        <DynamicStripeRevenueChart />
       </div>
 
       {/* Storage & Database Grid */}
