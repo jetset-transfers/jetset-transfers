@@ -61,7 +61,7 @@ export default function AdminLoginPage() {
       <div className="relative w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">
-          <a href="/es">
+          <a href="/">
             <img
               src="/images/logo/logo-jetset-dark.webp"
               alt="Jetset Transfers - Panel de Administración"
