@@ -481,6 +481,44 @@ export default function BookingsContent({ user, bookings: initialBookings }: Boo
                         </button>
                       ))}
                     </div>
+                    {/* Verify payment in Stripe button */}
+                    {selectedBooking.payment_status !== 'paid' && (
+                      <button
+                        onClick={async () => {
+                          setLoading(true);
+                          try {
+                            const res = await fetch('/api/verify-stripe-payment', {
+                              method: 'POST',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({ bookingId: selectedBooking.id }),
+                            });
+                            const data = await res.json();
+                            if (data.updated) {
+                              toast.success(data.message);
+                              router.refresh();
+                              // Update local state
+                              setSelectedBooking({
+                                ...selectedBooking,
+                                payment_status: 'paid',
+                                status: 'confirmed',
+                              });
+                            } else if (data.error) {
+                              toast.error(data.error);
+                            } else {
+                              toast.info(data.message);
+                            }
+                          } catch {
+                            toast.error('Error al verificar pago en Stripe');
+                          }
+                          setLoading(false);
+                        }}
+                        disabled={loading}
+                        className="w-full mt-2 px-3 py-2 rounded text-xs font-medium bg-purple-600/20 text-purple-300 hover:bg-purple-600/40 hover:text-purple-200 transition-colors border border-purple-600/30 flex items-center justify-center gap-2"
+                      >
+                        <CurrencyDollarIcon className="w-4 h-4" />
+                        {loading ? 'Verificando...' : 'Verificar Pago en Stripe'}
+                      </button>
+                    )}
                   </div>
 
                   <div className="p-4 bg-navy-800 rounded-lg">
