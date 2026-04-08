@@ -61,7 +61,7 @@ export default function AdminLoginPage() {
 
       <div className="relative w-full max-w-md">
         {/* Logo */}
-        <div className="text-center mb-8">
+        <div className="text-center mb-8" suppressHydrationWarning>
           <Link href="/es">
             <Image
               src="/images/logo/logo-jetset-dark.webp"
