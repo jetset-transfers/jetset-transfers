@@ -1,6 +1,5 @@
 'use client';
 
-import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import { User } from '@supabase/supabase-js';
 import AdminLayout from '@/components/admin/AdminLayout';
@@ -14,11 +13,6 @@ import {
   ExclamationTriangleIcon,
   InformationCircleIcon,
 } from '@heroicons/react/24/outline';
-
-const StripeRevenueChart = dynamic(
-  () => import('./StripeRevenueChart'),
-  { ssr: false }
-);
 
 // System version info
 const SYSTEM_INFO = {
@@ -73,7 +67,6 @@ interface DashboardContentProps {
   user: User;
   stats: DashboardStats;
 }
-
 
 export default function DashboardContent({ user, stats }: DashboardContentProps) {
   const router = useRouter();
@@ -149,11 +142,6 @@ export default function DashboardContent({ user, stats }: DashboardContentProps)
           <p className="text-2xl font-semibold text-white">2</p>
           <p className="text-sm text-navy-400">Idiomas</p>
         </div>
-      </div>
-
-      {/* Stripe Revenue Chart */}
-      <div className="mb-8">
-        <StripeRevenueChart />
       </div>
 
       {/* Storage & Database Grid */}
