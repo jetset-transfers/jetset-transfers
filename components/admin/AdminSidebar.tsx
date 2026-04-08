@@ -117,7 +117,7 @@ export default function AdminSidebar({ userEmail }: AdminSidebarProps) {
     <>
       {/* Logo */}
       <div className="p-6 border-b border-navy-800">
-        <Link href="/admin/dashboard" className="block">
+        <a href="/" className="block">
           <Image
             src="/images/logo/logo-jetset-dark.webp"
             alt="Jetset Transfers"
@@ -126,7 +126,7 @@ export default function AdminSidebar({ userEmail }: AdminSidebarProps) {
             className="h-8 w-auto"
           />
           <p className="text-xs text-navy-500 mt-2">Panel de Administración</p>
-        </Link>
+        </a>
         <div className="mt-3 pt-3 border-t border-navy-800/50">
           <p className="text-[10px] text-navy-600">
             v{SYSTEM_VERSION} • {RELEASE_DATE}
@@ -178,7 +178,7 @@ export default function AdminSidebar({ userEmail }: AdminSidebarProps) {
       {/* Mobile Header */}
       <div className="lg:hidden fixed top-0 left-0 right-0 z-40 bg-navy-900 border-b border-navy-800">
         <div className="flex items-center justify-between px-4 h-16">
-          <Link href="/admin/dashboard">
+          <a href="/">
             <Image
               src="/images/logo/logo-jetset-dark.webp"
               alt="Jetset Transfers"
@@ -186,7 +186,7 @@ export default function AdminSidebar({ userEmail }: AdminSidebarProps) {
               height={32}
               className="h-7 w-auto"
             />
-          </Link>
+          </a>
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             className="p-2.5 text-navy-300 hover:text-white rounded-lg hover:bg-navy-800 transition-colors"
