@@ -30,6 +30,7 @@ function StripeRevenueChart() {
   const [data, setData] = useState<RevenueData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
   const fetchRevenue = useCallback(async () => {
     setLoading(true);
@@ -45,7 +46,9 @@ function StripeRevenueChart() {
     setLoading(false);
   }, []);
 
-  useEffect(() => { fetchRevenue(); }, [fetchRevenue]);
+  useEffect(() => { setMounted(true); fetchRevenue(); }, [fetchRevenue]);
+
+  if (!mounted) return null;
 
   if (loading) {
     return (
