@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import Link from 'next/link';
 import { EnvelopeIcon, LockClosedIcon, EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 import { createClient } from '@/lib/supabase/client';
 
@@ -61,17 +60,16 @@ export default function AdminLoginPage() {
 
       <div className="relative w-full max-w-md">
         {/* Logo */}
-        <div className="text-center mb-8" suppressHydrationWarning>
-          <Link href="/es">
-            <Image
+        <div className="text-center mb-8">
+          <a href="/es">
+            <img
               src="/images/logo/logo-jetset-dark.webp"
               alt="Jetset Transfers - Panel de Administración"
               width={180}
               height={48}
               className="h-12 w-auto mx-auto cursor-pointer"
-              priority
             />
-          </Link>
+          </a>
           <p className="text-navy-400 mt-3 text-sm">Panel de Administración</p>
         </div>
 
