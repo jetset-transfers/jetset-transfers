@@ -399,7 +399,7 @@ export default function BookingsContent({ user, bookings: initialBookings }: Boo
                       {status.label}
                     </span>
                     <span className="text-green-400 font-semibold text-sm">
-                      ${booking.total_usd} USD
+                      ${Number(booking.total_usd).toFixed(2)} USD
                     </span>
                   </div>
                 </button>
@@ -457,7 +457,7 @@ export default function BookingsContent({ user, bookings: initialBookings }: Boo
                       </span>
                     </div>
                     <p className="text-2xl font-bold text-green-400 mt-2">
-                      ${selectedBooking.total_usd} USD
+                      ${Number(selectedBooking.total_usd).toFixed(2)} USD
                     </p>
                     {selectedBooking.payment_reference && (
                       <p className="text-navy-500 text-xs mt-1 truncate">
