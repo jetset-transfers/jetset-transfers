@@ -17,7 +17,7 @@ export async function generateMetadata({ params }: SuccessPageProps): Promise<Me
     description: locale === 'es'
       ? 'Tu reserva ha sido confirmada exitosamente.'
       : 'Your booking has been successfully confirmed.',
-    robots: { index: false, follow: false },
+    robots: { index: false, follow: true },
   };
 }
 

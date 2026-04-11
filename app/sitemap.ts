@@ -29,7 +29,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { path: '/services/shared-transfer', priority: 0.85, changeFrequency: 'monthly' },
     { path: '/services/vip-transfer', priority: 0.85, changeFrequency: 'monthly' },
     { path: '/pricing', priority: 0.85, changeFrequency: 'weekly' },
-    { path: '/transfer-booking', priority: 0.7, changeFrequency: 'monthly' },
     { path: '/privacy', priority: 0.3, changeFrequency: 'monthly' },
     { path: '/terms', priority: 0.3, changeFrequency: 'monthly' },
     { path: '/cookies', priority: 0.3, changeFrequency: 'monthly' },

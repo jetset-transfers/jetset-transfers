@@ -26,7 +26,9 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Redirect unknown paths without locale prefix to home
+  // Invalid paths (without locale prefix) must return a real 404,
+  // not redirect to /en. Redirecting non-existent pages causes Google
+  // to accumulate "page with redirect" URLs in Search Console.
   // Valid paths start with /es, /en, /admin, or are just /
   const isValidPath =
     pathname === '/' ||
@@ -35,10 +37,10 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith('/admin');
 
   if (!isValidPath) {
-    // Redirect to English home page
+    // Rewrite to Next.js internal not-found page so the response is 404
     const url = request.nextUrl.clone();
-    url.pathname = '/en';
-    return NextResponse.redirect(url);
+    url.pathname = '/en/_not-found';
+    return NextResponse.rewrite(url, { status: 404 });
   }
 
   // Handle internationalized routes

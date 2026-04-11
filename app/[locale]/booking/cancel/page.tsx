@@ -13,7 +13,7 @@ export async function generateMetadata({ params }: CancelPageProps): Promise<Met
     title: locale === 'es'
       ? 'Pago Cancelado | Jetset Transfers'
       : 'Payment Cancelled | Jetset Transfers',
-    robots: { index: false, follow: false },
+    robots: { index: false, follow: true },
   };
 }
 

@@ -19,6 +19,10 @@ export async function generateMetadata({ params }: TransferBookingPageProps): Pr
     description: locale === 'es'
       ? 'Reserva tu traslado privado desde el Aeropuerto de Cancun. Selecciona destino, vehiculo y paga en linea de forma segura.'
       : 'Book your private transfer from Cancun Airport. Select destination, vehicle and pay online securely.',
+    robots: {
+      index: false,
+      follow: true,
+    },
   };
 }
 

@@ -1,20 +1,16 @@
-# Robots.txt for Jetset Transfers
-# https://www.jetsetcancun.com
-
 User-agent: *
-Allow: /
 Allow: /en/
 Allow: /es/
 
-# Disallow admin and internal paths
 Disallow: /admin
 Disallow: /admin/
 Disallow: /_next/
 Disallow: /api/
 Disallow: /*/booking/success
 Disallow: /*/booking/cancel
+Disallow: /*/transfer-booking
+Disallow: /*?*
 
-# Allow AI crawlers for ChatGPT and Bing AI
 User-agent: GPTBot
 Allow: /
 
@@ -30,5 +26,4 @@ Allow: /
 User-agent: Applebot
 Allow: /
 
-# Sitemap location
 Sitemap: https://www.jetsetcancun.com/sitemap.xml
