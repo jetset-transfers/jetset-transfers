@@ -68,15 +68,35 @@ export default async function DestinationsPage({ params }: DestinationsPageProps
   const { locale } = await params;
   const supabase = await createClient();
 
-  // Fetch all active destinations
-  const { data: destinations } = await supabase
-    .from('destinations')
-    .select('*')
-    .eq('is_active', true)
-    .order('display_order', { ascending: true });
+  // Fetch destinations, zones and SEO content in parallel
+  const [
+    { data: destinations },
+    zones,
+    { data: seoContentRows },
+  ] = await Promise.all([
+    supabase
+      .from('destinations')
+      .select('*')
+      .eq('is_active', true)
+      .order('display_order', { ascending: true }),
+    getZones(supabase),
+    supabase
+      .from('site_content')
+      .select('key, value_es, value_en')
+      .in('key', ['destinations_seo_title', 'destinations_seo_content']),
+  ]);
 
-  // Fetch zones from database with fallback to defaults
-  const zones = await getZones(supabase);
+  // Pre-localize SEO block content
+  const seoMap = new Map<string, { value_es: string; value_en: string }>();
+  (seoContentRows || []).forEach((row) => seoMap.set(row.key, row));
+  const seoTitleRow = seoMap.get('destinations_seo_title');
+  const seoContentRow = seoMap.get('destinations_seo_content');
+  const seoTitle = seoTitleRow
+    ? (locale === 'es' ? seoTitleRow.value_es : seoTitleRow.value_en)
+    : undefined;
+  const seoContent = seoContentRow
+    ? (locale === 'es' ? seoContentRow.value_es : seoContentRow.value_en)
+    : undefined;
 
   const destList = destinations || [];
 
@@ -99,7 +119,13 @@ export default async function DestinationsPage({ params }: DestinationsPageProps
         items={itemListItems}
         name={locale === 'es' ? 'Areas de Traslado en Cancun y Riviera Maya' : 'Transfer Areas in Cancun and Riviera Maya'}
       />
-      <DestinationsContent locale={locale} destinations={destList} zones={zones} />
+      <DestinationsContent
+        locale={locale}
+        destinations={destList}
+        zones={zones}
+        seoTitle={seoTitle}
+        seoContent={seoContent}
+      />
     </>
   );
 }

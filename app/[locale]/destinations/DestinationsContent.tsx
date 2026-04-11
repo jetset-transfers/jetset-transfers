@@ -54,6 +54,8 @@ interface DestinationsContentProps {
   locale: string;
   destinations: Destination[];
   zones: Zone[];
+  seoTitle?: string;
+  seoContent?: string;
 }
 
 const translations = {
@@ -99,7 +101,7 @@ const translations = {
   },
 };
 
-export default function DestinationsContent({ locale, destinations, zones }: DestinationsContentProps) {
+export default function DestinationsContent({ locale, destinations, zones, seoTitle, seoContent }: DestinationsContentProps) {
   const t = translations[locale as keyof typeof translations] || translations.es;
   const { formatPrice, currency } = useCurrency();
   const [selectedZone, setSelectedZone] = useState<string | null>(null);
@@ -291,6 +293,22 @@ export default function DestinationsContent({ locale, destinations, zones }: Des
             )}
           </div>
         </section>
+
+        {/* SEO Content Block */}
+        {seoTitle && seoContent && (
+          <section className="py-16 md:py-20 bg-gray-50 dark:bg-navy-900/50">
+            <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+              <h2 className="text-2xl md:text-3xl font-bold mb-8 text-center">
+                {seoTitle}
+              </h2>
+              <div className="text-gray-700 dark:text-gray-300 leading-relaxed space-y-5">
+                {seoContent.split('\n\n').map((paragraph, index) => (
+                  <p key={index}>{paragraph}</p>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
 
         {/* Bottom CTA */}
         <LazySection animation="fade" className="py-16 md:py-20 bg-gradient-to-r from-navy-900 to-navy-800">
