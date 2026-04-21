@@ -4,7 +4,7 @@ import SuccessContent from './SuccessContent';
 
 interface SuccessPageProps {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ session_id?: string; booking_id?: string }>;
+  searchParams: Promise<{ session_id?: string; booking_id?: string; payment_method?: string }>;
 }
 
 export async function generateMetadata({ params }: SuccessPageProps): Promise<Metadata> {
@@ -35,7 +35,7 @@ function SuccessLoadingSkeleton() {
 
 export default async function SuccessPage({ params, searchParams }: SuccessPageProps) {
   const { locale } = await params;
-  const { session_id, booking_id } = await searchParams;
+  const { session_id, booking_id, payment_method } = await searchParams;
 
   return (
     <Suspense fallback={<SuccessLoadingSkeleton />}>
@@ -43,6 +43,7 @@ export default async function SuccessPage({ params, searchParams }: SuccessPageP
         locale={locale}
         sessionId={session_id}
         bookingId={booking_id}
+        paymentMethod={payment_method}
       />
     </Suspense>
   );

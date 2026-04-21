@@ -98,6 +98,15 @@ const translations = {
     requiredField: 'Este campo es requerido',
     invalidEmail: 'Correo electrónico inválido',
     invalidPhone: 'Teléfono inválido',
+    // Cash payment
+    paymentMethod: 'Método de pago',
+    payWithCard: 'Pagar con tarjeta',
+    payWithCardDesc: 'Pago seguro con Stripe',
+    payWithCash: 'Pagar en efectivo',
+    payWithCashDesc: 'Paga al conductor al llegar',
+    cashPaymentReady: 'Reserva lista para confirmar',
+    cashPaymentReadyDesc: 'Tu reserva será confirmada y pagarás en efectivo al conductor.',
+    confirmBooking: 'Confirmar reserva',
   },
   en: {
     backToSearch: 'Back to search',
@@ -147,6 +156,15 @@ const translations = {
     requiredField: 'This field is required',
     invalidEmail: 'Invalid email',
     invalidPhone: 'Invalid phone',
+    // Cash payment
+    paymentMethod: 'Payment method',
+    payWithCard: 'Pay with card',
+    payWithCardDesc: 'Secure payment with Stripe',
+    payWithCash: 'Pay with cash',
+    payWithCashDesc: 'Pay the driver upon arrival',
+    cashPaymentReady: 'Booking ready to confirm',
+    cashPaymentReadyDesc: 'Your booking will be confirmed and you will pay cash to the driver.',
+    confirmBooking: 'Confirm booking',
   },
 };
 
@@ -173,6 +191,7 @@ export default function BookingContent({ locale, searchParams }: BookingContentP
   const [processing, setProcessing] = useState(false);
   const [paymentError, setPaymentError] = useState<string | null>(null);
   const [roundTripDiscount, setRoundTripDiscount] = useState(10); // Default 10%
+  const [paymentMethod, setPaymentMethod] = useState<'card' | 'cash'>('card');
 
   // Form state
   const [formData, setFormData] = useState({
@@ -295,7 +314,7 @@ export default function BookingContent({ locale, searchParams }: BookingContentP
     }
   };
 
-  // Handle payment with Stripe
+  // Handle payment with Stripe or Cash
   const handlePayment = async () => {
     if (!destination || !selectedVehicle) return;
 
@@ -305,7 +324,10 @@ export default function BookingContent({ locale, searchParams }: BookingContentP
     try {
       const destinationName = locale === 'es' ? destination.name_es : destination.name_en;
 
-      const response = await fetch('/api/checkout', {
+      // Choose endpoint based on payment method
+      const endpoint = paymentMethod === 'cash' ? '/api/checkout/cash' : '/api/checkout';
+
+      const response = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -334,11 +356,16 @@ export default function BookingContent({ locale, searchParams }: BookingContentP
         throw new Error(data.error || 'Payment failed');
       }
 
-      // Redirect to Stripe Checkout
-      if (data.url) {
-        window.location.href = data.url;
+      if (paymentMethod === 'cash') {
+        // For cash, redirect to success page with booking info
+        router.push(`/${locale}/booking/success?booking_id=${data.bookingId}&payment_method=cash`);
       } else {
-        throw new Error('No checkout URL received');
+        // Redirect to Stripe Checkout
+        if (data.url) {
+          window.location.href = data.url;
+        } else {
+          throw new Error('No checkout URL received');
+        }
       }
     } catch (error) {
       console.error('Payment error:', error);
@@ -734,27 +761,114 @@ export default function BookingContent({ locale, searchParams }: BookingContentP
                   {t.payment}
                 </h2>
 
-                {/* Payment ready message */}
-                <div className="text-center py-12">
-                  <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-green-500/20 flex items-center justify-center">
-                    <CheckCircleIcon className="w-10 h-10 text-green-500" />
+                {/* Payment method selector */}
+                <div className="mb-8">
+                  <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                    {t.paymentMethod}
+                  </h3>
+                  <div className="grid sm:grid-cols-2 gap-4">
+                    {/* Card option */}
+                    <button
+                      type="button"
+                      onClick={() => setPaymentMethod('card')}
+                      className={`p-4 rounded-xl border-2 text-left transition-all ${
+                        paymentMethod === 'card'
+                          ? 'border-brand-500 bg-brand-500/10'
+                          : 'border-gray-200 dark:border-navy-700 hover:border-brand-300'
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                          paymentMethod === 'card' ? 'bg-brand-500/20' : 'bg-gray-100 dark:bg-navy-800'
+                        }`}>
+                          <svg className={`w-5 h-5 ${paymentMethod === 'card' ? 'text-brand-500' : 'text-gray-600 dark:text-gray-400'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                          </svg>
+                        </div>
+                        <div>
+                          <p className={`font-medium ${paymentMethod === 'card' ? 'text-brand-500' : 'text-gray-900 dark:text-white'}`}>
+                            {t.payWithCard}
+                          </p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400">
+                            {t.payWithCardDesc}
+                          </p>
+                        </div>
+                        {paymentMethod === 'card' && (
+                          <CheckCircleIcon className="w-6 h-6 text-brand-500 ml-auto" />
+                        )}
+                      </div>
+                    </button>
+
+                    {/* Cash option */}
+                    <button
+                      type="button"
+                      onClick={() => setPaymentMethod('cash')}
+                      className={`p-4 rounded-xl border-2 text-left transition-all ${
+                        paymentMethod === 'cash'
+                          ? 'border-green-500 bg-green-500/10'
+                          : 'border-gray-200 dark:border-navy-700 hover:border-green-300'
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                          paymentMethod === 'cash' ? 'bg-green-500/20' : 'bg-gray-100 dark:bg-navy-800'
+                        }`}>
+                          <svg className={`w-5 h-5 ${paymentMethod === 'cash' ? 'text-green-500' : 'text-gray-600 dark:text-gray-400'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                          </svg>
+                        </div>
+                        <div>
+                          <p className={`font-medium ${paymentMethod === 'cash' ? 'text-green-600 dark:text-green-500' : 'text-gray-900 dark:text-white'}`}>
+                            {t.payWithCash}
+                          </p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400">
+                            {t.payWithCashDesc}
+                          </p>
+                        </div>
+                        {paymentMethod === 'cash' && (
+                          <CheckCircleIcon className="w-6 h-6 text-green-500 ml-auto" />
+                        )}
+                      </div>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Payment ready message - varies by method */}
+                <div className="text-center py-8">
+                  <div className={`w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center ${
+                    paymentMethod === 'cash' ? 'bg-green-500/20' : 'bg-brand-500/20'
+                  }`}>
+                    <CheckCircleIcon className={`w-10 h-10 ${
+                      paymentMethod === 'cash' ? 'text-green-500' : 'text-brand-500'
+                    }`} />
                   </div>
                   <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-                    {t.paymentReady}
+                    {paymentMethod === 'cash' ? t.cashPaymentReady : t.paymentReady}
                   </h3>
                   <p className="text-gray-600 dark:text-gray-400 mb-6">
-                    {t.paymentReadyDesc}
+                    {paymentMethod === 'cash' ? t.cashPaymentReadyDesc : t.paymentReadyDesc}
                   </p>
 
-                  {/* Stripe badge */}
-                  <div className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-navy-800 rounded-lg">
-                    <svg className="w-5 h-5 text-[#635BFF]" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M13.976 9.15c-2.172-.806-3.356-1.426-3.356-2.409 0-.831.683-1.305 1.901-1.305 2.227 0 4.515.858 6.09 1.631l.89-5.494C18.252.975 15.697 0 12.165 0 9.667 0 7.589.654 6.104 1.872 4.56 3.147 3.757 4.992 3.757 7.218c0 4.039 2.467 5.76 6.476 7.219 2.585.92 3.445 1.574 3.445 2.583 0 .98-.84 1.545-2.354 1.545-1.875 0-4.965-.921-6.99-2.109l-.9 5.555C5.175 22.99 8.385 24 11.714 24c2.641 0 4.843-.624 6.328-1.813 1.664-1.305 2.525-3.236 2.525-5.732 0-4.128-2.524-5.851-6.591-7.305z"/>
-                    </svg>
-                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                      {t.securePayment}
-                    </span>
-                  </div>
+                  {/* Badge based on payment method */}
+                  {paymentMethod === 'card' ? (
+                    <div className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-navy-800 rounded-lg">
+                      <svg className="w-5 h-5 text-[#635BFF]" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M13.976 9.15c-2.172-.806-3.356-1.426-3.356-2.409 0-.831.683-1.305 1.901-1.305 2.227 0 4.515.858 6.09 1.631l.89-5.494C18.252.975 15.697 0 12.165 0 9.667 0 7.589.654 6.104 1.872 4.56 3.147 3.757 4.992 3.757 7.218c0 4.039 2.467 5.76 6.476 7.219 2.585.92 3.445 1.574 3.445 2.583 0 .98-.84 1.545-2.354 1.545-1.875 0-4.965-.921-6.99-2.109l-.9 5.555C5.175 22.99 8.385 24 11.714 24c2.641 0 4.843-.624 6.328-1.813 1.664-1.305 2.525-3.236 2.525-5.732 0-4.128-2.524-5.851-6.591-7.305z"/>
+                      </svg>
+                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                        {t.securePayment}
+                      </span>
+                    </div>
+                  ) : (
+                    <div className="inline-flex items-center gap-2 px-4 py-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
+                      <svg className="w-5 h-5 text-green-600 dark:text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                      </svg>
+                      <span className="text-sm font-medium text-green-700 dark:text-green-400">
+                        {t.payWithCash}
+                      </span>
+                    </div>
+                  )}
 
                   {/* Error message */}
                   {paymentError && (
@@ -794,13 +908,19 @@ export default function BookingContent({ locale, searchParams }: BookingContentP
                 <button
                   onClick={handlePayment}
                   disabled={processing}
-                  className="flex items-center gap-2 px-6 py-3 bg-green-500 hover:bg-green-600 disabled:bg-green-400 disabled:cursor-not-allowed text-white rounded-lg transition-colors"
+                  className={`flex items-center gap-2 px-6 py-3 disabled:cursor-not-allowed text-white rounded-lg transition-colors ${
+                    paymentMethod === 'cash'
+                      ? 'bg-green-500 hover:bg-green-600 disabled:bg-green-400'
+                      : 'bg-brand-500 hover:bg-brand-600 disabled:bg-brand-400'
+                  }`}
                 >
                   {processing ? (
                     <>
                       <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white" />
                       {t.processing}
                     </>
+                  ) : paymentMethod === 'cash' ? (
+                    t.confirmBooking
                   ) : (
                     t.proceedToPayment
                   )}

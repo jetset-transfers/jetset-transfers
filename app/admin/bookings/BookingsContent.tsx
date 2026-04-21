@@ -76,6 +76,7 @@ const bookingStatusConfig = {
 const paymentStatusConfig = {
   pending: { label: 'Pago pendiente', color: 'bg-yellow-500/20 text-yellow-400' },
   paid: { label: 'Pagado', color: 'bg-green-500/20 text-green-400' },
+  cash_pending: { label: 'Efectivo pendiente', color: 'bg-amber-500/20 text-amber-400' },
   failed: { label: 'Fallido', color: 'bg-red-500/20 text-red-400' },
   refunded: { label: 'Reembolsado', color: 'bg-purple-500/20 text-purple-400' },
 };
@@ -84,6 +85,7 @@ const serviceTypes: Record<string, string> = {
   transfer: 'Transfer Privado',
   roundtrip: 'Viaje Redondo',
   private: 'Transfer Privado',
+  oneway: 'Transfer One-Way',
 };
 
 export default function BookingsContent({ user, bookings: initialBookings }: BookingsContentProps) {
@@ -254,6 +256,7 @@ export default function BookingsContent({ user, bookings: initialBookings }: Boo
   // Count by payment status
   const paidCount = bookings.filter(b => b.payment_status === 'paid').length;
   const pendingCount = bookings.filter(b => b.payment_status === 'pending').length;
+  const cashPendingCount = bookings.filter(b => b.payment_status === 'cash_pending').length;
 
   return (
     <AdminLayout userEmail={user.email || ''}>
@@ -264,6 +267,11 @@ export default function BookingsContent({ user, bookings: initialBookings }: Boo
             {paidCount > 0 && (
               <span className="px-2 py-1 bg-green-500/20 text-green-400 text-xs font-medium rounded-full">
                 {paidCount} pagada{paidCount > 1 ? 's' : ''}
+              </span>
+            )}
+            {cashPendingCount > 0 && (
+              <span className="px-2 py-1 bg-amber-500/20 text-amber-400 text-xs font-medium rounded-full">
+                💵 {cashPendingCount} efectivo
               </span>
             )}
             {pendingCount > 0 && (
@@ -381,6 +389,11 @@ export default function BookingsContent({ user, bookings: initialBookings }: Boo
                         <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${source.color}`}>
                           {source.label}
                         </span>
+                        {booking.payment_method === 'cash' && (
+                          <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-amber-500/20 text-amber-400">
+                            💵 Cash
+                          </span>
+                        )}
                       </div>
                       <p className="text-white font-medium truncate mt-1">{booking.customer_name}</p>
                     </div>
@@ -456,9 +469,22 @@ export default function BookingsContent({ user, bookings: initialBookings }: Boo
                         {paymentStatusConfig[selectedBooking.payment_status as keyof typeof paymentStatusConfig]?.label || selectedBooking.payment_status}
                       </span>
                     </div>
-                    <p className="text-2xl font-bold text-green-400 mt-2" suppressHydrationWarning>
+                    <p className={`text-2xl font-bold mt-2 ${
+                      selectedBooking.payment_method === 'cash' ? 'text-amber-400' : 'text-green-400'
+                    }`} suppressHydrationWarning>
                       ${Number(selectedBooking.total_usd).toFixed(2)} USD
                     </p>
+                    {/* Payment method indicator */}
+                    {selectedBooking.payment_method && (
+                      <div className={`mt-2 inline-flex items-center gap-1.5 px-2 py-1 rounded text-xs font-medium ${
+                        selectedBooking.payment_method === 'cash'
+                          ? 'bg-amber-500/20 text-amber-400'
+                          : 'bg-blue-500/20 text-blue-400'
+                      }`}>
+                        {selectedBooking.payment_method === 'cash' ? '💵' : '💳'}
+                        {selectedBooking.payment_method === 'cash' ? 'Pago en efectivo' : 'Tarjeta (Stripe)'}
+                      </div>
+                    )}
                     {selectedBooking.payment_reference && (
                       <p className="text-navy-500 text-xs mt-1 truncate">
                         Ref: {selectedBooking.payment_reference}

@@ -13,12 +13,15 @@ import {
   EnvelopeIcon,
   PhoneIcon,
   DocumentTextIcon,
+  BanknotesIcon,
+  ExclamationTriangleIcon,
 } from '@heroicons/react/24/outline';
 
 interface SuccessContentProps {
   locale: string;
   sessionId?: string;
   bookingId?: string;
+  paymentMethod?: string;
 }
 
 interface BookingDetails {
@@ -44,6 +47,13 @@ const translations = {
   es: {
     title: 'Reserva Confirmada',
     subtitle: 'Tu pago ha sido procesado exitosamente',
+    // Cash payment
+    titleCash: 'Reserva Confirmada',
+    subtitleCash: 'Tu reserva ha sido registrada - Pago en efectivo',
+    cashPaymentTitle: 'Pago en Efectivo',
+    cashPaymentWarning: 'IMPORTANTE: Debes pagar en efectivo al momento de abordar el vehículo. Ten el monto listo.',
+    totalToPay: 'Total a pagar',
+    // Common
     confirmationCode: 'Código de confirmación',
     bookingDetails: 'Detalles de la reserva',
     tripInfo: 'Información del viaje',
@@ -67,6 +77,13 @@ const translations = {
       'Nuestro conductor te contactará el día de tu transfer',
       'Presenta tu código de confirmación al momento de la recogida',
     ],
+    nextStepsCash: [
+      'Recibirás un correo de confirmación con todos los detalles',
+      'Un día antes de tu viaje recibirás un recordatorio',
+      'Nuestro conductor te contactará el día de tu transfer',
+      'Ten el pago en efectivo listo al momento de la recogida',
+      'Presenta tu código de confirmación al conductor',
+    ],
     backToHome: 'Volver al inicio',
     viewDestinations: 'Ver más áreas',
     loading: 'Cargando detalles...',
@@ -75,6 +92,13 @@ const translations = {
   en: {
     title: 'Booking Confirmed',
     subtitle: 'Your payment has been processed successfully',
+    // Cash payment
+    titleCash: 'Booking Confirmed',
+    subtitleCash: 'Your reservation has been registered - Cash payment',
+    cashPaymentTitle: 'Cash Payment',
+    cashPaymentWarning: 'IMPORTANT: You must pay in cash when boarding the vehicle. Have the amount ready.',
+    totalToPay: 'Total to pay',
+    // Common
     confirmationCode: 'Confirmation code',
     bookingDetails: 'Booking details',
     tripInfo: 'Trip information',
@@ -98,6 +122,13 @@ const translations = {
       'Our driver will contact you on the day of your transfer',
       'Present your confirmation code at pickup',
     ],
+    nextStepsCash: [
+      "You'll receive a confirmation email with all the details",
+      "You'll receive a reminder the day before your trip",
+      'Our driver will contact you on the day of your transfer',
+      'Have your cash payment ready at pickup',
+      'Present your confirmation code to the driver',
+    ],
     backToHome: 'Back to home',
     viewDestinations: 'View more areas',
     loading: 'Loading details...',
@@ -109,9 +140,11 @@ export default function SuccessContent({
   locale,
   sessionId,
   bookingId,
+  paymentMethod,
 }: SuccessContentProps) {
   const supabase = createClient();
   const t = translations[locale as keyof typeof translations] || translations.es;
+  const isCashPayment = paymentMethod === 'cash';
 
   const [loading, setLoading] = useState(true);
   const [booking, setBooking] = useState<BookingDetails | null>(null);
@@ -239,17 +272,45 @@ export default function SuccessContent({
       <div className="max-w-3xl mx-auto px-4 sm:px-6">
         {/* Success Header */}
         <div className="text-center mb-8">
-          <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-green-500/20 flex items-center justify-center">
-            <CheckCircleIcon className="w-12 h-12 text-green-500" />
+          <div className={`w-20 h-20 mx-auto mb-4 rounded-full flex items-center justify-center ${
+            isCashPayment ? 'bg-amber-500/20' : 'bg-green-500/20'
+          }`}>
+            {isCashPayment ? (
+              <BanknotesIcon className="w-12 h-12 text-amber-500" />
+            ) : (
+              <CheckCircleIcon className="w-12 h-12 text-green-500" />
+            )}
           </div>
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-            {t.title}
+            {isCashPayment ? t.titleCash : t.title}
           </h1>
-          <p className="text-gray-600 dark:text-gray-400">{t.subtitle}</p>
+          <p className="text-gray-600 dark:text-gray-400">
+            {isCashPayment ? t.subtitleCash : t.subtitle}
+          </p>
         </div>
 
+        {/* Cash Payment Warning */}
+        {isCashPayment && (
+          <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-300 dark:border-amber-700 rounded-xl p-5 mb-6">
+            <div className="flex items-start gap-4">
+              <ExclamationTriangleIcon className="w-8 h-8 text-amber-500 flex-shrink-0" />
+              <div>
+                <p className="font-bold text-amber-800 dark:text-amber-300 text-lg mb-1">
+                  {t.cashPaymentTitle}
+                </p>
+                <p className="text-amber-700 dark:text-amber-400">
+                  {t.cashPaymentWarning}
+                </p>
+                <p className="text-2xl font-bold text-amber-800 dark:text-amber-300 mt-3">
+                  {formatPrice(booking.price_usd)}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Confirmation Code */}
-        <div className="bg-brand-500 text-white rounded-xl p-6 text-center mb-6">
+        <div className={`${isCashPayment ? 'bg-amber-500' : 'bg-brand-500'} text-white rounded-xl p-6 text-center mb-6`}>
           <p className="text-sm opacity-90 mb-1">{t.confirmationCode}</p>
           <p className="text-3xl font-bold tracking-wider">
             {booking.booking_number}
@@ -389,9 +450,9 @@ export default function SuccessContent({
             {/* Total */}
             <div className="pt-4 border-t border-gray-200 dark:border-navy-700 flex justify-between items-center">
               <span className="font-semibold text-gray-900 dark:text-white">
-                {t.total}
+                {isCashPayment ? t.totalToPay : t.total}
               </span>
-              <span className="text-2xl font-bold text-brand-500">
+              <span className={`text-2xl font-bold ${isCashPayment ? 'text-amber-500' : 'text-brand-500'}`}>
                 {formatPrice(booking.price_usd)}
               </span>
             </div>
@@ -415,10 +476,12 @@ export default function SuccessContent({
             {t.whatNext}
           </h2>
           <ul className="space-y-3">
-            {t.nextSteps.map((step, index) => (
+            {(isCashPayment ? t.nextStepsCash : t.nextSteps).map((step, index) => (
               <li key={index} className="flex items-start gap-3">
-                <div className="w-6 h-6 rounded-full bg-brand-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <span className="text-xs font-bold text-brand-500">
+                <div className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 ${
+                  isCashPayment ? 'bg-amber-500/20' : 'bg-brand-500/20'
+                }`}>
+                  <span className={`text-xs font-bold ${isCashPayment ? 'text-amber-500' : 'text-brand-500'}`}>
                     {index + 1}
                   </span>
                 </div>

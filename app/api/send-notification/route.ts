@@ -37,6 +37,7 @@ interface QuoteRequestData {
 
 interface BookingConfirmationData {
   type: 'booking_confirmation';
+  paymentMethod?: 'card' | 'cash'; // Payment method indicator
   booking: {
     booking_number: string;
     customer_name: string;
@@ -105,13 +106,54 @@ function formatDateEN(dateString?: string): string {
   return `${weekday}, ${monthName} ${day}, ${year}`;
 }
 
-function generateBookingConfirmationHTML(data: BookingConfirmationData['booking']): string {
+function generateBookingConfirmationHTML(data: BookingConfirmationData['booking'], isCashPayment: boolean = false): string {
   const serviceTypeLabels: Record<string, string> = {
     roundtrip: 'Round Trip Transfer',
     private: 'Private Transfer',
     oneway: 'One-Way Transfer',
   };
   const serviceTypeLabel = serviceTypeLabels[data.service_type] || 'Private Transfer';
+
+  const headerTitle = isCashPayment ? '🎫 Booking Confirmed!' : '🎉 Booking Confirmed!';
+  const headerSubtitle = isCashPayment
+    ? 'Your reservation has been confirmed - Pay in cash upon arrival'
+    : 'Your payment has been processed successfully';
+
+  const paymentSection = isCashPayment
+    ? `
+              <!-- Cash Payment Notice -->
+              <tr>
+                <td style="padding: 0 40px 20px 40px;">
+                  <div style="background-color: #fef3c7; border-radius: 8px; padding: 20px; border-left: 4px solid #f59e0b;">
+                    <p style="margin: 0 0 10px 0; color: #92400e; font-size: 16px; font-weight: 600;">
+                      💵 Payment: Cash
+                    </p>
+                    <p style="margin: 0; color: #a16207; font-size: 14px; line-height: 1.5;">
+                      <strong>IMPORTANT:</strong> Please have <strong>$${data.price_usd.toFixed(2)} USD</strong> in cash ready when boarding the vehicle.
+                    </p>
+                  </div>
+                </td>
+              </tr>
+    `
+    : `
+              <!-- Total Paid -->
+              <tr>
+                <td style="padding: 0 40px 30px 40px;">
+                  <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #f8fafc; border-radius: 8px; padding: 20px;">
+                    <tr>
+                      <td style="padding: 15px 20px;">
+                        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                          <tr>
+                            <td style="color: #1e293b; font-size: 16px; font-weight: 600;">Total Paid</td>
+                            <td style="color: #e63946; font-size: 24px; font-weight: 700; text-align: right;">$${data.price_usd.toFixed(2)} USD</td>
+                          </tr>
+                        </table>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+    `;
 
   return `
 <!DOCTYPE html>
@@ -131,10 +173,10 @@ function generateBookingConfirmationHTML(data: BookingConfirmationData['booking'
           <tr>
             <td style="background-color: #102a43; padding: 30px 40px; text-align: center;">
               <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: 600;">
-                🎉 Booking Confirmed!
+                ${headerTitle}
               </h1>
               <p style="margin: 10px 0 0 0; color: #94a3b8; font-size: 14px;">
-                Your payment has been processed successfully
+                ${headerSubtitle}
               </p>
             </td>
           </tr>
@@ -229,23 +271,7 @@ function generateBookingConfirmationHTML(data: BookingConfirmationData['booking'
             </td>
           </tr>
 
-          <!-- Total Paid -->
-          <tr>
-            <td style="padding: 0 40px 30px 40px;">
-              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #f8fafc; border-radius: 8px; padding: 20px;">
-                <tr>
-                  <td style="padding: 15px 20px;">
-                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
-                      <tr>
-                        <td style="color: #1e293b; font-size: 16px; font-weight: 600;">Total Paid</td>
-                        <td style="color: #e63946; font-size: 24px; font-weight: 700; text-align: right;">$${data.price_usd.toFixed(2)} USD</td>
-                      </tr>
-                    </table>
-                  </td>
-                </tr>
-              </table>
-            </td>
-          </tr>
+          ${paymentSection}
 
           <!-- Contact Section -->
           <tr>
@@ -294,13 +320,67 @@ function generateBookingConfirmationHTML(data: BookingConfirmationData['booking'
   `;
 }
 
-function generateBookingNotificationHTML(data: BookingConfirmationData['booking']): string {
+function generateBookingNotificationHTML(data: BookingConfirmationData['booking'], isCashPayment: boolean = false): string {
   const serviceTypeLabels: Record<string, string> = {
     roundtrip: 'Viaje Redondo',
     private: 'Traslado Privado',
     oneway: 'Transfer One-Way',
   };
   const serviceTypeLabel = serviceTypeLabels[data.service_type] || 'Traslado Privado';
+
+  const headerBgColor = isCashPayment ? '#d97706' : '#166534'; // Amber for cash, green for paid
+  const headerTitle = isCashPayment ? '🎫 Nueva Reserva - PAGO EN EFECTIVO' : '💰 Nueva Reserva PAGADA';
+  const headerSubtitle = isCashPayment
+    ? `${serviceTypeLabel} - $${data.price_usd.toFixed(2)} USD (Pendiente de cobro)`
+    : `${serviceTypeLabel} - $${data.price_usd.toFixed(2)} USD`;
+
+  const paymentStatusSection = isCashPayment
+    ? `
+              <!-- Cash Payment Warning -->
+              <tr>
+                <td style="padding: 0 40px 20px 40px;">
+                  <div style="background-color: #fef3c7; border-radius: 8px; padding: 15px; border-left: 4px solid #f59e0b;">
+                    <p style="margin: 0; color: #92400e; font-size: 14px; font-weight: 600;">
+                      ⚠️ PAGO PENDIENTE EN EFECTIVO
+                    </p>
+                    <p style="margin: 5px 0 0 0; color: #a16207; font-size: 13px;">
+                      El cliente pagará <strong>$${data.price_usd.toFixed(2)}</strong> en efectivo al momento del servicio.
+                    </p>
+                  </div>
+                </td>
+              </tr>
+    `
+    : '';
+
+  const totalSection = isCashPayment
+    ? `
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #fef3c7; border-radius: 8px;">
+                <tr>
+                  <td style="padding: 20px;">
+                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                      <tr>
+                        <td style="color: #92400e; font-size: 18px; font-weight: 600;">💵 Por Cobrar</td>
+                        <td style="color: #92400e; font-size: 28px; font-weight: 700; text-align: right;">$${data.price_usd.toFixed(2)} USD</td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+    `
+    : `
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #dcfce7; border-radius: 8px;">
+                <tr>
+                  <td style="padding: 20px;">
+                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                      <tr>
+                        <td style="color: #166534; font-size: 18px; font-weight: 600;">💵 Total Pagado</td>
+                        <td style="color: #166534; font-size: 28px; font-weight: 700; text-align: right;">$${data.price_usd.toFixed(2)} USD</td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+    `;
 
   return `
 <!DOCTYPE html>
@@ -318,12 +398,12 @@ function generateBookingNotificationHTML(data: BookingConfirmationData['booking'
 
           <!-- Header -->
           <tr>
-            <td style="background-color: #166534; padding: 30px 40px; text-align: center;">
+            <td style="background-color: ${headerBgColor}; padding: 30px 40px; text-align: center;">
               <h1 style="margin: 0; color: #ffffff; font-size: 24px; font-weight: 600;">
-                💰 Nueva Reserva PAGADA
+                ${headerTitle}
               </h1>
-              <p style="margin: 10px 0 0 0; color: #bbf7d0; font-size: 14px;">
-                ${serviceTypeLabel} - $${data.price_usd.toFixed(2)} USD
+              <p style="margin: 10px 0 0 0; color: rgba(255,255,255,0.8); font-size: 14px;">
+                ${headerSubtitle}
               </p>
             </td>
           </tr>
@@ -332,9 +412,11 @@ function generateBookingNotificationHTML(data: BookingConfirmationData['booking'
           <tr>
             <td style="padding: 30px 40px 20px 40px; text-align: center;">
               <p style="margin: 0 0 5px 0; color: #64748b; font-size: 14px;">Código de Confirmación</p>
-              <p style="margin: 0; color: #166534; font-size: 28px; font-weight: 700; letter-spacing: 2px;">${data.booking_number}</p>
+              <p style="margin: 0; color: ${isCashPayment ? '#d97706' : '#166534'}; font-size: 28px; font-weight: 700; letter-spacing: 2px;">${data.booking_number}</p>
             </td>
           </tr>
+
+          ${paymentStatusSection}
 
           <!-- Client Info -->
           <tr>
@@ -441,18 +523,7 @@ function generateBookingNotificationHTML(data: BookingConfirmationData['booking'
           <!-- Total -->
           <tr>
             <td style="padding: 0 40px 30px 40px;">
-              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #dcfce7; border-radius: 8px;">
-                <tr>
-                  <td style="padding: 20px;">
-                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
-                      <tr>
-                        <td style="color: #166534; font-size: 18px; font-weight: 600;">💵 Total Pagado</td>
-                        <td style="color: #166534; font-size: 28px; font-weight: 700; text-align: right;">$${data.price_usd.toFixed(2)} USD</td>
-                      </tr>
-                    </table>
-                  </td>
-                </tr>
-              </table>
+              ${totalSection}
             </td>
           </tr>
 
@@ -858,15 +929,18 @@ export async function POST(request: NextRequest) {
     if (body.type === 'booking_confirmation') {
       const data = body as BookingConfirmationData;
       const booking = data.booking;
+      const isCashPayment = data.paymentMethod === 'cash';
 
       // Send confirmation email to customer
-      const customerSubject = `Booking Confirmed: ${booking.booking_number} - Jetset Transfers`;
+      const customerSubject = isCashPayment
+        ? `Booking Confirmed (Cash Payment): ${booking.booking_number} - Jetset Transfers`
+        : `Booking Confirmed: ${booking.booking_number} - Jetset Transfers`;
 
       const { error: customerError } = await resend.emails.send({
         from: 'Jetset Transfers <notificaciones@notify.jetsetcancun.com>',
         to: [booking.customer_email],
         subject: customerSubject,
-        html: generateBookingConfirmationHTML(booking),
+        html: generateBookingConfirmationHTML(booking, isCashPayment),
       });
 
       if (customerError) {
@@ -874,13 +948,15 @@ export async function POST(request: NextRequest) {
       }
 
       // Send notification to admin
-      const adminSubject = `💰 Nueva Reserva PAGADA: ${booking.booking_number} - ${booking.destination} - $${booking.price_usd} USD`;
+      const adminSubject = isCashPayment
+        ? `🎫 Nueva Reserva (PAGO EFECTIVO): ${booking.booking_number} - ${booking.destination} - $${booking.price_usd} USD`
+        : `💰 Nueva Reserva PAGADA: ${booking.booking_number} - ${booking.destination} - $${booking.price_usd} USD`;
 
       const { data: emailData, error: adminError } = await resend.emails.send({
         from: 'Jetset Transfers <notificaciones@notify.jetsetcancun.com>',
         to: ['transportesjetset@gmail.com'],
         subject: adminSubject,
-        html: generateBookingNotificationHTML(booking),
+        html: generateBookingNotificationHTML(booking, isCashPayment),
         replyTo: booking.customer_email,
       });
 
