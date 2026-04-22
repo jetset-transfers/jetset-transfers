@@ -507,8 +507,8 @@ export default function BookingsContent({ user, bookings: initialBookings }: Boo
                         </button>
                       ))}
                     </div>
-                    {/* Verify payment in Stripe button */}
-                    {selectedBooking.payment_status !== 'paid' && (
+                    {/* Verify payment in Stripe button - only show for card payments */}
+                    {selectedBooking.payment_status !== 'paid' && selectedBooking.payment_method !== 'cash' && (
                       <button
                         onClick={async () => {
                           setLoading(true);
