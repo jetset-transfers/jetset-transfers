@@ -30,7 +30,10 @@
       "Bash(mkdir -p \"c:/Users/EDDCODE/Documents/EDDCODE/jetset-transfers/app/[locale]/about\")",
       "Bash(mkdir -p \"c:/Users/EDDCODE/Documents/EDDCODE/jetset-transfers/app/[locale]/services/private-transfer\")",
       "Bash(mkdir -p \"c:/Users/EDDCODE/Documents/EDDCODE/jetset-transfers/app/[locale]/services/shared-transfer\")",
-      "Bash(mkdir -p \"c:/Users/EDDCODE/Documents/EDDCODE/jetset-transfers/app/[locale]/services/vip-transfer\")"
+      "Bash(mkdir -p \"c:/Users/EDDCODE/Documents/EDDCODE/jetset-transfers/app/[locale]/services/vip-transfer\")",
+      "Bash(git status *)",
+      "Bash(git pull *)",
+      "Bash(git stash *)"
     ]
   }
 }
