@@ -30,7 +30,7 @@ export default function PageLoader({ message, fullScreen = true }: PageLoaderPro
         aria-label={ariaLabel}
       >
         <img
-          src="/images/loading/van-jetset.svg"
+          src="/images/loading/van-jetset.webp"
           alt={altText}
           width={256}
           height={256}
@@ -55,7 +55,7 @@ export default function PageLoader({ message, fullScreen = true }: PageLoaderPro
       aria-label={ariaLabel}
     >
       <img
-        src="/images/loading/van-jetset.svg"
+        src="/images/loading/van-jetset.webp"
         alt={altText}
         width={160}
         height={160}
