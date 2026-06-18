@@ -71,6 +71,7 @@ export async function POST(request: NextRequest) {
         price_usd: body.priceUsd,
         total_usd: body.priceUsd,
         payment_status: 'pending',
+        payment_method: 'stripe',
         status: 'pending',
         special_requests: body.specialRequests || null,
       })
@@ -137,14 +138,17 @@ export async function POST(request: NextRequest) {
       locale: body.locale === 'es' ? 'es' : 'en',
     });
 
-    // Update booking with Stripe session ID (using payment_reference column)
-    await supabase
+    // Update booking with Stripe session ID
+    const { error: updateError } = await supabase
       .from('bookings')
       .update({
         payment_reference: session.id,
-        payment_method: 'stripe'
       })
       .eq('id', booking.id);
+
+    if (updateError) {
+      console.error('Failed to persist Stripe session id on booking', booking.id, updateError);
+    }
 
     return NextResponse.json({
       sessionId: session.id,

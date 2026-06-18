@@ -44,6 +44,7 @@ export async function POST(request: NextRequest) {
           .from('bookings')
           .update({
             payment_status: 'paid',
+            payment_method: 'stripe',
             status: 'confirmed',
             payment_reference: session.payment_intent as string,
             confirmed_at: new Date().toISOString(),
